@@ -56,6 +56,60 @@
       </tags>
   </entry>
   <entry>
+    <title>转发与重定向</title>
+    <url>/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</url>
+    <content><![CDATA[<h1 id="转发与重定向"><a href="#转发与重定向" class="headerlink" title="转发与重定向"></a>转发与重定向</h1><p> 转发和重定向都是作为实现页面跳转的方法，他们的区别</p>
+<ul>
+<li><p>转发：</p>
+<ul>
+<li><p>由服务器进行的页面跳转，一个对oneServlet的请求，服务器使用twoServlet响应</p>
+</li>
+<li><blockquote>
+<p>request.getRequestDispatcher(“/目标地址”).forward(request,response);</p>
+</blockquote>
+</li>
+<li><p>特点：</p>
+<ul>
+<li>地址栏不发生变化，显示的是上一个页面的地址</li>
+<li>只有一次请求</li>
+<li>请求域中的数据不会丢失</li>
+<li>根目录：<a href="http://localhost:8080/%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80/%EF%BC%8C%E5%8C%85%E5%90%AB%E4%BA%86%E9%A1%B9%E7%9B%AE%E7%9A%84%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80">http://localhost:8080/项目地址/，包含了项目的访问地址</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>重定向：</p>
+<ul>
+<li><p>由浏览器进行的页面跳转，浏览器对服务器1进行访问，服务器1响应返回让浏览器进行访问服务器2的操作</p>
+</li>
+<li><blockquote>
+<p>response.sendRedirect(“要跳转的地址”)</p>
+</blockquote>
+<ul>
+<li>地址栏显示新的地址</li>
+<li>请求2次</li>
+<li>请求域中的数据会丢失</li>
+<li>根目录：<a href="http://localhost:8080/">http://localhost:8080/</a> 没有项目的名字</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>问：什么时候使用转发，什么时候使用重定向？</p>
+<pre><code>如果要保留请求域中的数据，使用转发，否则使用重定向。
+
+以后访问数据库，增删改使用重定向，查询使用转发。</code></pre>
+</li>
+<li><p>问：转发或重定向后续的代码是否还会运行？</p>
+<pre><code>无论转发或重定向后续的代码都会执行</code></pre>
+</li>
+</ul>
+<p>​          </p>
+]]></content>
+      <tags>
+        <tag>web</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>java IO</title>
     <url>/2020/11/11/the_java-IO/</url>
     <content><![CDATA[<h1 id="Java-IO"><a href="#Java-IO" class="headerlink" title="Java IO"></a>Java IO</h1><h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>blocking I/O（阻塞同步的io）</p>
