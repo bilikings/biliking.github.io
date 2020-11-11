@@ -58,7 +58,7 @@
   <entry>
     <title>java IO</title>
     <url>/2020/11/11/java-IO/</url>
-    <content><![CDATA[<h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>blocking I/O（阻塞同步的io）</p>
+    <content><![CDATA[<h1 id="Java-IO"><a href="#Java-IO" class="headerlink" title="Java IO"></a>Java IO</h1><h2 id="BIO"><a href="#BIO" class="headerlink" title="BIO"></a>BIO</h2><p>blocking I/O（阻塞同步的io）</p>
 <p>服务器实现模式为一个连接连接一个线程，客户端确保请求是服务器就需要启动一个线程进行处理，如果连接不做事情就会浪费资源（可以通过线程池优化）</p>
 <h4 id="简单流程"><a href="#简单流程" class="headerlink" title="简单流程"></a>简单流程</h4><ol>
 <li>服务器端启动一个serverSocket</li>
@@ -69,6 +69,8 @@
 </ul>
 </li>
 </ol>
+<a id="more"></a>
+
 <blockquote>
 <p>一个bio的服务器端</p>
 </blockquote>
@@ -124,8 +126,6 @@
 <li>只用连接真正有读写事件发生时，才会进行读写，减少系统的开销，变扭不必为每个连接都创建一个线程，不用去维护多个线程</li>
 <li>避免了多线程上下文切换导致的开销</li>
 </ol>
-<img src="/.io//Nio.png" style="zoom:67%;">
-
 <ul>
 <li>当客户端连接时会通过<code>ServerSocketChannel</code>得到对应的<code>SocketChannel</code></li>
 <li>把SocketChannel注册到一个Selector上</li>
