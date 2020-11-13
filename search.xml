@@ -148,61 +148,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>TopK</title>
-    <url>/2020/11/11/TopK/</url>
-    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
-<ul>
-<li>直接排序，取top100</li>
-<li>堆排序，取top100</li>
-<li>快排的思想，使用划分函数取100</li>
-</ul>
-<p>那么他们分别有什么缺陷呢？</p>
-<ul>
-<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
-<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
-<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
-</ul>
-<a id="more"></a>
-
-<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
-<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
-<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
-<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
-<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
-]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java Stream</title>
     <url>/2020/11/11/Stream/</url>
     <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
@@ -277,6 +222,61 @@
       </tags>
   </entry>
   <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>TopK</title>
+    <url>/2020/11/11/TopK/</url>
+    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
+<ul>
+<li>直接排序，取top100</li>
+<li>堆排序，取top100</li>
+<li>快排的思想，使用划分函数取100</li>
+</ul>
+<p>那么他们分别有什么缺陷呢？</p>
+<ul>
+<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
+<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
+<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
+<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
+<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
+<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
+<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
+]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -291,6 +291,8 @@
 <p>\s 匹配一个空白字符 A\sB 匹配A B</p>
 <p>\W匹配非数字、字母或者下划线</p>
 <p>\S匹配一个非空白字符</p>
+<a id="more"></a>
+
 <p><strong>下面这些需要和字符，\d,\w之类的一起使用</strong></p>
 <p>*匹配任意一个数字</p>
 <p>+ 匹配至少一个字符</p>
