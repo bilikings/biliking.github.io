@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bilikings.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="正则表达式实例： 匹配用户输入为19xx 正则:19\d\d Java字符串”19\\d\\d“ 匹配精确匹配规则\u匹配指定Unicode字符 . 可以匹配任意一个字符 例如a.c 匹配abc，afc ，a%c \d 匹配一个数字 \w 匹配一个数字、字母或者下划线 \s 匹配一个空白字符 A\sB 匹配A B \W匹配非数字、字母或者下划线 \S匹配一个非空白字符 下面这些需要和字符，\d,\">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式&#39;">
+<meta property="og:url" content="https://bilikings.github.io/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Groza&#39;s">
+<meta property="og:description" content="正则表达式实例： 匹配用户输入为19xx 正则:19\d\d Java字符串”19\\d\\d“ 匹配精确匹配规则\u匹配指定Unicode字符 . 可以匹配任意一个字符 例如a.c 匹配abc，afc ，a%c \d 匹配一个数字 \w 匹配一个数字、字母或者下划线 \s 匹配一个空白字符 A\sB 匹配A B \W匹配非数字、字母或者下划线 \S匹配一个非空白字符 下面这些需要和字符，\d,\">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-11-13T15:35:50.000Z">
+<meta property="article:modified_time" content="2020-11-13T15:46:43.031Z">
+<meta property="article:author" content="Biliking">
+<meta property="article:tag" content="正则">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://bilikings.github.io/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>正则表达式' | Groza's</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Groza's</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">噫|呜|呜|噫</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/bilikings" class="github-corner" title="I on GitHub" aria-label="I on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://bilikings.github.io/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          正则表达式'
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-13 23:35:50 / 修改时间：23:46:43" itemprop="dateCreated datePublished" datetime="2020-11-13T23:35:50+08:00">2020-11-13</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
+<p>匹配用户输入为19xx</p>
+<p>正则:19\d\d</p>
+<p>Java字符串”19\\d\\d“</p>
+<h2 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h2><h3 id="精确匹配规则"><a href="#精确匹配规则" class="headerlink" title="精确匹配规则"></a>精确匹配规则</h3><p>\u匹配指定Unicode字符</p>
+<p>. 可以匹配任意一个字符</p>
+<p>例如a.c 匹配abc，afc ，a%c</p>
+<p>\d 匹配一个数字</p>
+<p>\w 匹配一个数字、字母或者下划线</p>
+<p>\s 匹配一个空白字符 A\sB 匹配A B</p>
+<p>\W匹配非数字、字母或者下划线</p>
+<p>\S匹配一个非空白字符</p>
+<p><strong>下面这些需要和字符，\d,\w之类的一起使用</strong></p>
+<p>*匹配任意一个数字</p>
+<p>+ 匹配至少一个字符</p>
+<p>？ 0-1个字符</p>
+<p>{n} 表示匹配n个字符</p>
+<p>{n,m} 表示匹配n-m个字符</p>
+<p>{n，} 表示至少匹配n个字符</p>
+<h3 id="复杂匹配规则"><a href="#复杂匹配规则" class="headerlink" title="复杂匹配规则"></a>复杂匹配规则</h3><p>^匹配开头，比如^A\d{3} 可以匹配A123，A345</p>
+<p>$匹配结尾比如DA\d$可以匹配DA1</p>
+<p>[]可以匹配访问内的字符，比如[acf]1可以匹配a1，c1，但是ac1不行</p>
+<p>如果我们规定一个7~8位数字的电话号码不能以<code>0</code>开头，应该怎么写匹配规则呢？<code>\d&#123;7,8&#125;</code>是不行的，因为第一个<code>\d</code>可以匹配到<code>0</code>。</p>
+<p>使用<code>[...]</code>可以匹配范围内的字符，例如，<code>[123456789]</code>可以匹配<code>1</code>~<code>9</code>，这样就可以写出上述电话号码的规则：<code>[123456789]\d&#123;6,7&#125;</code>。</p>
+<p>把所有字符全列出来太麻烦，<code>[...]</code>还有一种写法，直接写<code>[1-9]</code>就可以。</p>
+<p>[^…]匹配…里面没有的字符</p>
+<h3 id="分组匹配"><a href="#分组匹配" class="headerlink" title="分组匹配"></a>分组匹配</h3><p>()可以分组</p>
+<p>比如”(\d{4})\-(\d{1,2})\-(\d{1,2})可以吧“2019-12-21”转换成”2019””12”“21”</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Pattern p = Patten.comppile(<span class="string">&quot;正则表达式&quot;</span>);</span><br><span class="line">Matcher m = p.matcher(<span class="string">&quot;目标字符&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>但是反复使用<code>String.matches()</code>对同一个正则表达式进行多次匹配效率较低，因为每次都会创建出一样的<code>Pattern</code>对象。完全可以先创建出一个<code>Pattern</code>对象，然后反复使用，就可以实现编译一次，多次匹配：</p>
+<p><strong>使用<code>Matcher</code>时，必须首先调用<code>matches()</code>判断是否匹配成功，匹配成功后，才能调用<code>group()</code>提取子串。</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Pattern p = Patten.comppile(<span class="string">&quot;正则表达式&quot;</span>);</span><br><span class="line">Matcher m = p.matcher(<span class="string">&quot;目标字符&quot;</span>);</span><br><span class="line"><span class="keyword">if</span>(match.matchs())&#123;</span><br><span class="line">    String whole =matcher.group(<span class="number">0</span>)<span class="comment">//0表示匹配整个字符串，1表示匹配第二个子串</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="贪婪匹配"><a href="#贪婪匹配" class="headerlink" title="贪婪匹配"></a>贪婪匹配</h3><p>贪婪匹配改为非贪婪匹配在/d后加？</p>
+<p>区分/d?和?的区别</p>
+<h3 id="搜索和替换"><a href="#搜索和替换" class="headerlink" title="搜索和替换"></a>搜索和替换</h3><h4 id="分割"><a href="#分割" class="headerlink" title="分割"></a>分割</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;a b c&quot;</span>.split(\\s); <span class="comment">//&#123;&quot;a&quot;,&quot;b&quot;,&quot;c&quot;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="搜索"><a href="#搜索" class="headerlink" title="搜索"></a>搜索</h4><p>Matcher.find()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">String s =<span class="string">&quot; the q b f&quot;</span>;</span><br><span class="line">Pattern p = pattern.compile(<span class="string">&quot;the&quot;</span>);</span><br><span class="line">Matcher m =p.matcher(s);</span><br><span class="line"><span class="keyword">while</span>(m.find)&#123;</span><br><span class="line">    String sub = s.substring(m.start(),m.end());</span><br><span class="line">    sout(sub)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>忽略大小写 Pattern.CASE_INSENSITIVE</p>
+<h4 id="替换"><a href="#替换" class="headerlink" title="替换"></a>替换</h4><p>String.replaceAll()</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String s =<span class="string">&quot; the q b f&quot;</span>;</span><br><span class="line">String r =s.replaceAll(<span class="string">&quot;需替换的（可正则表达式）&quot;</span>,<span class="string">&quot;目标替换&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="正则常用例子"><a href="#正则常用例子" class="headerlink" title="正则常用例子"></a>正则常用例子</h3><h3 id="常见正则实例"><a href="#常见正则实例" class="headerlink" title="常见正则实例"></a>常见正则实例</h3><h4 id="用户名正则"><a href="#用户名正则" class="headerlink" title="用户名正则"></a>用户名正则</h4><blockquote>
+<p>//4-16位（字母数字下划线减号）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pattern =/^[a-zA-Z0-9_-]&#123;4,16&#125;&amp;/</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="密码强度正则"><a href="#密码强度正则" class="headerlink" title="密码强度正则"></a>密码强度正则</h4><blockquote>
+<p>//密码强度正则，最少6位，包括至少1个大写字母，1个小写字母，1个数字，1个特殊字符</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pPattern = /^.*(?=.&#123;6,&#125;)(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="Email正则"><a href="#Email正则" class="headerlink" title="Email正则"></a><strong>Email正则</strong></h4><blockquote>
+<p>//标准email</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pat = /^&#123;/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z0-9]&#123;2,8&#125;)$/&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="手机号正则"><a href="#手机号正则" class="headerlink" title="手机号正则"></a>手机号正则</h4><blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mPattern = /^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(18[0,5-9]))\d&#123;8&#125;$/</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="URL正则"><a href="#URL正则" class="headerlink" title="URL正则"></a><strong>URL正则</strong></h4><blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cP &#x3D; &#x2F;^[1-9]\d&#123;5&#125;(18|19|([23]\d))\d&#123;2&#125;((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d&#123;3&#125;[0-9Xx]$&#x2F;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="身份证号正则"><a href="#身份证号正则" class="headerlink" title="身份证号正则"></a><strong>身份证号正则</strong></h4><blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cP = /^[1-9]\d&#123;5&#125;(18|19|([23]\d))\d&#123;2&#125;((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d&#123;3&#125;[0-9Xx]$/</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="日期正则"><a href="#日期正则" class="headerlink" title="日期正则"></a><strong>日期正则</strong></h4><blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dP1 = /^\d&#123;4&#125;(\-)\d&#123;1,2&#125;\1\d&#123;1,2&#125;$/</span><br></pre></td></tr></table></figure></blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Biliking
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://bilikings.github.io/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" title="正则表达式&#39;">https://bilikings.github.io/2020/11/13/正则表达式/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%AD%A3%E5%88%99/" rel="tag"># 正则</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/" rel="prev" title="螺旋矩阵">
+      <i class="fa fa-chevron-left"></i> 螺旋矩阵
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">正则表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8C%B9%E9%85%8D"><span class="nav-number">1.1.</span> <span class="nav-text">匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E7%A1%AE%E5%8C%B9%E9%85%8D%E8%A7%84%E5%88%99"><span class="nav-number">1.1.1.</span> <span class="nav-text">精确匹配规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E5%8C%B9%E9%85%8D%E8%A7%84%E5%88%99"><span class="nav-number">1.1.2.</span> <span class="nav-text">复杂匹配规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E7%BB%84%E5%8C%B9%E9%85%8D"><span class="nav-number">1.1.3.</span> <span class="nav-text">分组匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%AA%E5%A9%AA%E5%8C%B9%E9%85%8D"><span class="nav-number">1.1.4.</span> <span class="nav-text">贪婪匹配</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2%E5%92%8C%E6%9B%BF%E6%8D%A2"><span class="nav-number">1.1.5.</span> <span class="nav-text">搜索和替换</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%89%B2"><span class="nav-number">1.1.5.1.</span> <span class="nav-text">分割</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%90%9C%E7%B4%A2"><span class="nav-number">1.1.5.2.</span> <span class="nav-text">搜索</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9B%BF%E6%8D%A2"><span class="nav-number">1.1.5.3.</span> <span class="nav-text">替换</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E5%88%99%E5%B8%B8%E7%94%A8%E4%BE%8B%E5%AD%90"><span class="nav-number">1.1.6.</span> <span class="nav-text">正则常用例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%AD%A3%E5%88%99%E5%AE%9E%E4%BE%8B"><span class="nav-number">1.1.7.</span> <span class="nav-text">常见正则实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%90%8D%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.1.</span> <span class="nav-text">用户名正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E5%BC%BA%E5%BA%A6%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.2.</span> <span class="nav-text">密码强度正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Email%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.3.</span> <span class="nav-text">Email正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%8B%E6%9C%BA%E5%8F%B7%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.4.</span> <span class="nav-text">手机号正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#URL%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.5.</span> <span class="nav-text">URL正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BA%AB%E4%BB%BD%E8%AF%81%E5%8F%B7%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.6.</span> <span class="nav-text">身份证号正则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E6%AD%A3%E5%88%99"><span class="nav-number">1.1.7.7.</span> <span class="nav-text">日期正则</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Biliking"
+      src="/images/peiky.png">
+  <p class="site-author-name" itemprop="name">Biliking</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bilikings" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bilikings" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://kiritostna.github.io/Rice/" title="https:&#x2F;&#x2F;kiritostna.github.io&#x2F;Rice&#x2F;" rel="noopener" target="_blank">MuMing</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bilikings</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
