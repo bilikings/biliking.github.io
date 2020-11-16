@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"bilikings.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"bilikings.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="要点 Java引用的功能和意义 Java引用与内存回收之间的关系 Java对象在内存中的不同状态 软引用的作用和使用软引用的注意点 弱引用的作用和使用弱引用的注意点 虚引用的作用和使用虚引用的注意点 Java内存泄漏的原因 Java内存泄漏和C++内存泄漏的差别 Java垃圾回收机制的基本算法 堆内存的分代回收 Young代、Old代和Permanent代的各自存储的对象 Young代、Old代和">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM内存回收概述">
-<meta property="og:url" content="https://bilikings.github.io/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:url" content="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="Groza&#39;s">
 <meta property="og:description" content="要点 Java引用的功能和意义 Java引用与内存回收之间的关系 Java对象在内存中的不同状态 软引用的作用和使用软引用的注意点 弱引用的作用和使用弱引用的注意点 虚引用的作用和使用虚引用的注意点 Java内存泄漏的原因 Java内存泄漏和C++内存泄漏的差别 Java垃圾回收机制的基本算法 堆内存的分代回收 Young代、Old代和Permanent代的各自存储的对象 Young代、Old代和">
 <meta property="og:locale" content="zh_CN">
@@ -33,7 +33,7 @@
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://bilikings.github.io/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/">
+<link rel="canonical" href="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/">
 
 
 <script id="page-configurations">
@@ -77,6 +77,7 @@
   </style>
 </noscript>
 
+<link rel="alternate" href="/atom.xml" title="Groza's" type="application/atom+xml">
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
@@ -182,7 +183,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bilikings.github.io/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/peiky.png">
@@ -321,7 +322,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://bilikings.github.io/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/" title="JVM内存回收概述">https://bilikings.github.io/2020/11/11/JVM内存回收概述/</a>
+    <a href="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/" title="JVM内存回收概述">http://bilikings.top/2020/11/11/JVM内存回收概述/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -435,6 +436,9 @@
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
         <a href="https://github.com/bilikings" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bilikings" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="rss fa-fw"></i>RSS</a>
       </span>
   </div>
   <div class="cc-license motion-element" itemprop="license">

@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"bilikings.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"bilikings.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Java IOBIOblocking I&#x2F;O（阻塞同步的io） 服务器实现模式为一个连接连接一个线程，客户端确保请求是服务器就需要启动一个线程进行处理，如果连接不做事情就会浪费资源（可以通过线程池优化） 简单流程 服务器端启动一个serverSocket 客户端启动Socket对服务器进行通信，默认情况下服务器需要对每个客户建立一个线程与之通信 客户端发送一个请求之后，先咨询服务器是否有线程响应">
 <meta property="og:type" content="article">
 <meta property="og:title" content="java IO">
-<meta property="og:url" content="https://bilikings.github.io/2020/11/11/the_java-IO/index.html">
+<meta property="og:url" content="http://bilikings.top/2020/11/11/the_java-IO/index.html">
 <meta property="og:site_name" content="Groza&#39;s">
 <meta property="og:description" content="Java IOBIOblocking I&#x2F;O（阻塞同步的io） 服务器实现模式为一个连接连接一个线程，客户端确保请求是服务器就需要启动一个线程进行处理，如果连接不做事情就会浪费资源（可以通过线程池优化） 简单流程 服务器端启动一个serverSocket 客户端启动Socket对服务器进行通信，默认情况下服务器需要对每个客户建立一个线程与之通信 客户端发送一个请求之后，先咨询服务器是否有线程响应">
 <meta property="og:locale" content="zh_CN">
@@ -33,7 +33,7 @@
 <meta property="article:tag" content="BIO_NIO_AIO">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://bilikings.github.io/2020/11/11/the_java-IO/">
+<link rel="canonical" href="http://bilikings.top/2020/11/11/the_java-IO/">
 
 
 <script id="page-configurations">
@@ -77,6 +77,7 @@
   </style>
 </noscript>
 
+<link rel="alternate" href="/atom.xml" title="Groza's" type="application/atom+xml">
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage">
@@ -182,7 +183,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://bilikings.github.io/2020/11/11/the_java-IO/">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/11/the_java-IO/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/peiky.png">
@@ -388,7 +389,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://bilikings.github.io/2020/11/11/the_java-IO/" title="java IO">https://bilikings.github.io/2020/11/11/the_java-IO/</a>
+    <a href="http://bilikings.top/2020/11/11/the_java-IO/" title="java IO">http://bilikings.top/2020/11/11/the_java-IO/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -502,6 +503,9 @@
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
         <a href="https://github.com/bilikings" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bilikings" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="rss fa-fw"></i>RSS</a>
       </span>
   </div>
   <div class="cc-license motion-element" itemprop="license">

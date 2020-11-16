@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Groza&#39;s</title>
+  <icon>http://bilikings.top/icon.png</icon>
+  <subtitle>噫|呜|呜|噫</subtitle>
+  <link href="http://bilikings.top/atom.xml" rel="self"/>
+  
+  <link href="http://bilikings.top/"/>
+  <updated>2020-11-15T09:06:43.539Z</updated>
+  <id>http://bilikings.top/</id>
+  
+  <author>
+    <name>Biliking</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>JavaJUC(二)——Concurrent包</title>
+    <link href="http://bilikings.top/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/"/>
+    <id>http://bilikings.top/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</id>
+    <published>2020-11-15T09:05:31.000Z</published>
+    <updated>2020-11-15T09:06:43.539Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;java-util-concurrent&quot;&gt;&lt;a href=&quot;#java-util-concurrent&quot; class=&quot;headerlink&quot; title=&quot;java.util.concurrent&quot;&gt;&lt;/a&gt;java.util.concurrent&lt;/h1&gt;&lt;p&gt;这是一个jdk1.5之后的一个有关多线程的包&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JavaJUC(一)——线程</title>
+    <link href="http://bilikings.top/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/"/>
+    <id>http://bilikings.top/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/</id>
+    <published>2020-11-15T09:03:28.000Z</published>
+    <updated>2020-11-15T09:05:05.265Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;线程&quot;&gt;&lt;a href=&quot;#线程&quot; class=&quot;headerlink&quot; title=&quot;线程&quot;&gt;&lt;/a&gt;线程&lt;/h1&gt;&lt;p&gt;进程是系统资源分配的基本单位&lt;/p&gt;
+&lt;p&gt;线程是cpu进行调度的基本单位&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>通过反射定义注解</title>
+    <link href="http://bilikings.top/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/"/>
+    <id>http://bilikings.top/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</id>
+    <published>2020-11-15T03:11:52.000Z</published>
+    <updated>2020-11-15T03:12:35.440Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;本文则以输入校验的 &lt;code&gt;@Length&lt;/code&gt;注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。&lt;/p&gt;
+&lt;h2 id=&quot;第一步：首先定义注解：-Length&quot;&gt;&lt;a href=&quot;#第一步：首先定义注解：-Length&quot; class=&quot;headerlink&quot; title=&quot;第一步：首先定义注解：@Length&quot;&gt;&lt;/a&gt;第一步：首先定义注解：@Length&lt;/h2&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@Target(&amp;#123;ElementType.FIELD&amp;#125;)&lt;/span&gt;&lt;span class=&quot;comment&quot;&gt;//元注解&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@Retention(RetentionPolicy.RUNTIME)&lt;/span&gt;&lt;span class=&quot;comment&quot;&gt;//元注解&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;meta&quot;&gt;@interface&lt;/span&gt; Length&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 允许字符串长度的最小值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 允许字符串长度的最大值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;String &lt;span class=&quot;title&quot;&gt;errorMsg&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 自定义的错误提示信息&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>人工智能基础</title>
+    <link href="http://bilikings.top/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/"/>
+    <id>http://bilikings.top/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</id>
+    <published>2020-11-14T08:38:49.000Z</published>
+    <updated>2020-11-14T08:40:57.305Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;人工智能基础复习材料&quot;&gt;&lt;a href=&quot;#人工智能基础复习材料&quot; class=&quot;headerlink&quot; title=&quot;人工智能基础复习材料&quot;&gt;&lt;/a&gt;人工智能基础复习材料&lt;/h1&gt;&lt;h2 id=&quot;名词解释&quot;&gt;&lt;a href=&quot;#名词解释&quot; class=&quot;headerlink&quot; title=&quot;名词解释&quot;&gt;&lt;/a&gt;名词解释&lt;/h2&gt;&lt;h3 id=&quot;人工智能-Artificial-Intelligence-：&quot;&gt;&lt;a href=&quot;#人工智能-Artificial-Intelligence-：&quot; class=&quot;headerlink&quot; title=&quot;人工智能(Artificial Intelligence)：&quot;&gt;&lt;/a&gt;人工智能(Artificial Intelligence)：&lt;/h3&gt;&lt;p&gt; 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="算法" scheme="http://bilikings.top/tags/%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>正则表达式&#39;</title>
+    <link href="http://bilikings.top/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"/>
+    <id>http://bilikings.top/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</id>
+    <published>2020-11-13T15:35:50.000Z</published>
+    <updated>2020-11-13T15:49:34.534Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;正则表达式&quot;&gt;&lt;a href=&quot;#正则表达式&quot; class=&quot;headerlink&quot; title=&quot;正则表达式&quot;&gt;&lt;/a&gt;正则表达式&lt;/h1&gt;&lt;p&gt;实例：&lt;/p&gt;
+&lt;p&gt;匹配用户输入为19xx&lt;/p&gt;
+&lt;p&gt;正则:19\d\d&lt;/p&gt;
+&lt;p&gt;Java字符串”19\\d\\d“&lt;/p&gt;
+&lt;h2 id=&quot;匹配&quot;&gt;&lt;a href=&quot;#匹配&quot; class=&quot;headerlink&quot; title=&quot;匹配&quot;&gt;&lt;/a&gt;匹配&lt;/h2&gt;&lt;h3 id=&quot;精确匹配规则&quot;&gt;&lt;a href=&quot;#精确匹配规则&quot; class=&quot;headerlink&quot; title=&quot;精确匹配规则&quot;&gt;&lt;/a&gt;精确匹配规则&lt;/h3&gt;&lt;p&gt;\u匹配指定Unicode字符&lt;/p&gt;
+&lt;p&gt;. 可以匹配任意一个字符&lt;/p&gt;
+&lt;p&gt;例如a.c 匹配abc，afc ，a%c&lt;/p&gt;
+&lt;p&gt;\d 匹配一个数字&lt;/p&gt;
+&lt;p&gt;\w 匹配一个数字、字母或者下划线&lt;/p&gt;
+&lt;p&gt;\s 匹配一个空白字符 A\sB 匹配A B&lt;/p&gt;
+&lt;p&gt;\W匹配非数字、字母或者下划线&lt;/p&gt;
+&lt;p&gt;\S匹配一个非空白字符&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="正则" scheme="http://bilikings.top/tags/%E6%AD%A3%E5%88%99/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>螺旋矩阵</title>
+    <link href="http://bilikings.top/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/"/>
+    <id>http://bilikings.top/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</id>
+    <published>2020-11-12T05:55:54.000Z</published>
+    <updated>2020-11-12T05:56:56.337Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;螺旋矩阵&quot;&gt;&lt;a href=&quot;#螺旋矩阵&quot; class=&quot;headerlink&quot; title=&quot;螺旋矩阵&quot;&gt;&lt;/a&gt;螺旋矩阵&lt;/h3&gt;&lt;p&gt;一个 n&lt;em&gt;n&lt;/em&gt; 行 n&lt;em&gt;n&lt;/em&gt; 列的螺旋矩阵可由如下方法生成：&lt;/p&gt;
+&lt;p&gt;从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,&lt;em&gt;n&lt;/em&gt;2，便构成了一个螺旋矩阵。&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;下图是一个 &lt;strong&gt;n=4&lt;/strong&gt; 时的螺旋矩阵。&lt;/p&gt;
+&lt;figure class=&quot;highlight shell&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1     2     3     4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;12    13    14     5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11    16    15     6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10     9     8     7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;/blockquote&gt;</summary>
+    
+    
+    
+    
+    <category term="数据结构与算法" scheme="http://bilikings.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>JVM内存回收概述</title>
+    <link href="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/"/>
+    <id>http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/</id>
+    <published>2020-11-11T12:17:16.000Z</published>
+    <updated>2020-11-11T12:18:22.511Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;要点&quot;&gt;&lt;a href=&quot;#要点&quot; class=&quot;headerlink&quot; title=&quot;要点&quot;&gt;&lt;/a&gt;要点&lt;/h2&gt;&lt;ol&gt;
+&lt;li&gt;Java引用的功能和意义&lt;/li&gt;
+&lt;li&gt;Java引用与内存回收之间的关系&lt;/li&gt;
+&lt;li&gt;Java对象在内存中的不同状态&lt;/li&gt;
+&lt;li&gt;软引用的作用和使用软引用的注意点&lt;/li&gt;
+&lt;li&gt;弱引用的作用和使用弱引用的注意点&lt;/li&gt;
+&lt;li&gt;虚引用的作用和使用虚引用的注意点&lt;/li&gt;
+&lt;li&gt;Java内存泄漏的原因&lt;/li&gt;
+&lt;li&gt;Java内存泄漏和C++内存泄漏的差别&lt;/li&gt;
+&lt;li&gt;Java垃圾回收机制的基本算法&lt;/li&gt;
+&lt;li&gt;堆内存的分代回收&lt;/li&gt;
+&lt;li&gt;Young代、Old代和Permanent代的各自存储的对象&lt;/li&gt;
+&lt;li&gt;Young代、Old代和Permanent代的特定及适用的回收算法&lt;/li&gt;
+&lt;li&gt;常见垃圾回收机制对堆内存的回收细节&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java Stream</title>
+    <link href="http://bilikings.top/2020/11/11/Stream/"/>
+    <id>http://bilikings.top/2020/11/11/Stream/</id>
+    <published>2020-11-11T08:39:37.000Z</published>
+    <updated>2020-11-11T08:42:22.009Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;Stream&quot;&gt;&lt;a href=&quot;#Stream&quot; class=&quot;headerlink&quot; title=&quot;Stream&quot;&gt;&lt;/a&gt;Stream&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;流式API&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;这个&lt;code&gt;Stream&lt;/code&gt;不同于&lt;code&gt;java.io&lt;/code&gt;的&lt;code&gt;InputStream&lt;/code&gt;和&lt;code&gt;OutputStream&lt;/code&gt;，它代表的是任意Java对象的序列。两者对比如下&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;th&gt;java.io&lt;/th&gt;
+&lt;th&gt;java.util.steam&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;&lt;tr&gt;
+&lt;td&gt;存储&lt;/td&gt;
+&lt;td&gt;顺序读写的byte或者char&lt;/td&gt;
+&lt;td&gt;顺序输出的任意Java对象实例&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;用途&lt;/td&gt;
+&lt;td&gt;序列化文件或者网络&lt;/td&gt;
+&lt;td&gt;内存计算/业务逻辑&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;</summary>
+    
+    
+    
+    
+    <category term="java" scheme="http://bilikings.top/tags/java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Lambda</title>
+    <link href="http://bilikings.top/2020/11/11/Lambda/"/>
+    <id>http://bilikings.top/2020/11/11/Lambda/</id>
+    <published>2020-11-11T08:39:20.000Z</published>
+    <updated>2020-11-11T08:42:13.976Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;Lambda表达式&quot;&gt;&lt;a href=&quot;#Lambda表达式&quot; class=&quot;headerlink&quot; title=&quot;Lambda表达式&quot;&gt;&lt;/a&gt;Lambda表达式&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;java中，经常遇到一大堆单方法接口，即一个接口只定义了一个方法&lt;ul&gt;
+&lt;li&gt;Comparator（比较器）&lt;/li&gt;
+&lt;li&gt;Runnable&lt;/li&gt;
+&lt;li&gt;Callable&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;String[] arr =&amp;#123;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Comparator&amp;lt;String&amp;gt;()&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;compare&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(String s1,String s2 )&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; s1.compareTo(s2);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;这样写，非常繁琐&lt;/p&gt;
+&lt;p&gt;java8开始用Lambda了替换单方法接口：&lt;/p&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,(s1,s2)-&amp;gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; s1.compare(s2);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+
+&lt;p&gt;Lambda表达式值需要写出方法定义，参数类型可以省略&lt;/p&gt;
+&lt;p&gt;只有一行return代码可以写成&lt;/p&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,(s1,s2)-&amp;gt;s1.compare(s2));&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</summary>
+    
+    
+    
+    
+    <category term="java" scheme="http://bilikings.top/tags/java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>转发与重定向</title>
+    <link href="http://bilikings.top/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://bilikings.top/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</id>
+    <published>2020-11-11T08:36:23.000Z</published>
+    <updated>2020-11-11T08:37:17.935Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;转发与重定向&quot;&gt;&lt;a href=&quot;#转发与重定向&quot; class=&quot;headerlink&quot; title=&quot;转发与重定向&quot;&gt;&lt;/a&gt;转发与重定向&lt;/h1&gt;&lt;p&gt;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="web" scheme="http://bilikings.top/tags/web/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>贝壳公司一面经历</title>
+    <link href="http://bilikings.top/2020/11/11/%E8%B4%9D%E5%A3%B3%E5%85%AC%E5%8F%B8%E4%B8%80%E9%9D%A2%E7%BB%8F%E5%8E%86/"/>
+    <id>http://bilikings.top/2020/11/11/%E8%B4%9D%E5%A3%B3%E5%85%AC%E5%8F%B8%E4%B8%80%E9%9D%A2%E7%BB%8F%E5%8E%86/</id>
+    <published>2020-11-11T08:07:07.000Z</published>
+    <updated>2020-11-11T08:07:52.720Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;贝壳公司一面&quot;&gt;&lt;a href=&quot;#贝壳公司一面&quot; class=&quot;headerlink&quot; title=&quot;贝壳公司一面&quot;&gt;&lt;/a&gt;贝壳公司一面&lt;/h1&gt;&lt;p&gt;先叫介绍一下自己，然后看到自己有说了解jdk源码，然后抓住String类来问了&lt;/p&gt;
+&lt;h3 id=&quot;String&quot;&gt;&lt;a href=&quot;#String&quot; class=&quot;headerlink&quot; title=&quot;String&quot;&gt;&lt;/a&gt;String&lt;/h3&gt;&lt;blockquote&gt;
+&lt;p&gt;String a = new String(“a”);&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;这句创建了几个对象？&lt;/p&gt;
+&lt;p&gt;String a不会创建，=不会创建。所以“a“是字符串常量池的一个对象，new String 是一个堆中的对象，返回这个对象的引用为a，所以一共创建了两个对象&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;String str = “a”+”b”;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;产生几个对象？在编译时折叠，产生一个对象，要是不优化就是2个对象&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;String a=new String(“b”+”c”);&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;字符串常量 “b” 被JVM存放在数据段区常量池中 &lt;/li&gt;
+&lt;li&gt;字符串常量 “c” 被JVM存放在数据段区常量池中 &lt;/li&gt;
+&lt;li&gt;由于String不可变性，”b”+”c” 又生成了一个字符串 被JVM存放在数据段区常量池中 &lt;/li&gt;
+&lt;li&gt;new String(“b”+”c”)对象被JVM存放在堆中&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;String a =”a” + new String(“b”);&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;ul&gt;
+&lt;li&gt;创建“a”&lt;/li&gt;
+&lt;li&gt;创建”b”&lt;/li&gt;
+&lt;li&gt;创建new String（“b”）&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="面经" scheme="http://bilikings.top/tags/%E9%9D%A2%E7%BB%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>java IO</title>
+    <link href="http://bilikings.top/2020/11/11/the_java-IO/"/>
+    <id>http://bilikings.top/2020/11/11/the_java-IO/</id>
+    <published>2020-11-11T04:16:30.000Z</published>
+    <updated>2020-11-11T04:31:29.963Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Java-IO&quot;&gt;&lt;a href=&quot;#Java-IO&quot; class=&quot;headerlink&quot; title=&quot;Java IO&quot;&gt;&lt;/a&gt;Java IO&lt;/h1&gt;&lt;h2 id=&quot;BIO&quot;&gt;&lt;a href=&quot;#BIO&quot; class=&quot;headerlink&quot; title=&quot;BIO&quot;&gt;&lt;/a&gt;BIO&lt;/h2&gt;&lt;p&gt;blocking I/O（阻塞同步的io）&lt;/p&gt;
+&lt;p&gt;服务器实现模式为一个连接连接一个线程，客户端确保请求是服务器就需要启动一个线程进行处理，如果连接不做事情就会浪费资源（可以通过线程池优化）&lt;/p&gt;
+&lt;h4 id=&quot;简单流程&quot;&gt;&lt;a href=&quot;#简单流程&quot; class=&quot;headerlink&quot; title=&quot;简单流程&quot;&gt;&lt;/a&gt;简单流程&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;服务器端启动一个serverSocket&lt;/li&gt;
+&lt;li&gt;客户端启动Socket对服务器进行通信，默认情况下服务器需要对每个客户建立一个线程与之通信&lt;/li&gt;
+&lt;li&gt;客户端发送一个请求之后，先咨询服务器是否有线程响应&lt;ul&gt;
+&lt;li&gt;如果没有就会wait或者被拒绝&lt;/li&gt;
+&lt;li&gt;如果有客户端就会等待请求结束后继续执行&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    
+    <category term="BIO_NIO_AIO" scheme="http://bilikings.top/tags/BIO-NIO-AIO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Netty</title>
+    <link href="http://bilikings.top/2020/11/11/Netty/"/>
+    <id>http://bilikings.top/2020/11/11/Netty/</id>
+    <published>2020-11-11T02:48:20.000Z</published>
+    <updated>2020-11-11T02:48:35.544Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;Netty&quot;&gt;&lt;a href=&quot;#Netty&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="NIO" scheme="http://bilikings.top/tags/NIO/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>TopK</title>
+    <link href="http://bilikings.top/2020/11/11/TopK/"/>
+    <id>http://bilikings.top/2020/11/11/TopK/</id>
+    <published>2020-11-11T02:45:21.000Z</published>
+    <updated>2020-11-11T03:28:34.528Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;TopK问题&quot;&gt;&lt;a href=&quot;#TopK问题&quot; class=&quot;headerlink&quot; title=&quot;TopK问题&quot;&gt;&lt;/a&gt;TopK问题&lt;/h1&gt;&lt;p&gt;你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;直接排序，取top100&lt;/li&gt;
+&lt;li&gt;堆排序，取top100&lt;/li&gt;
+&lt;li&gt;快排的思想，使用划分函数取100&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;那么他们分别有什么缺陷呢？&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常&lt;/li&gt;
+&lt;li&gt;堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。&lt;/li&gt;
+&lt;li&gt;使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&amp;gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="数据结构与算法" scheme="http://bilikings.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
+  
+</feed>
