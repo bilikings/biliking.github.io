@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-17T09:03:49.165Z</updated>
+  <updated>2020-11-17T09:07:52.251Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,75 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java并发编程笔记(4)——同步工具类</title>
+    <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/"/>
+    <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</id>
+    <published>2020-11-17T09:07:27.000Z</published>
+    <updated>2020-11-17T09:07:52.251Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;同步工具类&quot;&gt;&lt;a href=&quot;#同步工具类&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java并发编程笔记(5)——同步的基础构建模块</title>
+    <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/"/>
+    <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</id>
+    <published>2020-11-17T09:06:33.000Z</published>
+    <updated>2020-11-17T09:06:58.509Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;基础构建模块&quot;&gt;&lt;a href=&quot;#基础构建模块&quot; class=&quot;headerlink&quot; title=&quot;基础构建模块&quot;&gt;&lt;/a&gt;基础构建模块&lt;/h2&gt;&lt;h3 id=&quot;同步容器类&quot;&gt;&lt;a href=&quot;#同步容器类&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java并发编程笔记(3)——对象的组合</title>
+    <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/"/>
+    <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</id>
+    <published>2020-11-17T09:03:28.000Z</published>
+    <updated>2020-11-17T09:05:37.991Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;对象的组合&quot;&gt;&lt;a href=&quot;#对象的组合&quot; class=&quot;headerlink&quot; title=&quot;对象的组合&quot;&gt;&lt;/a&gt;对象的组合&lt;/h2&gt;&lt;p&gt;实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。&lt;/p&gt;
+&lt;h3 id=&quot;设计线程安全的类&quot;&gt;&lt;a href=&quot;#设计线程安全的类&quot; class=&quot;headerlink&quot; title=&quot;设计线程安全的类&quot;&gt;&lt;/a&gt;设计线程安全的类&lt;/h3&gt;&lt;p&gt;基本要素：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;找出构成对象的所有变量&lt;/li&gt;
+&lt;li&gt;找出约束状态条件的不变性条件&lt;/li&gt;
+&lt;li&gt;建立对象状态的并发访问管理策略&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>Java并发编程笔记(2)——对象的共享</title>
@@ -452,34 +521,6 @@
     
     
     <category term="NIO" scheme="http://bilikings.top/tags/NIO/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>TopK</title>
-    <link href="http://bilikings.top/2020/11/11/TopK/"/>
-    <id>http://bilikings.top/2020/11/11/TopK/</id>
-    <published>2020-11-11T02:45:21.000Z</published>
-    <updated>2020-11-11T03:28:34.528Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;TopK问题&quot;&gt;&lt;a href=&quot;#TopK问题&quot; class=&quot;headerlink&quot; title=&quot;TopK问题&quot;&gt;&lt;/a&gt;TopK问题&lt;/h1&gt;&lt;p&gt;你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;直接排序，取top100&lt;/li&gt;
-&lt;li&gt;堆排序，取top100&lt;/li&gt;
-&lt;li&gt;快排的思想，使用划分函数取100&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;那么他们分别有什么缺陷呢？&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常&lt;/li&gt;
-&lt;li&gt;堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。&lt;/li&gt;
-&lt;li&gt;使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&amp;gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）&lt;/li&gt;
-&lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="数据结构与算法" scheme="http://bilikings.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
