@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-17T09:01:58.075Z</updated>
+  <updated>2020-11-17T09:03:49.165Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java并发编程笔记(2)——对象的共享</title>
+    <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/"/>
+    <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/</id>
+    <published>2020-11-17T09:03:13.000Z</published>
+    <updated>2020-11-17T09:03:49.165Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;对象的共享&quot;&gt;&lt;a href=&quot;#对象的共享&quot; class=&quot;headerlink&quot; title=&quot;对象的共享&quot;&gt;&lt;/a&gt;对象的共享&lt;/h2&gt;&lt;p&gt;同步还有一个重要的方面，内存可见性(Memory Visibility)，简而言之，我们需要对一个对象在进行修改时，其他线程不会对这个对象进行修改，而且在修改完成之后，其他线程也能看到这个对象状态的变化。&lt;/p&gt;
+&lt;h3 id=&quot;可见性&quot;&gt;&lt;a href=&quot;#可见性&quot; class=&quot;headerlink&quot; title=&quot;可见性&quot;&gt;&lt;/a&gt;可见性&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;重排序&lt;/strong&gt;：在编译器和处理时与运行时，可能对操作进行顺序进行进行重排序，所以对内存操作的顺序无法正确判断。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;非原子的64位操作&lt;/strong&gt;：在Java中，long与double类型，JVM允许把其拆分成2个32位的进行计算。如果对这个变量的读操作和写操作在不同的线程中进行，可能就读取到错误的数据。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>Java并发编程笔记(1)——线程安全性</title>
