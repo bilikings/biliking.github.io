@@ -461,6 +461,8 @@
 <blockquote>
 <p>也可以通过一些机制来创建自己的同步工具类</p>
 </blockquote>
+<a id="more"></a>
+
 <h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>他作为一种同步工具类， 可以延迟线程的进度直到到达终止状态。</p>
 <p>可以用来保证模型或者直到其他活动都完成后再继续执行</p>
 <ul>
@@ -501,10 +503,65 @@
       </tags>
   </entry>
   <entry>
+    <title>Lambda</title>
+    <url>/2020/11/11/Lambda/</url>
+    <content><![CDATA[<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><ul>
+<li>java中，经常遇到一大堆单方法接口，即一个接口只定义了一个方法<ul>
+<li>Comparator（比较器）</li>
+<li>Runnable</li>
+<li>Callable</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] arr =&#123;&#125;;</span><br><span class="line">Arrays.sort(arr,<span class="keyword">new</span> Comparator&lt;String&gt;()&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(String s1,String s2 )</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s1.compareTo(s2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这样写，非常繁琐</p>
+<p>java8开始用Lambda了替换单方法接口：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(arr,(s1,s2)-&gt;&#123;</span><br><span class="line">    <span class="keyword">return</span> s1.compare(s2);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>Lambda表达式值需要写出方法定义，参数类型可以省略</p>
+<p>只有一行return代码可以写成</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(arr,(s1,s2)-&gt;s1.compare(s2));</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<h3 id="FunctionalInterface-功能接口"><a href="#FunctionalInterface-功能接口" class="headerlink" title="FunctionalInterface(功能接口)"></a>FunctionalInterface(功能接口)</h3><p>我们把只定义了单方法的接口称之为<code>FunctionalInterface</code>，用注解<code>@FunctionalInterface</code>标记。例如，<code>Callable</code>接口：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"> <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt;</span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">call</span><span class="params">()</span> throw Exception</span>;</span><br><span class="line"> &#125;    </span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Callable mycallable =()-&gt;&#123;</span><br><span class="line">    Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;hello&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Comparator</code>接口：</p>
+<p>虽然<code>Comparator</code>接口有很多方法，但只有一个抽象方法<code>int compare(T o1, T o2)</code>，其他的方法都是<code>default</code>方法或<code>static</code>方法。另外注意到<code>boolean equals(Object obj)</code>是<code>Object</code>定义的方法，不算在接口方法内。因此，<code>Comparator</code>也是一个<code>FunctionalInterface</code>。</p>
+<p>接收<code>FunctionalInterface</code>作为参数的时候，可以把实例化的匿名类改写为Lambda表达式，能大大简化代码。</p>
+<h3 id="Lambda方法引用"><a href="#Lambda方法引用" class="headerlink" title="Lambda方法引用"></a>Lambda方法引用</h3><p>除了Lambda表达式，我们还可以直接传入方法引用。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       String[] arr =<span class="keyword">new</span> String&#123;<span class="string">&quot;A&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>&#125;;</span><br><span class="line">        Arrays.sort(arr,Main::cmp);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cmp</span><span class="params">(String s1,String s2)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s1.compareTo(s2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接传入一个静态方法，输出也是一个函数方法。</p>
+<p>所谓方法引用，就是方法的签名和接口正好一致，就可以直接传入方法引用</p>
+<p>因为<code>Comparator</code>接口定义的方法是<code>int compare(String, String)</code>，和静态方法<code>int cmp(String, String)</code>相比，除了方法名外，方法参数一致，返回类型相同，因此，我们说两者的方法签名一致，可以直接把方法名作为Lambda表达式传入：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(array, String::compareTo);<span class="comment">//只看参数类型和返回类型，不看方法名称，也不看类的继承关系。</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="构造方法引用"><a href="#构造方法引用" class="headerlink" title="构造方法引用"></a>构造方法引用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Function</span>&lt;<span class="title">T</span>, <span class="title">R</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">R <span class="title">apply</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>把泛型对应上就是方法签名<code>Person apply(String)</code>，即传入参数<code>String</code>，返回类型<code>Person</code>。而<code>Person</code>类的构造方法恰好满足这个条件，因为构造方法的参数是<code>String</code>，而构造方法虽然没有<code>return</code>语句，但它会隐式地返回<code>this</code>实例，类型就是<code>Person</code>，因此，此处可以引用构造方法。构造方法的引用写法是<code>类名::new</code>，因此，此处传入<code>Person::new</code>。</p>
+<ul>
+<li>符合方法签名的实例方法（实例类型被看做第一个参数类型）；</li>
+<li>符合方法签名的构造方法（实例类型被看做返回类型）。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Function;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Predicate;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Supplier;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> lambda</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/18 20:09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">filter</span><span class="params">(List&lt;T&gt; list , Predicate&lt;T&gt; p)</span></span>&#123;</span><br><span class="line">        List&lt;T&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(T s:list)&#123;</span><br><span class="line">            <span class="keyword">if</span>(p.test(s))&#123;</span><br><span class="line">                res.add(s);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T,R&gt; <span class="function">List&lt;R&gt; <span class="title">map</span> <span class="params">(List&lt;T&gt; list, Function&lt;T,R&gt; f)</span></span>&#123;</span><br><span class="line">        List&lt;R&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(T s:list)&#123;</span><br><span class="line">            res.add(f.apply(s));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>  res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        List&lt;String&gt; to = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        to.add(<span class="string">&quot;sdad&quot;</span>);</span><br><span class="line">        to.add(<span class="string">&quot;sjfa&quot;</span>);</span><br><span class="line">        to.add(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        System.out.println(to.toString());</span><br><span class="line">        List&lt;String&gt; non = filter(to,s-&gt;!s.isEmpty());</span><br><span class="line">        System.out.println(non.toString());</span><br><span class="line"></span><br><span class="line">        List&lt;Integer&gt; l = map(Arrays.asList(<span class="string">&quot;lambda&quot;</span>,<span class="string">&quot;in&quot;</span>,<span class="string">&quot;Action&quot;</span>), String::length);</span><br><span class="line">        System.out.println(l);</span><br><span class="line"></span><br><span class="line">        Callable&lt;Integer&gt; c=()-&gt;<span class="number">43</span>;</span><br><span class="line">        System.out.println(c.call().intValue());</span><br><span class="line"></span><br><span class="line">        Runnable stringRunnable = ()-&gt; System.out.println(<span class="string">&quot;stringRun&quot;</span>);</span><br><span class="line">        stringRunnable.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java并发编程笔记(5)——同步的基础构建模块</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
     <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
-<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器</p>
+<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器。</p>
+<a id="more"></a>
+
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用迭代器来遍历list</span></span><br><span class="line">List&lt;String&gt; s = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">...<span class="comment">//add操作</span></span><br><span class="line">  </span><br><span class="line">      Iterator&lt;String&gt; iterator = s.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">          String next = iterator.next();</span><br><span class="line">          System.out.println(next);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p><code>ConcurrentHashMap</code>（使用分段锁），<code>CopyOnWriteArrayList</code>（写入时复制，一般在读操作远多于写操作时使用），</p>
@@ -569,56 +626,25 @@
       </tags>
   </entry>
   <entry>
-    <title>Lambda</title>
-    <url>/2020/11/11/Lambda/</url>
-    <content><![CDATA[<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><ul>
-<li>java中，经常遇到一大堆单方法接口，即一个接口只定义了一个方法<ul>
-<li>Comparator（比较器）</li>
-<li>Runnable</li>
-<li>Callable</li>
-</ul>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String[] arr =&#123;&#125;;</span><br><span class="line">Arrays.sort(arr,<span class="keyword">new</span> Comparator&lt;String&gt;()&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(String s1,String s2 )</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s1.compareTo(s2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-<p>这样写，非常繁琐</p>
-<p>java8开始用Lambda了替换单方法接口：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(arr,(s1,s2)-&gt;&#123;</span><br><span class="line">    <span class="keyword">return</span> s1.compare(s2);</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
-
-<p>Lambda表达式值需要写出方法定义，参数类型可以省略</p>
-<p>只有一行return代码可以写成</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(arr,(s1,s2)-&gt;s1.compare(s2));</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<h3 id="FunctionalInterface-功能接口"><a href="#FunctionalInterface-功能接口" class="headerlink" title="FunctionalInterface(功能接口)"></a>FunctionalInterface(功能接口)</h3><p>我们把只定义了单方法的接口称之为<code>FunctionalInterface</code>，用注解<code>@FunctionalInterface</code>标记。例如，<code>Callable</code>接口：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"> <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Callable</span>&lt;<span class="title">V</span>&gt;</span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">call</span><span class="params">()</span> throw Exception</span>;</span><br><span class="line"> &#125;    </span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Callable mycallable =()-&gt;&#123;</span><br><span class="line">    Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;hello&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>Comparator</code>接口：</p>
-<p>虽然<code>Comparator</code>接口有很多方法，但只有一个抽象方法<code>int compare(T o1, T o2)</code>，其他的方法都是<code>default</code>方法或<code>static</code>方法。另外注意到<code>boolean equals(Object obj)</code>是<code>Object</code>定义的方法，不算在接口方法内。因此，<code>Comparator</code>也是一个<code>FunctionalInterface</code>。</p>
-<p>接收<code>FunctionalInterface</code>作为参数的时候，可以把实例化的匿名类改写为Lambda表达式，能大大简化代码。</p>
-<h3 id="Lambda方法引用"><a href="#Lambda方法引用" class="headerlink" title="Lambda方法引用"></a>Lambda方法引用</h3><p>除了Lambda表达式，我们还可以直接传入方法引用。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       String[] arr =<span class="keyword">new</span> String&#123;<span class="string">&quot;A&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>&#125;;</span><br><span class="line">        Arrays.sort(arr,Main::cmp);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">cmp</span><span class="params">(String s1,String s2)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> s1.compareTo(s2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>直接传入一个静态方法，输出也是一个函数方法。</p>
-<p>所谓方法引用，就是方法的签名和接口正好一致，就可以直接传入方法引用</p>
-<p>因为<code>Comparator</code>接口定义的方法是<code>int compare(String, String)</code>，和静态方法<code>int cmp(String, String)</code>相比，除了方法名外，方法参数一致，返回类型相同，因此，我们说两者的方法签名一致，可以直接把方法名作为Lambda表达式传入：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Arrays.sort(array, String::compareTo);<span class="comment">//只看参数类型和返回类型，不看方法名称，也不看类的继承关系。</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="构造方法引用"><a href="#构造方法引用" class="headerlink" title="构造方法引用"></a>构造方法引用</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@FunctionalInterface</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Function</span>&lt;<span class="title">T</span>, <span class="title">R</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function">R <span class="title">apply</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>把泛型对应上就是方法签名<code>Person apply(String)</code>，即传入参数<code>String</code>，返回类型<code>Person</code>。而<code>Person</code>类的构造方法恰好满足这个条件，因为构造方法的参数是<code>String</code>，而构造方法虽然没有<code>return</code>语句，但它会隐式地返回<code>this</code>实例，类型就是<code>Person</code>，因此，此处可以引用构造方法。构造方法的引用写法是<code>类名::new</code>，因此，此处传入<code>Person::new</code>。</p>
-<ul>
-<li>符合方法签名的实例方法（实例类型被看做第一个参数类型）；</li>
-<li>符合方法签名的构造方法（实例类型被看做返回类型）。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Callable;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Function;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Predicate;</span><br><span class="line"><span class="keyword">import</span> java.util.function.Supplier;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> lambda</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/18 20:09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">List&lt;T&gt; <span class="title">filter</span><span class="params">(List&lt;T&gt; list , Predicate&lt;T&gt; p)</span></span>&#123;</span><br><span class="line">        List&lt;T&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(T s:list)&#123;</span><br><span class="line">            <span class="keyword">if</span>(p.test(s))&#123;</span><br><span class="line">                res.add(s);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;T,R&gt; <span class="function">List&lt;R&gt; <span class="title">map</span> <span class="params">(List&lt;T&gt; list, Function&lt;T,R&gt; f)</span></span>&#123;</span><br><span class="line">        List&lt;R&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span>(T s:list)&#123;</span><br><span class="line">            res.add(f.apply(s));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>  res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        List&lt;String&gt; to = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        to.add(<span class="string">&quot;sdad&quot;</span>);</span><br><span class="line">        to.add(<span class="string">&quot;sjfa&quot;</span>);</span><br><span class="line">        to.add(<span class="string">&quot;&quot;</span>);</span><br><span class="line">        System.out.println(to.toString());</span><br><span class="line">        List&lt;String&gt; non = filter(to,s-&gt;!s.isEmpty());</span><br><span class="line">        System.out.println(non.toString());</span><br><span class="line"></span><br><span class="line">        List&lt;Integer&gt; l = map(Arrays.asList(<span class="string">&quot;lambda&quot;</span>,<span class="string">&quot;in&quot;</span>,<span class="string">&quot;Action&quot;</span>), String::length);</span><br><span class="line">        System.out.println(l);</span><br><span class="line"></span><br><span class="line">        Callable&lt;Integer&gt; c=()-&gt;<span class="number">43</span>;</span><br><span class="line">        System.out.println(c.call().intValue());</span><br><span class="line"></span><br><span class="line">        Runnable stringRunnable = ()-&gt; System.out.println(<span class="string">&quot;stringRun&quot;</span>);</span><br><span class="line">        stringRunnable.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
 ]]></content>
       <tags>
-        <tag>java</tag>
+        <tag>NIO</tag>
       </tags>
   </entry>
   <entry>
@@ -693,28 +719,6 @@
 ]]></content>
       <tags>
         <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
       </tags>
   </entry>
   <entry>
@@ -814,6 +818,24 @@
       </tags>
   </entry>
   <entry>
+    <title>螺旋矩阵</title>
+    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
+    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
+<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
+<blockquote>
+<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
+</blockquote>
+<a id="more"></a>
+
+<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
+<p>然后递归下一圈。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -889,24 +911,6 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>螺旋矩阵</title>
-    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
-    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
-<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
-<blockquote>
-<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
-</blockquote>
-<a id="more"></a>
-
-<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
-<p>然后递归下一圈。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
       </tags>
   </entry>
   <entry>

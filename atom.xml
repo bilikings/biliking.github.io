@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-17T09:07:52.251Z</updated>
+  <updated>2020-11-17T09:10:42.452Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -21,16 +21,19 @@
     <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/"/>
     <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</id>
     <published>2020-11-17T09:07:27.000Z</published>
-    <updated>2020-11-17T09:07:52.251Z</updated>
+    <updated>2020-11-17T09:10:42.452Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;同步工具类&quot;&gt;&lt;a href=&quot;#同步工具类&quot; class=&quot;headerlink&quot;</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;同步工具类&quot;&gt;&lt;a href=&quot;#同步工具类&quot; class=&quot;headerlink&quot; title=&quot;同步工具类&quot;&gt;&lt;/a&gt;同步工具类&lt;/h2&gt;&lt;p&gt;同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;阻塞队列&lt;/li&gt;
+&lt;li&gt;信号量（Semaphore）&lt;/li&gt;
+&lt;li&gt;栅栏（Barrier）&lt;/li&gt;
+&lt;li&gt;闭锁（Latch）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;blockquote&gt;
+&lt;p&gt;也可以通过一些机制来创建自己的同步工具类&lt;/p&gt;
+&lt;/blockquote&gt;</summary>
     
     
     
@@ -44,16 +47,11 @@
     <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/"/>
     <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</id>
     <published>2020-11-17T09:06:33.000Z</published>
-    <updated>2020-11-17T09:06:58.509Z</updated>
+    <updated>2020-11-17T09:10:51.939Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;基础构建模块&quot;&gt;&lt;a href=&quot;#基础构建模块&quot; class=&quot;headerlink&quot; title=&quot;基础构建模块&quot;&gt;&lt;/a&gt;基础构建模块&lt;/h2&gt;&lt;h3 id=&quot;同步容器类&quot;&gt;&lt;a href=&quot;#同步容器类&quot; class=&quot;headerlink&quot;</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;基础构建模块&quot;&gt;&lt;a href=&quot;#基础构建模块&quot; class=&quot;headerlink&quot; title=&quot;基础构建模块&quot;&gt;&lt;/a&gt;基础构建模块&lt;/h2&gt;&lt;h3 id=&quot;同步容器类&quot;&gt;&lt;a href=&quot;#同步容器类&quot; class=&quot;headerlink&quot; title=&quot;同步容器类&quot;&gt;&lt;/a&gt;同步容器类&lt;/h3&gt;&lt;p&gt;同步容器类包括早期的Vector（基本弃用）和&lt;code&gt;Hashtable&lt;/code&gt;（&lt;strong&gt;ConcurrentHashMap&lt;/strong&gt;（一致性hashmap）他不香吗），这些类的创建基本就是由&lt;code&gt;Collections.synchronizedXxx&lt;/code&gt;等工厂方法创建的。&lt;/p&gt;
+&lt;h3 id=&quot;迭代容器&quot;&gt;&lt;a href=&quot;#迭代容器&quot; class=&quot;headerlink&quot; title=&quot;迭代容器&quot;&gt;&lt;/a&gt;迭代容器&lt;/h3&gt;&lt;p&gt;现在的许多容器也没有消除&lt;strong&gt;复合操作&lt;/strong&gt;的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出&lt;code&gt;concurrentModificationException&lt;/code&gt;，但只能当做并发问题的预警警示器。&lt;/p&gt;</summary>
     
     
     
