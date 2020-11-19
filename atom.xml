@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-17T09:10:42.452Z</updated>
+  <updated>2020-11-19T01:30:31.129Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,25 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>RedisMQ</title>
+    <link href="http://bilikings.top/2020/11/19/RedisMQ/"/>
+    <id>http://bilikings.top/2020/11/19/RedisMQ/</id>
+    <published>2020-11-19T01:29:53.000Z</published>
+    <updated>2020-11-19T01:30:31.129Z</updated>
+    
+    
+    <summary type="html">&lt;p&gt;Redis实现轻量级的消息队列与消息中间件相比，没有高级特性也没有ACK保证，无法做到数据不重不漏，如果业务简单而且对消息的可靠性不是那么严格可以尝试使用。&lt;/p&gt;
+&lt;p&gt;Redis中列表&lt;code&gt;List&lt;/code&gt;类型是按照插入顺序排序的字符串链表，和数据结构中的普通链表一样，可以在头部&lt;code&gt;left&lt;/code&gt;和尾部&lt;code&gt;right&lt;/code&gt;添加新的元素。插入时如果键不存在Redis将为该键创建一个新的链表。如果链表中所有元素均被删除，那么该键也会被删除。&lt;/p&gt;
+&lt;p&gt;Redis提供了两种方式来做消息队列，一种是&lt;strong&gt;生产消费模式&lt;/strong&gt;，另一种是&lt;strong&gt;发布订阅模式&lt;/strong&gt;。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Redis" scheme="http://bilikings.top/tags/Redis/"/>
+    
+  </entry>
   
   <entry>
     <title>Java并发编程笔记(4)——同步工具类</title>
@@ -496,29 +515,6 @@
     
     
     <category term="BIO_NIO_AIO" scheme="http://bilikings.top/tags/BIO-NIO-AIO/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Netty</title>
-    <link href="http://bilikings.top/2020/11/11/Netty/"/>
-    <id>http://bilikings.top/2020/11/11/Netty/</id>
-    <published>2020-11-11T02:48:20.000Z</published>
-    <updated>2020-11-11T02:48:35.544Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;Netty&quot;&gt;&lt;a href=&quot;#Netty&quot; class=&quot;headerlink&quot;</summary>
-        
-      
-    
-    
-    
-    
-    <category term="NIO" scheme="http://bilikings.top/tags/NIO/"/>
     
   </entry>
   
