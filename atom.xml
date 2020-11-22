@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-19T01:30:31.129Z</updated>
+  <updated>2020-11-22T12:21:45.616Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,52 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java并发编程笔记(6)——线程池</title>
+    <link href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/"/>
+    <id>http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</id>
+    <published>2020-11-22T12:19:12.000Z</published>
+    <updated>2020-11-22T12:21:45.616Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;线程池的使用&quot;&gt;&lt;a href=&quot;#线程池的使用&quot; class=&quot;headerlink&quot; title=&quot;线程池的使用&quot;&gt;&lt;/a&gt;线程池的使用&lt;/h2&gt;&lt;p&gt;有些任务需要明确的指定执行策略：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;依赖性任务：如果线程池中的任务需要依赖其他任务的活动，那么就隐含的给执行策略带来了约束&lt;/li&gt;
+&lt;li&gt;使用线程封闭机制的任务：单线程的Executor可以对并发性做出更强的承诺，对象封闭在任务线程中，使得线程中的任务访问这个对象时不会同步，&lt;/li&gt;
+&lt;li&gt;对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性&lt;/li&gt;
+&lt;li&gt;使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Java并发编程笔记(6)——任务</title>
+    <link href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/"/>
+    <id>http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/</id>
+    <published>2020-11-22T12:18:58.000Z</published>
+    <updated>2020-11-22T12:20:58.831Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;任务执行&quot;&gt;&lt;a href=&quot;#任务执行&quot; class=&quot;headerlink&quot; title=&quot;任务执行&quot;&gt;&lt;/a&gt;任务执行&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;任务&lt;/strong&gt;通常是一项抽象并且离散的一些单元。&lt;/p&gt;
+&lt;p&gt;可以把应用程序分解到多个任务中，可以简化程序的组织结构，提供一种自然的事务边界来优化错误的恢复过程&lt;/p&gt;
+&lt;h3 id=&quot;在线程中执行任务&quot;&gt;&lt;a href=&quot;#在线程中执行任务&quot; class=&quot;headerlink&quot; title=&quot;在线程中执行任务&quot;&gt;&lt;/a&gt;在线程中执行任务&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;找出任务边界&lt;/li&gt;
+&lt;li&gt;任务并不依赖其他的任务的状态、结果、边界效应。&lt;/li&gt;
+&lt;li&gt;多数web服务器的任务边界是一独立的客户请求为边界&lt;/li&gt;
+&lt;/ol&gt;</summary>
+    
+    
+    
+    
+    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
+    
+  </entry>
   
   <entry>
     <title>RedisMQ</title>
@@ -445,76 +491,6 @@
     
     
     <category term="web" scheme="http://bilikings.top/tags/web/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>贝壳公司一面经历</title>
-    <link href="http://bilikings.top/2020/11/11/%E8%B4%9D%E5%A3%B3%E5%85%AC%E5%8F%B8%E4%B8%80%E9%9D%A2%E7%BB%8F%E5%8E%86/"/>
-    <id>http://bilikings.top/2020/11/11/%E8%B4%9D%E5%A3%B3%E5%85%AC%E5%8F%B8%E4%B8%80%E9%9D%A2%E7%BB%8F%E5%8E%86/</id>
-    <published>2020-11-11T08:07:07.000Z</published>
-    <updated>2020-11-11T08:07:52.720Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;贝壳公司一面&quot;&gt;&lt;a href=&quot;#贝壳公司一面&quot; class=&quot;headerlink&quot; title=&quot;贝壳公司一面&quot;&gt;&lt;/a&gt;贝壳公司一面&lt;/h1&gt;&lt;p&gt;先叫介绍一下自己，然后看到自己有说了解jdk源码，然后抓住String类来问了&lt;/p&gt;
-&lt;h3 id=&quot;String&quot;&gt;&lt;a href=&quot;#String&quot; class=&quot;headerlink&quot; title=&quot;String&quot;&gt;&lt;/a&gt;String&lt;/h3&gt;&lt;blockquote&gt;
-&lt;p&gt;String a = new String(“a”);&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;这句创建了几个对象？&lt;/p&gt;
-&lt;p&gt;String a不会创建，=不会创建。所以“a“是字符串常量池的一个对象，new String 是一个堆中的对象，返回这个对象的引用为a，所以一共创建了两个对象&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;String str = “a”+”b”;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;产生几个对象？在编译时折叠，产生一个对象，要是不优化就是2个对象&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;String a=new String(“b”+”c”);&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;字符串常量 “b” 被JVM存放在数据段区常量池中 &lt;/li&gt;
-&lt;li&gt;字符串常量 “c” 被JVM存放在数据段区常量池中 &lt;/li&gt;
-&lt;li&gt;由于String不可变性，”b”+”c” 又生成了一个字符串 被JVM存放在数据段区常量池中 &lt;/li&gt;
-&lt;li&gt;new String(“b”+”c”)对象被JVM存放在堆中&lt;/li&gt;
-&lt;/ul&gt;
-&lt;blockquote&gt;
-&lt;p&gt;String a =”a” + new String(“b”);&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;创建“a”&lt;/li&gt;
-&lt;li&gt;创建”b”&lt;/li&gt;
-&lt;li&gt;创建new String（“b”）&lt;/li&gt;
-&lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="面经" scheme="http://bilikings.top/tags/%E9%9D%A2%E7%BB%8F/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>java IO</title>
-    <link href="http://bilikings.top/2020/11/11/the_java-IO/"/>
-    <id>http://bilikings.top/2020/11/11/the_java-IO/</id>
-    <published>2020-11-11T04:16:30.000Z</published>
-    <updated>2020-11-11T04:31:29.963Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;Java-IO&quot;&gt;&lt;a href=&quot;#Java-IO&quot; class=&quot;headerlink&quot; title=&quot;Java IO&quot;&gt;&lt;/a&gt;Java IO&lt;/h1&gt;&lt;h2 id=&quot;BIO&quot;&gt;&lt;a href=&quot;#BIO&quot; class=&quot;headerlink&quot; title=&quot;BIO&quot;&gt;&lt;/a&gt;BIO&lt;/h2&gt;&lt;p&gt;blocking I/O（阻塞同步的io）&lt;/p&gt;
-&lt;p&gt;服务器实现模式为一个连接连接一个线程，客户端确保请求是服务器就需要启动一个线程进行处理，如果连接不做事情就会浪费资源（可以通过线程池优化）&lt;/p&gt;
-&lt;h4 id=&quot;简单流程&quot;&gt;&lt;a href=&quot;#简单流程&quot; class=&quot;headerlink&quot; title=&quot;简单流程&quot;&gt;&lt;/a&gt;简单流程&lt;/h4&gt;&lt;ol&gt;
-&lt;li&gt;服务器端启动一个serverSocket&lt;/li&gt;
-&lt;li&gt;客户端启动Socket对服务器进行通信，默认情况下服务器需要对每个客户建立一个线程与之通信&lt;/li&gt;
-&lt;li&gt;客户端发送一个请求之后，先咨询服务器是否有线程响应&lt;ul&gt;
-&lt;li&gt;如果没有就会wait或者被拒绝&lt;/li&gt;
-&lt;li&gt;如果有客户端就会等待请求结束后继续执行&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ol&gt;</summary>
-    
-    
-    
-    
-    <category term="BIO_NIO_AIO" scheme="http://bilikings.top/tags/BIO-NIO-AIO/"/>
     
   </entry>
   
