@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-11-27T13:07:54.627Z</updated>
+  <updated>2020-11-29T04:57:19.381Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>常用数据库引擎对比</title>
+    <link href="http://bilikings.top/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/"/>
+    <id>http://bilikings.top/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/</id>
+    <published>2020-11-29T04:56:34.000Z</published>
+    <updated>2020-11-29T04:57:19.381Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;InnoDB和MyIsAM的区别&quot;&gt;&lt;a href=&quot;#InnoDB和MyIsAM的区别&quot; class=&quot;headerlink&quot; title=&quot;InnoDB和MyIsAM的区别&quot;&gt;&lt;/a&gt;InnoDB和MyIsAM的区别&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;InnoDB&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;InnoDB是MySQL默认的事务型引擎，也是最重要、最广泛的存储引擎。它的设计是用来处理大量短期事务，短期事务大部分是正常提交的，很少回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中，也很流行。除了非常特别的原因需要使用其他引擎，InnoDB也是非常好值得花时间研究的对象。&lt;/p&gt;
+&lt;p&gt;InnoDB的数据存储在表空间中，表空间是由InnoDB管理的黑盒文件系统，由一系列系统文件组成。InnoDB可以将每个表的数据和索引存放在单独的文件中。InnoDB也可以使用裸设备作为表空间存储介质。&lt;/p&gt;
+&lt;p&gt;InnoDB通过间隙锁（next-key locking）防止幻读的出现。InnoDB是基于聚簇索引建立，与其他存储引擎有很大的区别，聚簇索引对主键查询有很高的性能，不过它的二级索引（secondary ind ex，非主键索引）必须包含主键列。所以如果主键列很大的话，索引会很大。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;MyISAM&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在5.1之前，MyISAM是默认的引擎，MyISAM有大量的特心态，包括全文索引、压缩、空间函数。但是MyISAM不支持事务和行级锁，而且在崩溃后无法安全恢复。即使后续版本中MyISAM支持了事务，但是很多人的概念中依然是不支持事务的引擎。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="SQL" scheme="http://bilikings.top/tags/SQL/"/>
+    
+  </entry>
   
   <entry>
     <title>Java并发编程笔记(8)——显式锁</title>
@@ -449,39 +471,6 @@
 &lt;td&gt;内存计算/业务逻辑&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;&lt;/table&gt;</summary>
-    
-    
-    
-    
-    <category term="java" scheme="http://bilikings.top/tags/java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Lambda</title>
-    <link href="http://bilikings.top/2020/11/11/Lambda/"/>
-    <id>http://bilikings.top/2020/11/11/Lambda/</id>
-    <published>2020-11-11T08:39:20.000Z</published>
-    <updated>2020-11-11T08:42:13.976Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;Lambda表达式&quot;&gt;&lt;a href=&quot;#Lambda表达式&quot; class=&quot;headerlink&quot; title=&quot;Lambda表达式&quot;&gt;&lt;/a&gt;Lambda表达式&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;java中，经常遇到一大堆单方法接口，即一个接口只定义了一个方法&lt;ul&gt;
-&lt;li&gt;Comparator（比较器）&lt;/li&gt;
-&lt;li&gt;Runnable&lt;/li&gt;
-&lt;li&gt;Callable&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;String[] arr =&amp;#123;&amp;#125;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Comparator&amp;lt;String&amp;gt;()&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;compare&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(String s1,String s2 )&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; s1.compareTo(s2);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;);&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;这样写，非常繁琐&lt;/p&gt;
-&lt;p&gt;java8开始用Lambda了替换单方法接口：&lt;/p&gt;
-&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,(s1,s2)-&amp;gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; s1.compare(s2);&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;)&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;Lambda表达式值需要写出方法定义，参数类型可以省略&lt;/p&gt;
-&lt;p&gt;只有一行return代码可以写成&lt;/p&gt;
-&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;Arrays.sort(arr,(s1,s2)-&amp;gt;s1.compare(s2));&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</summary>
     
     
     
