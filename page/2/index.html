@@ -177,6 +177,153 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/" class="post-title-link" itemprop="url">Java并发编程笔记(2)——对象的共享</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-17 17:03:13 / 修改时间：17:03:49" itemprop="dateCreated datePublished" datetime="2020-11-17T17:03:13+08:00">2020-11-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="对象的共享"><a href="#对象的共享" class="headerlink" title="对象的共享"></a>对象的共享</h2><p>同步还有一个重要的方面，内存可见性(Memory Visibility)，简而言之，我们需要对一个对象在进行修改时，其他线程不会对这个对象进行修改，而且在修改完成之后，其他线程也能看到这个对象状态的变化。</p>
+<h3 id="可见性"><a href="#可见性" class="headerlink" title="可见性"></a>可见性</h3><p><strong>重排序</strong>：在编译器和处理时与运行时，可能对操作进行顺序进行进行重排序，所以对内存操作的顺序无法正确判断。</p>
+<p><strong>非原子的64位操作</strong>：在Java中，long与double类型，JVM允许把其拆分成2个32位的进行计算。如果对这个变量的读操作和写操作在不同的线程中进行，可能就读取到错误的数据。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/" class="post-title-link" itemprop="url">Java并发编程笔记(1)——线程安全性</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-17 17:00:25 / 修改时间：17:01:58" itemprop="dateCreated datePublished" datetime="2020-11-17T17:00:25+08:00">2020-11-17</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>什么是线程</p>
+</blockquote>
+<ul>
+<li>线程也成为轻量级进程</li>
+<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
+<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
+</ul>
+<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+<ol>
+<li>不在线程中共享这个状态变量</li>
+<li>把状态变量修改为不可变的变量</li>
+<li>在访问状态时候使用同步</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/16/%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -736,174 +883,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">JVM内存回收概述</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-11 20:17:16 / 修改时间：20:18:22" itemprop="dateCreated datePublished" datetime="2020-11-11T20:17:16+08:00">2020-11-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
-<li>Java引用的功能和意义</li>
-<li>Java引用与内存回收之间的关系</li>
-<li>Java对象在内存中的不同状态</li>
-<li>软引用的作用和使用软引用的注意点</li>
-<li>弱引用的作用和使用弱引用的注意点</li>
-<li>虚引用的作用和使用虚引用的注意点</li>
-<li>Java内存泄漏的原因</li>
-<li>Java内存泄漏和C++内存泄漏的差别</li>
-<li>Java垃圾回收机制的基本算法</li>
-<li>堆内存的分代回收</li>
-<li>Young代、Old代和Permanent代的各自存储的对象</li>
-<li>Young代、Old代和Permanent代的特定及适用的回收算法</li>
-<li>常见垃圾回收机制对堆内存的回收细节</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/11/Stream/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/11/Stream/" class="post-title-link" itemprop="url">Java Stream</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-11 16:39:37 / 修改时间：16:42:22" itemprop="dateCreated datePublished" datetime="2020-11-11T16:39:37+08:00">2020-11-11</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
-<li>流式API</li>
-</ul>
-<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>java.io</th>
-<th>java.util.steam</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>存储</td>
-<td>顺序读写的byte或者char</td>
-<td>顺序输出的任意Java对象实例</td>
-</tr>
-<tr>
-<td>用途</td>
-<td>序列化文件或者网络</td>
-<td>内存计算/业务逻辑</td>
-</tr>
-</tbody></table>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/11/Stream/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -975,12 +954,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-count">28</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">13</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
