@@ -95,78 +95,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JavaJUC(二)——Concurrent包</title>
-    <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
-    <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
-<a id="more"></a>
-
-<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>内存可见性：不同线程对一个共享数据进行操作的时候，都是先把数据读到自己方法区缓存中去，所以当线程1更改了数据时在 ，线程2是对这个更改的数据不可见的，所以在声明这个数据时候，可以添加一个关键字<code>volatile</code>，保证某一个线程在更改这个数据时候，会马上把结果返回主存中（另一个效率很低的方法是每次指向前进行同步，加<code>synchronized</code>互斥   锁）</p>
-<p>volatile使用底层的内存栅栏</p>
-<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>java.util.concurrent.atomic：</p>
-<ul>
-<li>使用volatile保证内存可见性</li>
-<li>CAS（compare-And-Swap）算法保证数据原子性<ul>
-<li>cas有三个操作数：<ol>
-<li>内存值 V</li>
-<li>预估值A</li>
-<li>更新值B</li>
-</ol>
-</li>
-<li>当且仅当V==A时，V=B，else，不做任何操作</li>
-</ul>
-</li>
-</ul>
-<p>i++不是原子性的，AtomicXXX（比如：AtomicInteger）类的 getAndIncrement()解决了这个问题，</p>
-<p>i–就使用getAndDecrement()解决</p>
-<h2 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h2><p>ConcurrentHashMap采用锁分段机制【Concurrent：并存的】</p>
-<h2 id="Callable接口"><a href="#Callable接口" class="headerlink" title="Callable接口"></a>Callable接口</h2><p>可以有返回值</p>
-<p>结果需要用FutureTask接收</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public static void main(String[] args) throws ExecutionException, InterruptedException &#123;</span><br><span class="line">    DemoThread demoThread &#x3D; new DemoThread();</span><br><span class="line">    FutureTask&lt;Integer&gt; futureTask &#x3D; new FutureTask&lt;&gt;(demoThread);</span><br><span class="line">    new Thread(futureTask).start();</span><br><span class="line">    final Integer sum &#x3D; futureTask.get();</span><br><span class="line">    System.out.println(sum);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoThread</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] range = IntStream.range(<span class="number">1</span>, <span class="number">100</span>).toArray();</span><br><span class="line">        <span class="keyword">for</span> (Integer i:range) &#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="lock同步锁"><a href="#lock同步锁" class="headerlink" title="lock同步锁"></a>lock同步锁</h2><p>ReentrantLock，这是一个显示的锁，需要通过lock()方法上锁，用unlock()释放锁。 </p>
-<h3 id="自动释放锁"><a href="#自动释放锁" class="headerlink" title="自动释放锁"></a>自动释放锁</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.Lock;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AutoLock</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Lock lock;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AutoLock</span><span class="params">(Lock lock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lock = lock;</span><br><span class="line">        lock.lock();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="生成者和消费者"><a href="#生成者和消费者" class="headerlink" title="生成者和消费者"></a>生成者和消费者</h2><ul>
-<li><p>使用wait（）让线程等待</p>
-</li>
-<li><p>notify()/notifyAll()唤醒其他wait的线程</p>
-</li>
-<li><p>直接使用会造成虚假唤醒，所以应该总是使用在循环中</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(obj)&#123;</span><br><span class="line">    <span class="keyword">while</span> ()&#123;</span><br><span class="line">        obj.wait();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>ReadWriteLock</p>
-<ul>
-<li><strong>解决了写写/读写需要互斥而读读不需要互斥的操作</strong></li>
-</ul>
-<h2 id="线程8锁"><a href="#线程8锁" class="headerlink" title="线程8锁"></a>线程8锁</h2><ul>
-<li>非静态方法的锁默认为thhis，静态方法的锁默认为对应的Class实例</li>
-<li>某一个时刻内，只有一个线程持有锁，无论几个方法 </li>
-</ul>
-<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>提供了一个线程队列。队列中保存着所有的等待状态的线程，避免了创建和销毁的开销，提高了性能</p>
-<h3 id="interface-Executor"><a href="#interface-Executor" class="headerlink" title="interface Executor"></a>interface Executor</h3><ul>
-<li><p>ExecutorService newFixsdThreadPool():创建固定大小的线程池</p>
-</li>
-<li><p>ExecutorService newCachedThreadPool()  创建缓存线程池，可以根据需要自动更改数量</p>
-</li>
-<li><p>ExecutorService newSingleThreadExecutor() 创建单个线程池，这里面只有一个线程</p>
-</li>
-<li><p>ScheduledExecutorService newScheduledThreadPool() 创建固定大小的线程，可以延时或者定时执行任务</p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService pool =Executor.newFixsdThreadPool();</span><br><span class="line">ThreadDemo task  = <span class="keyword">new</span> ThreadDemo();</span><br><span class="line"><span class="comment">//为线程池中的线程分配任务</span></span><br><span class="line">pool.submit(task);</span><br><span class="line"><span class="comment">//关闭线程池</span></span><br><span class="line">pool.shutdown();</span><br></pre></td></tr></table></figure>
-
-<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><h2 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h2><p>在必要的情况下，把一个大任务拆分（fork）成若干个小任务（拆到不可以在拆的时候），再把一个个小任务运算的结果进行join汇总</p>
-<p>在stream处理中，要是开启多线程，内部使用此框架</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JavaJUC(一)——线程</title>
     <url>/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/</url>
     <content><![CDATA[<h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><p>进程是系统资源分配的基本单位</p>
@@ -260,6 +188,132 @@
 <li>锁粗化</li>
 <li>偏向锁</li>
 </ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(1)——线程安全性</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
+    <content><![CDATA[<blockquote>
+<p>什么是线程</p>
+</blockquote>
+<ul>
+<li>线程也成为轻量级进程</li>
+<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
+<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
+</ul>
+<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+<ol>
+<li>不在线程中共享这个状态变量</li>
+<li>把状态变量修改为不可变的变量</li>
+<li>在访问状态时候使用同步</li>
+</ol>
+<a id="more"></a>
+
+<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
+<ul>
+<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
+<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
+</ul>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
+<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
+</blockquote>
+<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
+<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<ul>
+<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
+<blockquote>
+<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
+</blockquote>
+<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
+<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
+</li>
+<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
+</li>
+</ul>
+<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
+<blockquote>
+<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JavaJUC(二)——Concurrent包</title>
+    <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
+<a id="more"></a>
+
+<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>内存可见性：不同线程对一个共享数据进行操作的时候，都是先把数据读到自己方法区缓存中去，所以当线程1更改了数据时在 ，线程2是对这个更改的数据不可见的，所以在声明这个数据时候，可以添加一个关键字<code>volatile</code>，保证某一个线程在更改这个数据时候，会马上把结果返回主存中（另一个效率很低的方法是每次指向前进行同步，加<code>synchronized</code>互斥   锁）</p>
+<p>volatile使用底层的内存栅栏</p>
+<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>java.util.concurrent.atomic：</p>
+<ul>
+<li>使用volatile保证内存可见性</li>
+<li>CAS（compare-And-Swap）算法保证数据原子性<ul>
+<li>cas有三个操作数：<ol>
+<li>内存值 V</li>
+<li>预估值A</li>
+<li>更新值B</li>
+</ol>
+</li>
+<li>当且仅当V==A时，V=B，else，不做任何操作</li>
+</ul>
+</li>
+</ul>
+<p>i++不是原子性的，AtomicXXX（比如：AtomicInteger）类的 getAndIncrement()解决了这个问题，</p>
+<p>i–就使用getAndDecrement()解决</p>
+<h2 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h2><p>ConcurrentHashMap采用锁分段机制【Concurrent：并存的】</p>
+<h2 id="Callable接口"><a href="#Callable接口" class="headerlink" title="Callable接口"></a>Callable接口</h2><p>可以有返回值</p>
+<p>结果需要用FutureTask接收</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public static void main(String[] args) throws ExecutionException, InterruptedException &#123;</span><br><span class="line">    DemoThread demoThread &#x3D; new DemoThread();</span><br><span class="line">    FutureTask&lt;Integer&gt; futureTask &#x3D; new FutureTask&lt;&gt;(demoThread);</span><br><span class="line">    new Thread(futureTask).start();</span><br><span class="line">    final Integer sum &#x3D; futureTask.get();</span><br><span class="line">    System.out.println(sum);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoThread</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] range = IntStream.range(<span class="number">1</span>, <span class="number">100</span>).toArray();</span><br><span class="line">        <span class="keyword">for</span> (Integer i:range) &#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="lock同步锁"><a href="#lock同步锁" class="headerlink" title="lock同步锁"></a>lock同步锁</h2><p>ReentrantLock，这是一个显示的锁，需要通过lock()方法上锁，用unlock()释放锁。 </p>
+<h3 id="自动释放锁"><a href="#自动释放锁" class="headerlink" title="自动释放锁"></a>自动释放锁</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.Lock;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AutoLock</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Lock lock;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AutoLock</span><span class="params">(Lock lock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lock = lock;</span><br><span class="line">        lock.lock();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="生成者和消费者"><a href="#生成者和消费者" class="headerlink" title="生成者和消费者"></a>生成者和消费者</h2><ul>
+<li><p>使用wait（）让线程等待</p>
+</li>
+<li><p>notify()/notifyAll()唤醒其他wait的线程</p>
+</li>
+<li><p>直接使用会造成虚假唤醒，所以应该总是使用在循环中</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(obj)&#123;</span><br><span class="line">    <span class="keyword">while</span> ()&#123;</span><br><span class="line">        obj.wait();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>ReadWriteLock</p>
+<ul>
+<li><strong>解决了写写/读写需要互斥而读读不需要互斥的操作</strong></li>
+</ul>
+<h2 id="线程8锁"><a href="#线程8锁" class="headerlink" title="线程8锁"></a>线程8锁</h2><ul>
+<li>非静态方法的锁默认为thhis，静态方法的锁默认为对应的Class实例</li>
+<li>某一个时刻内，只有一个线程持有锁，无论几个方法 </li>
+</ul>
+<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>提供了一个线程队列。队列中保存着所有的等待状态的线程，避免了创建和销毁的开销，提高了性能</p>
+<h3 id="interface-Executor"><a href="#interface-Executor" class="headerlink" title="interface Executor"></a>interface Executor</h3><ul>
+<li><p>ExecutorService newFixsdThreadPool():创建固定大小的线程池</p>
+</li>
+<li><p>ExecutorService newCachedThreadPool()  创建缓存线程池，可以根据需要自动更改数量</p>
+</li>
+<li><p>ExecutorService newSingleThreadExecutor() 创建单个线程池，这里面只有一个线程</p>
+</li>
+<li><p>ScheduledExecutorService newScheduledThreadPool() 创建固定大小的线程，可以延时或者定时执行任务</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService pool =Executor.newFixsdThreadPool();</span><br><span class="line">ThreadDemo task  = <span class="keyword">new</span> ThreadDemo();</span><br><span class="line"><span class="comment">//为线程池中的线程分配任务</span></span><br><span class="line">pool.submit(task);</span><br><span class="line"><span class="comment">//关闭线程池</span></span><br><span class="line">pool.shutdown();</span><br></pre></td></tr></table></figure>
+
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><h2 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h2><p>在必要的情况下，把一个大任务拆分（fork）成若干个小任务（拆到不可以在拆的时候），再把一个个小任务运算的结果进行join汇总</p>
+<p>在stream处理中，要是开启多线程，内部使用此框架</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -365,54 +419,84 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(1)——线程安全性</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
-    <content><![CDATA[<blockquote>
-<p>什么是线程</p>
-</blockquote>
-<ul>
-<li>线程也成为轻量级进程</li>
-<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
-<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
-</ul>
-<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+    <title>Java并发编程笔记(3)——对象的组合</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
+    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
+<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
 <ol>
-<li>不在线程中共享这个状态变量</li>
-<li>把状态变量修改为不可变的变量</li>
-<li>在访问状态时候使用同步</li>
+<li>找出构成对象的所有变量</li>
+<li>找出约束状态条件的不变性条件</li>
+<li>建立对象状态的并发访问管理策略</li>
 </ol>
 <a id="more"></a>
 
-<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
-<ul>
-<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
-<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
-</ul>
-<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
-<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
+<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
+<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
+<blockquote>
+<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
 </blockquote>
-<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
-<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
+<blockquote>
+<p>通过一个私有锁来保护状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>委托模型</p>
+<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
+<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(4)——同步工具类</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
+    <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
 <ul>
-<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<li>阻塞队列</li>
+<li>信号量（Semaphore）</li>
+<li>栅栏（Barrier）</li>
+<li>闭锁（Latch）</li>
+</ul>
+<blockquote>
+<p>也可以通过一些机制来创建自己的同步工具类</p>
+</blockquote>
+<a id="more"></a>
 
+<h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>他作为一种同步工具类， 可以延迟线程的进度直到到达终止状态。</p>
+<p>可以用来保证模型或者直到其他活动都完成后再继续执行</p>
+<ul>
+<li><p><strong>CountDownLatch</strong>是一种灵活的闭锁实现，有一个递减计数器，先初始为一个正数，当一件事发生之后count递减，当count==0时为结束状态，如果一直不为0，就一直阻塞，或线程中断或超时。</p>
+</li>
+<li><p><strong>FutureTask</strong>是计算Callable来实现的，是一种可以生成结果的Runable，有三种状态</p>
+<ul>
+<li>Waiting to Run：等待运行</li>
+<li>Complete：运行完成</li>
+<li>Running ：正在运行</li>
+</ul>
+<p>当运行完成时，<code>FutureTask</code>会停在这状态上</p>
 </li>
 </ul>
-<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
-<blockquote>
-<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
-</blockquote>
-<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
-<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
-</li>
-<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
-</li>
+<h4 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h4><p>计算信号量的简化操作是二值信号量（初始值为1的信号量），用作互斥体，并拥有不可重入的语义，所以，谁拥有这个唯一的许可，谁就拥有互斥锁。</p>
+<p>个人感觉就是PV操作。</p>
+<h4 id="栅栏"><a href="#栅栏" class="headerlink" title="栅栏"></a>栅栏</h4><p>juc包中提供了<code>CyclicBarrier</code>（循环栅栏）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException, TimeoutException</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>线程调用 await() 表示自己已经到达栅栏</li>
+<li><code>BrokenBarrierException</code> 表示栅栏已经被破坏，破坏的原因可能是其中一个线程 await() 时被中断或者超时</li>
 </ul>
-<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
-<blockquote>
-<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
+<p>栅栏类似于闭锁，他可以阻塞一个线程直到摸个事件的发生，栅栏于闭锁的区别在于，<strong>所有线程必须通道到达栅栏维持，才能继续执行，</strong></p>
+<p>闭锁用于等待事件，而栅栏用于等待其他线程。</p>
+<h3 id="开发缓存组件（高效可伸缩）"><a href="#开发缓存组件（高效可伸缩）" class="headerlink" title="开发缓存组件（高效可伸缩）"></a>开发缓存组件（高效可伸缩）</h3><blockquote>
+<p>基础组件</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Computable</span>&lt;<span class="title">A</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExpensiveFunction</span> <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">String</span> , <span class="title">BigInteger</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> BigInteger <span class="title">computer</span><span class="params">(String arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(arg);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 </blockquote>
+<h4 id="使用HashMap和同步机制"><a href="#使用HashMap和同步机制" class="headerlink" title="使用HashMap和同步机制"></a>使用HashMap和同步机制</h4><p>hashMap不是线程安全的，所以为了确保线程安全性，但是会带来一个明显的<strong>可伸缩</strong>问题：每次只能一个线程调用，其他线程会阻塞。阻塞多了，可能会比不使用记忆的方式还要慢。</p>
+<h4 id="使用ConcurrentHashMap替代"><a href="#使用ConcurrentHashMap替代" class="headerlink" title="使用ConcurrentHashMap替代"></a>使用ConcurrentHashMap替代</h4><p>虽然是使用了行级锁的<code>ConcurrentHashMap</code>，但是同样带来了并发性问题，而且科技风会让一个值被获得多次，</p>
+<h4 id="基于FutureTask"><a href="#基于FutureTask" class="headerlink" title="基于FutureTask"></a>基于FutureTask</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> cache</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/27 20:10</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;A, Future&lt;V&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;A, V&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(Computable&lt;A, V&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Future&lt;V&gt; f = cache.get(arg);</span><br><span class="line">            <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Callable&lt;V&gt; eval = () -&gt; c.computer(arg);</span><br><span class="line">                FutureTask&lt;V&gt; ft = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                f = cache.putIfAbsent(arg, ft);<span class="comment">//没有则添加</span></span><br><span class="line">                <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    ft.run();</span><br><span class="line">                    f = ft;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> f.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CancellationException e)&#123;</span><br><span class="line">                cache.remove(arg,f);<span class="comment">//执行错误时清除缓存，保证计算正确</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -484,36 +568,6 @@
 </ul>
 </blockquote>
 <h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(3)——对象的组合</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
-    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
-<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
-<ol>
-<li>找出构成对象的所有变量</li>
-<li>找出约束状态条件的不变性条件</li>
-<li>建立对象状态的并发访问管理策略</li>
-</ol>
-<a id="more"></a>
-
-<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
-<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
-<blockquote>
-<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
-</blockquote>
-<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
-<blockquote>
-<p>通过一个私有锁来保护状态</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>委托模型</p>
-<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
-<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
-]]></content>
       <tags>
         <tag>Java</tag>
       </tags>
@@ -605,60 +659,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(4)——同步工具类</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
-    <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
-<ul>
-<li>阻塞队列</li>
-<li>信号量（Semaphore）</li>
-<li>栅栏（Barrier）</li>
-<li>闭锁（Latch）</li>
-</ul>
-<blockquote>
-<p>也可以通过一些机制来创建自己的同步工具类</p>
-</blockquote>
-<a id="more"></a>
-
-<h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>他作为一种同步工具类， 可以延迟线程的进度直到到达终止状态。</p>
-<p>可以用来保证模型或者直到其他活动都完成后再继续执行</p>
-<ul>
-<li><p><strong>CountDownLatch</strong>是一种灵活的闭锁实现，有一个递减计数器，先初始为一个正数，当一件事发生之后count递减，当count==0时为结束状态，如果一直不为0，就一直阻塞，或线程中断或超时。</p>
-</li>
-<li><p><strong>FutureTask</strong>是计算Callable来实现的，是一种可以生成结果的Runable，有三种状态</p>
-<ul>
-<li>Waiting to Run：等待运行</li>
-<li>Complete：运行完成</li>
-<li>Running ：正在运行</li>
-</ul>
-<p>当运行完成时，<code>FutureTask</code>会停在这状态上</p>
-</li>
-</ul>
-<h4 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h4><p>计算信号量的简化操作是二值信号量（初始值为1的信号量），用作互斥体，并拥有不可重入的语义，所以，谁拥有这个唯一的许可，谁就拥有互斥锁。</p>
-<p>个人感觉就是PV操作。</p>
-<h4 id="栅栏"><a href="#栅栏" class="headerlink" title="栅栏"></a>栅栏</h4><p>juc包中提供了<code>CyclicBarrier</code>（循环栅栏）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException, TimeoutException</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>线程调用 await() 表示自己已经到达栅栏</li>
-<li><code>BrokenBarrierException</code> 表示栅栏已经被破坏，破坏的原因可能是其中一个线程 await() 时被中断或者超时</li>
-</ul>
-<p>栅栏类似于闭锁，他可以阻塞一个线程直到摸个事件的发生，栅栏于闭锁的区别在于，<strong>所有线程必须通道到达栅栏维持，才能继续执行，</strong></p>
-<p>闭锁用于等待事件，而栅栏用于等待其他线程。</p>
-<h3 id="开发缓存组件（高效可伸缩）"><a href="#开发缓存组件（高效可伸缩）" class="headerlink" title="开发缓存组件（高效可伸缩）"></a>开发缓存组件（高效可伸缩）</h3><blockquote>
-<p>基础组件</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Computable</span>&lt;<span class="title">A</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExpensiveFunction</span> <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">String</span> , <span class="title">BigInteger</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> BigInteger <span class="title">computer</span><span class="params">(String arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(arg);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<h4 id="使用HashMap和同步机制"><a href="#使用HashMap和同步机制" class="headerlink" title="使用HashMap和同步机制"></a>使用HashMap和同步机制</h4><p>hashMap不是线程安全的，所以为了确保线程安全性，但是会带来一个明显的<strong>可伸缩</strong>问题：每次只能一个线程调用，其他线程会阻塞。阻塞多了，可能会比不使用记忆的方式还要慢。</p>
-<h4 id="使用ConcurrentHashMap替代"><a href="#使用ConcurrentHashMap替代" class="headerlink" title="使用ConcurrentHashMap替代"></a>使用ConcurrentHashMap替代</h4><p>虽然是使用了行级锁的<code>ConcurrentHashMap</code>，但是同样带来了并发性问题，而且科技风会让一个值被获得多次，</p>
-<h4 id="基于FutureTask"><a href="#基于FutureTask" class="headerlink" title="基于FutureTask"></a>基于FutureTask</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> cache</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/27 20:10</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;A, Future&lt;V&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;A, V&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(Computable&lt;A, V&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Future&lt;V&gt; f = cache.get(arg);</span><br><span class="line">            <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Callable&lt;V&gt; eval = () -&gt; c.computer(arg);</span><br><span class="line">                FutureTask&lt;V&gt; ft = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                f = cache.putIfAbsent(arg, ft);<span class="comment">//没有则添加</span></span><br><span class="line">                <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    ft.run();</span><br><span class="line">                    f = ft;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> f.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CancellationException e)&#123;</span><br><span class="line">                cache.remove(arg,f);<span class="comment">//执行错误时清除缓存，保证计算正确</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(7)——线程池</title>
     <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
     <content><![CDATA[<h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
@@ -718,6 +718,40 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(8)——显式锁</title>
+    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
+    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
+<a id="more"></a>
+
+<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
+<ul>
+<li>公平：FIFO</li>
+<li>非公平：先请求的锁不一定先取得</li>
+</ul>
+<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
+<p>内置的synchronize的锁也是非公平的</p>
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
+<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
+<ul>
+<li>await</li>
+<li>signal</li>
+</ul>
+<p>相当于Object类中提供的wait和notify方法</p>
+<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
+<li>ReentranLock</li>
+<li>Semaphore</li>
+<li>CountDownLatch</li>
+<li>FutureTask</li>
+<li>ReentrantReadWriteLock</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Lambda</title>
     <url>/2020/11/11/Lambda/</url>
     <content><![CDATA[<h2 id="Lambda表达式"><a href="#Lambda表达式" class="headerlink" title="Lambda表达式"></a>Lambda表达式</h2><ul>
@@ -768,40 +802,6 @@
 ]]></content>
       <tags>
         <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(8)——显式锁</title>
-    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
-    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
-<a id="more"></a>
-
-<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
-<ul>
-<li>公平：FIFO</li>
-<li>非公平：先请求的锁不一定先取得</li>
-</ul>
-<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
-<p>内置的synchronize的锁也是非公平的</p>
-<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
-<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
-<ul>
-<li>await</li>
-<li>signal</li>
-</ul>
-<p>相当于Object类中提供的wait和notify方法</p>
-<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
-<li>ReentranLock</li>
-<li>Semaphore</li>
-<li>CountDownLatch</li>
-<li>FutureTask</li>
-<li>ReentrantReadWriteLock</li>
-</ul>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -1113,80 +1113,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java Stream</title>
-    <url>/2020/11/11/Stream/</url>
-    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
-<li>流式API</li>
-</ul>
-<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>java.io</th>
-<th>java.util.steam</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>存储</td>
-<td>顺序读写的byte或者char</td>
-<td>顺序输出的任意Java对象实例</td>
-</tr>
-<tr>
-<td>用途</td>
-<td>序列化文件或者网络</td>
-<td>内存计算/业务逻辑</td>
-</tr>
-</tbody></table>
-<a id="more"></a>
-
-<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
-<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
-<p>一个流在使用一次之后会销毁掉。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
-<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
-</li>
-<li><p>基于数组或Collection</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
-
-<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
-<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
-</li>
-<li><p>基于Supplier（供货人）</p>
-<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
-</li>
-</ul>
-<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>map对String的操作</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
-<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
-<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
-<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
-</blockquote>
-<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
-]]></content>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Springboot核心注解详解</title>
     <url>/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<h2 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h2><h3 id="spring相关"><a href="#spring相关" class="headerlink" title="spring相关"></a>spring相关</h3><blockquote>
@@ -1316,6 +1242,80 @@
       </tags>
   </entry>
   <entry>
+    <title>Java Stream</title>
+    <url>/2020/11/11/Stream/</url>
+    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
+<li>流式API</li>
+</ul>
+<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>java.io</th>
+<th>java.util.steam</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储</td>
+<td>顺序读写的byte或者char</td>
+<td>顺序输出的任意Java对象实例</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>序列化文件或者网络</td>
+<td>内存计算/业务逻辑</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
+<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
+<p>一个流在使用一次之后会销毁掉。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
+<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
+</li>
+<li><p>基于数组或Collection</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
+
+<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
+<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
+</li>
+<li><p>基于Supplier（供货人）</p>
+<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
+</li>
+</ul>
+<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>map对String的操作</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
+<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
+<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
+<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
+</blockquote>
+<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>TopK</title>
     <url>/2020/11/11/TopK/</url>
     <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
@@ -1346,6 +1346,70 @@
 ]]></content>
       <tags>
         <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Zuul微服务网关</title>
+    <url>/2020/11/30/Zuul%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/</url>
+    <content><![CDATA[<h1 id="zuul路由网关"><a href="#zuul路由网关" class="headerlink" title="zuul路由网关"></a>zuul路由网关</h1><ul>
+<li>为了解决客户端不同请求的服务</li>
+<li>解决跨域问题</li>
+<li>解决认证问题</li>
+</ul>
+<p>客户端和服务端直连弊端：</p>
+<ul>
+<li>解决客户端不同请求的服务，会增加客户端的复杂性</li>
+<li>存在跨域请求是，需要进行额外处理（转发，重定向）</li>
+<li>认证服务，各个辅助需要独立认证</li>
+<li>UI端和微服务端进行耦合</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="什么是微服务网关"><a href="#什么是微服务网关" class="headerlink" title="什么是微服务网关"></a>什么是微服务网关</h3><p>服务网关=服务路由+过滤器</p>
+<ul>
+<li>路由转发：接受一切外界的请求，转发到后端的服务器上面</li>
+<li>过滤器：在服务网关中完成一项列的横切功能，权限校验，限流，监控等。（路由转发也是通过过滤器实现的）</li>
+</ul>
+<h4 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h4><ul>
+<li>流量控制： 路由、熔断、降级</li>
+<li>统一接入：为各种请求提供统一入口、高性能、高并发、高可用、负载均衡、容灾切换（异地多活）</li>
+<li>安全防护：风控防刷、防止恶意攻击、IP黑名单、URL黑名单</li>
+<li>协议适配：前端系统是（http，http2）后端业务系统（RPC）、长短连接支持、根据前端请求路径路由至相应的SOA服务执行，并将结果返回给前端页面。</li>
+</ul>
+<h3 id="网关与服务与注册中心的关系"><a href="#网关与服务与注册中心的关系" class="headerlink" title="网关与服务与注册中心的关系"></a>网关与服务与注册中心的关系</h3><ul>
+<li>服务网关（openServer，service）启动时注册到注册中心上去</li>
+<li>用户请求时直接请求网关，网关中智能路由转发（服务发现，负载均衡）到openServer，其中包含权限校验，监控，和限流的操作</li>
+<li>openServer聚合service的响应，返回给网关，网关返回给用户</li>
+</ul>
+<h2 id="zuul环境搭建以及使用"><a href="#zuul环境搭建以及使用" class="headerlink" title="zuul环境搭建以及使用"></a>zuul环境搭建以及使用</h2><ol>
+<li><p>添加pom依赖</p>
+<ul>
+<li><p>添加eureka</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-eureka-client<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>添加zuul</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-zuul<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+<li><p>配置yml</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">spring:</span><br><span class="line"> application:</span><br><span class="line">   name: zuul-service   # 这里 规定了 注册到eureka-server的服务名称</span><br><span class="line"># 配置当前网关服务的地址</span><br><span class="line">server:</span><br><span class="line"> port: <span class="number">9001</span></span><br><span class="line"># 配置注册中心地址</span><br><span class="line">eureka:</span><br><span class="line"> client:</span><br><span class="line">   serviceUrl:</span><br><span class="line">     defaultZone: http:<span class="comment">//localhost:7001/eureka/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在主启动类上添加注解启动zuul和eureka-client</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="meta">@EnableZuulServer</span></span><br><span class="line"><span class="meta">@EnableEurekaClient</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZuulDemoApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(ZuulDemoApplication.class, args);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+</li>
+</ol>
+<h3 id="定制路由规则"><a href="#定制路由规则" class="headerlink" title="定制路由规则"></a>定制路由规则</h3><p>我们知道zuul的作用，一个是路由转发，另一个是过滤，现在我们来看路由转发的配置</p>
+<h5 id="个性定制转发到其他服务"><a href="#个性定制转发到其他服务" class="headerlink" title="个性定制转发到其他服务"></a>个性定制转发到其他服务</h5><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">zuul:</span></span><br><span class="line"> <span class="attr">routes:</span></span><br><span class="line">   <span class="attr">system:</span></span><br><span class="line">     <span class="attr">path:</span> <span class="string">/system/**</span></span><br><span class="line">     <span class="attr">serviceId:</span> <span class="string">cloud-order-service</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="个性定制转发到其他的url"><a href="#个性定制转发到其他的url" class="headerlink" title="个性定制转发到其他的url"></a>个性定制转发到其他的url</h5><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">zuul:</span></span><br><span class="line"> <span class="attr">routes:</span></span><br><span class="line">   <span class="attr">system:</span></span><br><span class="line">     <span class="attr">path:</span> <span class="string">/system/**</span></span><br><span class="line">     <span class="attr">serviceId:</span> <span class="string">cloud-order-service</span></span><br><span class="line">   <span class="attr">test:</span></span><br><span class="line">     <span class="attr">path:</span> <span class="string">/test/**</span></span><br><span class="line">     <span class="attr">url:</span> <span class="string">http://localhost:8001/</span></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -1476,6 +1540,93 @@
       </tags>
   </entry>
   <entry>
+    <title>设计模式设计原则</title>
+    <url>/2020/11/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
+<li>找出应用中的变化之处，独立出来，不要和不需要编号的代码混在一起</li>
+<li>面向接口编程而不是面向实现编程</li>
+<li>为了交互对象的松耦合设计</li>
+</ul>
+<a id="more"></a>
+
+<ol>
+<li><p>单一职责原则</p>
+<ul>
+<li><p>一个类，应当只有一个引起它变化的原因；即一个类应该只有一个职责。</p>
+<p>■ 降低类的复杂性；</p>
+<p>■ 提高类的可读性；</p>
+<p>■ 提高代码的可维护性和复用性；</p>
+<p>■ 降低因变更引起的风险。</p>
+</li>
+</ul>
+</li>
+<li><p>接口隔离原则</p>
+<ul>
+<li>客户端不应该依赖它不需要的接口。</li>
+<li>类间的依赖关系应该建立在最小的接口上。</li>
+</ul>
+</li>
+<li><p>依赖倒置原则（依赖倒置原则更加精确的定义就是“面向接口编程”）</p>
+<ul>
+<li>高层模块不应该依赖低层模块，两者都依赖其抽象；</li>
+<li>抽象不依赖细节；</li>
+<li>细节应该依赖于抽象。</li>
+</ul>
+</li>
+<li><p>开闭原则</p>
+<p>一个软件实体应当对扩展开放，对修改关闭。</p>
+<ul>
+<li>提高复用性。</li>
+<li>提高可维护性。</li>
+<li>提高灵活性。</li>
+<li>易于测试。</li>
+</ul>
+</li>
+<li><p>里氏替换原则</p>
+<p>如果对一个类型为S的对象o1，都有类型为T的对象o2，使得以S定义的所有程序P在所有的对象o1都代换成o2时，程序P的行为没有发生变化，那么类型T是类型S的子类型。（请说人话）</p>
+<ul>
+<li>子类必须完全实现父类的方法；</li>
+<li>子类可以有自己的个性；</li>
+<li>覆盖或实现父类的方法时输入参数可以被放大；</li>
+<li>覆盖或实现父类的方法时输出结果可以被缩小。（子类不能使用一个低访问权限的方法覆盖基类中的高访问权限的方法。）</li>
+</ul>
+</li>
+<li><p>迪米特法则（最少知识原则）</p>
+<p>是一个对象应当对其他对象尽可能少的了解</p>
+</li>
+<li><p>合成复用原则</p>
+<p>使用一个其他类的方法时，<strong>能使用组合/聚合，就不要用继承</strong></p>
+<p><code>组合：class B中new A</code></p>
+<p><code>聚合: class B中set()方法调用A</code></p>
+<p>继承（抽象类）是 is-a </p>
+<p>组合（接口）是has-a </p>
+<p>继承之后重写并新增是is-like -a</p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>螺旋矩阵</title>
+    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
+    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
+<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
+<blockquote>
+<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
+</blockquote>
+<a id="more"></a>
+
+<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
+<p>然后递归下一圈。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -1551,93 +1702,6 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>螺旋矩阵</title>
-    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
-    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
-<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
-<blockquote>
-<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
-</blockquote>
-<a id="more"></a>
-
-<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
-<p>然后递归下一圈。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>设计模式设计原则</title>
-    <url>/2020/11/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
-<li>找出应用中的变化之处，独立出来，不要和不需要编号的代码混在一起</li>
-<li>面向接口编程而不是面向实现编程</li>
-<li>为了交互对象的松耦合设计</li>
-</ul>
-<a id="more"></a>
-
-<ol>
-<li><p>单一职责原则</p>
-<ul>
-<li><p>一个类，应当只有一个引起它变化的原因；即一个类应该只有一个职责。</p>
-<p>■ 降低类的复杂性；</p>
-<p>■ 提高类的可读性；</p>
-<p>■ 提高代码的可维护性和复用性；</p>
-<p>■ 降低因变更引起的风险。</p>
-</li>
-</ul>
-</li>
-<li><p>接口隔离原则</p>
-<ul>
-<li>客户端不应该依赖它不需要的接口。</li>
-<li>类间的依赖关系应该建立在最小的接口上。</li>
-</ul>
-</li>
-<li><p>依赖倒置原则（依赖倒置原则更加精确的定义就是“面向接口编程”）</p>
-<ul>
-<li>高层模块不应该依赖低层模块，两者都依赖其抽象；</li>
-<li>抽象不依赖细节；</li>
-<li>细节应该依赖于抽象。</li>
-</ul>
-</li>
-<li><p>开闭原则</p>
-<p>一个软件实体应当对扩展开放，对修改关闭。</p>
-<ul>
-<li>提高复用性。</li>
-<li>提高可维护性。</li>
-<li>提高灵活性。</li>
-<li>易于测试。</li>
-</ul>
-</li>
-<li><p>里氏替换原则</p>
-<p>如果对一个类型为S的对象o1，都有类型为T的对象o2，使得以S定义的所有程序P在所有的对象o1都代换成o2时，程序P的行为没有发生变化，那么类型T是类型S的子类型。（请说人话）</p>
-<ul>
-<li>子类必须完全实现父类的方法；</li>
-<li>子类可以有自己的个性；</li>
-<li>覆盖或实现父类的方法时输入参数可以被放大；</li>
-<li>覆盖或实现父类的方法时输出结果可以被缩小。（子类不能使用一个低访问权限的方法覆盖基类中的高访问权限的方法。）</li>
-</ul>
-</li>
-<li><p>迪米特法则（最少知识原则）</p>
-<p>是一个对象应当对其他对象尽可能少的了解</p>
-</li>
-<li><p>合成复用原则</p>
-<p>使用一个其他类的方法时，<strong>能使用组合/聚合，就不要用继承</strong></p>
-<p><code>组合：class B中new A</code></p>
-<p><code>聚合: class B中set()方法调用A</code></p>
-<p>继承（抽象类）是 is-a </p>
-<p>组合（接口）是has-a </p>
-<p>继承之后重写并新增是is-like -a</p>
-</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -1744,6 +1808,81 @@
 ]]></content>
       <tags>
         <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>人工智能基础</title>
+    <url>/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h1 id="人工智能基础复习材料"><a href="#人工智能基础复习材料" class="headerlink" title="人工智能基础复习材料"></a>人工智能基础复习材料</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="人工智能-Artificial-Intelligence-："><a href="#人工智能-Artificial-Intelligence-：" class="headerlink" title="人工智能(Artificial Intelligence)："></a>人工智能(Artificial Intelligence)：</h3><p> 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。</p>
+<a id="more"></a>
+
+<h3 id="机器学习-Machine-Learning"><a href="#机器学习-Machine-Learning" class="headerlink" title="机器学习(Machine Learning)"></a>机器学习(Machine Learning)</h3><p>机器学习是一门专门研究计算机模拟或实现人类的学习行为，重新组织已有的知识结构，并获取新的知 识和技能，进而使之不断改善自身性能的学科。 </p>
+<h3 id="深度学习-Deep-Learning"><a href="#深度学习-Deep-Learning" class="headerlink" title="深度学习(Deep Learning)"></a>深度学习(Deep Learning)</h3><p>深度学习一般采用多层非线性变换，通过对数据特征的自动抽象和逐层提取，来实现分类或回归的学习 目的。 </p>
+<h3 id="物联网-IoT-Internet-of-things"><a href="#物联网-IoT-Internet-of-things" class="headerlink" title="物联网(IoT, Internet of things)"></a>物联网(IoT, Internet of things)</h3><p>物联网即“万物相连的互联网”，是互联网基础上的延伸和扩展的网络，将各种信息传感设备与互联网 结合起来而形成的一个巨大网络，实现在任何时间、任何地点，人、机、物的互联互通。 </p>
+<h3 id="专家系统-Expert-system"><a href="#专家系统-Expert-system" class="headerlink" title="专家系统(Expert system)"></a>专家系统(Expert system)</h3><p>专家系统是一个智能计算机程序系统，其内部含有大量的某个领域专家水平的知识与经验，能够利用人 类专家的知识和解决问题的方法来处理该领域问题。也就是说，专家系统是一个具有大量的专门知识与经验 的程序系统，它应用人工智能技术和计算机技术，根据某领域一个或多个专家提供的知识和经验，进行推理 和判断，模拟人类专家的决策过程，以便解决那些需要人类专家处理的复杂问题，简而言之，专家系统是一 种模拟人类专家解决领域问题的计算机程序系统。 </p>
+<h3 id="有监督学习-Supervised-Learning"><a href="#有监督学习-Supervised-Learning" class="headerlink" title="有监督学习(Supervised Learning)"></a>有监督学习(Supervised Learning)</h3><p>训练数据由一组训练实例组成。在监督学习中，每一个例子都是一对由一个输入对象（通常是一个向量） 和一个期望的输出值（也被称为监督信号）。有监督学习算法分析训练数据，并产生一个推断的功能，它可 以用于映射新的例子。一个最佳的方案将允许该算法正确地在标签不可见的情况下确定类标签。 用已知某种或某些特性的样本作为训练集，以建立一个数学模型(如模式识别中的判别模型，人工神经 网络法中的权重模型等)，再用已建立的模型来预测未知样本，此种方法称为有监督学习。是最常见的机器 学习方法。 </p>
+<h3 id="无监督学习-Unsupervised-Learning"><a href="#无监督学习-Unsupervised-Learning" class="headerlink" title="无监督学习(Unsupervised Learning)"></a>无监督学习(Unsupervised Learning)</h3><p>根据类别未知(没有被标记)的训练样本解决模式识别中的各种问题，称之为无监督学习。 不同于有监督学习，不需要用历史经验知识作为指导，，而是不断地自主从数据本身特性认知数据的特 征，自主归纳和巩固，形成对知识的认知结果。 </p>
+<h3 id="人工神经网络-ANN-Artificial-Neural-Network"><a href="#人工神经网络-ANN-Artificial-Neural-Network" class="headerlink" title="人工神经网络(ANN, Artificial Neural Network)"></a>人工神经网络(ANN, Artificial Neural Network)</h3><p>也简称为神经网络(NN)，是模仿生物脑神经的工作原理，由大量简单的处理单元广泛互联形成复杂的 网络系统，从而对模糊的随机性的非线性数据表现出强大的逼近能力。 </p>
+<h3 id="代价函数-lost-function"><a href="#代价函数-lost-function" class="headerlink" title="代价函数(lost function)"></a>代价函数(lost function)</h3><p>(或者损失函数 loss function) 代价函数或损失函数是衡量学习模型的预测值与实际值之间误差的函数。这个误差被称为模型误差，函 数值越小表示误差越小，也就意味着预测值越接近实际值，认为所构建的模型性能越好。 二、各章节算法等信息补充 生成与测试范式 解决问题的直接方法是提出可能的解，然后检查每个提议，看是否有提议构成了解。 </p>
+<h2 id="算法与源码"><a href="#算法与源码" class="headerlink" title="算法与源码"></a>算法与源码</h2><h3 id="n皇后回溯解法"><a href="#n皇后回溯解法" class="headerlink" title="n皇后回溯解法"></a>n皇后回溯解法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> List&lt;List&lt;String&gt;&gt; solveNQueens(<span class="keyword">int</span> n) &#123;</span><br><span class="line">        <span class="keyword">char</span>[][] chess = <span class="keyword">new</span> <span class="keyword">char</span>[n][n];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">                chess[i][j] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">        List&lt;List&lt;String&gt;&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        solve(res, chess, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">solve</span><span class="params">(List&lt;List&lt;String&gt;&gt; res, <span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (row == chess.length) &#123;</span><br><span class="line">            res.add(construct(chess));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; chess.length; col++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (valid(chess, row, col)) &#123;</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;Q&#x27;</span>;</span><br><span class="line">                solve(res, chess, row + <span class="number">1</span>);</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//row表示第几行，col表示第几列</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">valid</span><span class="params">(<span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row, <span class="keyword">int</span> col)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//判断当前列有没有皇后,因为他是一行一行往下走的，</span></span><br><span class="line">        <span class="comment">//我们只需要检查走过的行数即可，通俗一点就是判断当前</span></span><br><span class="line">        <span class="comment">//坐标位置的上面有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; row; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][col] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的右上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col + <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &lt; chess.length; i--, j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的左上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col - <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &gt;= <span class="number">0</span>; i--, j--) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//把数组转为list</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">construct</span><span class="params">(<span class="keyword">char</span>[][] chess)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; path = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; chess.length; i++) &#123;</span><br><span class="line">            path.add(<span class="keyword">new</span> String(chess[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> path;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="贪婪-贪心算法"><a href="#贪婪-贪心算法" class="headerlink" title="贪婪(贪心算法)"></a>贪婪(贪心算法)</h3><p> 贪心算法(Greedy Algorithm)，又称贪婪算法，是一种<strong>在每一步选择中都采取在当前状态下最好或最 优(即最有利)的选择</strong>，从而希望导致结果是最好或最优的算法。比如在旅行销售员问题中，如果销售员每次 都选择最近的城市，那这就是一种贪心算法。Dijkstra 算法就算采用了贪心策略的实例，每次扩展最短的节 点，更新距离表。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择。也就是说，不从 整体最优上加以考虑，做出的只是在某种意义上的局部最优解</p>
+<h3 id="TSP-旅行商问题-TSP-最短路径问题"><a href="#TSP-旅行商问题-TSP-最短路径问题" class="headerlink" title="TSP 旅行商问题(TSP 最短路径问题)"></a>TSP 旅行商问题(TSP 最短路径问题)</h3><p>(Travelling Salesman Problem, TSP)是这样一个问题：给定一系列城 市和每对城市之间的距离，求解访问每一座城市一次并回到起始城市的最短回路。它是组合优化中的一个 NP Hard 问题，在运筹学和理论计算机科学中非常重要。TSP 的暴力解法时间复杂度是 O(n!)，目前现有的 非暴力算法只能无限逼近其最优解，而不能保证得到通解</p>
+<h3 id="盲目搜索"><a href="#盲目搜索" class="headerlink" title="盲目搜索"></a>盲目搜索</h3><h4 id="DFS"><a href="#DFS" class="headerlink" title="DFS"></a>DFS</h4><p> 实现借助 Stack/递归 在树很深、分支因子不大、解出现的位置较深的情况下适合 </p>
+<h4 id="BFS"><a href="#BFS" class="headerlink" title="BFS"></a>BFS</h4><p>实现借助 Queue 在分支因子很大，解出现的位置合理深度、路径不是非常深的情况下适合</p>
+<h4 id="DFS-ID"><a href="#DFS-ID" class="headerlink" title="DFS-ID"></a>DFS-ID</h4><p>迭代加深的深度优先搜索 实质上就是限定下界的深度优先搜索。即首先允许深度优先搜索 K 层搜索树，若没有发现可行解，再 将 K+1 后重复以上步骤搜索，直到搜索到可行解。在迭代加深搜索的算法中，连续的深度优先搜索被引入， 每一个深度约束逐次加 1，直到搜索到目标为止。迭代加深搜索算法就是仿广度优先搜索的深度优先搜索。 既能满足深度优先搜索的线性存储要求，又能保证发现一个最小深度的目标结点。从实际应用来看，迭代加 深搜索的效果比较好，并不比广度优先搜索慢很多，但是空间复杂度却与深度优先搜索相同，比广度优先搜 索小很多，在一些层次遍历的题目中，迭代加深不失为一种好方法 </p>
+<h3 id="知情搜索-分支定界法"><a href="#知情搜索-分支定界法" class="headerlink" title="知情搜索-分支定界法"></a>知情搜索-分支定界法</h3><p> 代价评估函数 f(n) = g(n) + h*(n)表示从初始节点 S 到目标节点 n 的代价，g(n):从初始节点 S 到目标 节点 n 的距离，h*(n)从当前位置 n 经过最短路径到达 G 的剩余距离，然而在过程中无法直接求出 h*(n)， 因此使用一个估计值 h(n)代替，只有对所有节点 h(n)&lt;=h*(n)才有意义，此时 h(n)被视为可接受的启发， 因此最终评估函数是 f(n) = g(n) + h(n) </p>
+<h4 id="UCS"><a href="#UCS" class="headerlink" title="UCS"></a>UCS</h4><p>一致代价搜索（普通的分支定界） 一致代价搜索的特点是 f(n)=g(n)，也就是说对任意 n 都有 h(n)=0，非常类似 BFS，不过 BFS 是努力 找一条通往目标的路径，而 UCS 是努力找一条最优路径。 </p>
+<h4 id="A"><a href="#A" class="headerlink" title="A*"></a>A*</h4><p> A*算法实际上是综合 BFS、Dijkstra、最佳优先搜索算法的特点于一身的（或者说是采用了剩余距离估 计值和动态规划的分支定界法）。f(n)是节点 n 的综合优先级。当我们选择下一个要遍历的节点时，我们总 会选取综合优先级最高（值最小）的节点。g(n) 是节点 n 距离起点的代价。h(n)是节点 n 距离终点的预计 代价，这也就是 A<em>算法的启发函数。关于启发函数我们在下面详细讲解。A</em>算法在运算过程中，每次从优 先队列中选取 f(n)值最小（优先级最高）的节点作为下一个待遍历的节点。 另外，A*算法使用两个集合来表示待遍历的节点，与已经遍历过的节点，这通常称之为 open_set 和 close_set。 </p>
+<p>完整A*算法过程</p>
+<ul>
+<li><p>初始化openSet和closeSet</p>
+</li>
+<li><p>把起点加入openSet中</p>
+</li>
+<li><p>如果openSet!=null,就从openSet中选择第一个节点n：</p>
+<ul>
+<li><p>如果n为终点</p>
+<p>就从双面开始逐步最终parent节点，一直到达起点，返回结果路径，算法结束</p>
+</li>
+<li><p>如果n不是终点</p>
+<p>把节点n从openSet中移除，并加入到closeSet中</p>
+<p>遍历n节点的所有临近节点 </p>
+<ul>
+<li>如果临近节点在closeSet中，就跳过，选择下一个临近节点</li>
+<li>如果临近节点m不在openSet中<ol>
+<li>设置m的parent节点为n</li>
+<li>计算m到终点的代价f（n）</li>
+<li>把m节点加入到openSet中</li>
+</ol>
+</li>
+<li>对openSet中的节点按照代价从小到大的排序（openSet可以使用优先队列优化）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>返回找不到路径的错误</p>
+</li>
+</ul>
+<h4 id="八数码"><a href="#八数码" class="headerlink" title="八数码"></a>八数码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">slidingPuzzle</span><span class="params">(<span class="keyword">int</span>[][] board)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> R = board.length, C = board[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">int</span> sr = <span class="number">0</span>, sc = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Find sr, sc</span></span><br><span class="line">        search:<span class="comment">//跳转</span></span><br><span class="line">            <span class="keyword">for</span> (sr = <span class="number">0</span>; sr &lt; R; sr++)</span><br><span class="line">                <span class="keyword">for</span> (sc = <span class="number">0</span>; sc &lt; C; sc++)</span><br><span class="line">                    <span class="keyword">if</span> (board[sr][sc] == <span class="number">0</span>)</span><br><span class="line">                        <span class="keyword">break</span> search;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[][] directions = <span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;-<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">0</span>, -<span class="number">1</span>&#125;&#125;;</span><br><span class="line">        PriorityQueue&lt;Node&gt; heap = <span class="keyword">new</span> PriorityQueue&lt;Node&gt;((a, b) -&gt;</span><br><span class="line">            (a.heuristic + a.depth) - (b.heuristic + b.depth));</span><br><span class="line">        Node start = <span class="keyword">new</span> Node(board, sr, sc, <span class="number">0</span>);</span><br><span class="line">        heap.add(start);</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Integer&gt; cost = <span class="keyword">new</span> HashMap();</span><br><span class="line">        cost.put(start.boardstring, <span class="number">9999999</span>);</span><br><span class="line"></span><br><span class="line">        String target = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);<span class="comment">//这里改成目标</span></span><br><span class="line">        String targetWrong = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!heap.isEmpty()) &#123;</span><br><span class="line">            Node node = heap.poll();</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(target))</span><br><span class="line">                <span class="keyword">return</span> node.depth;</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(targetWrong))</span><br><span class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.depth + node.heuristic &gt; cost.get(node.boardstring))</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span>[] di: directions) &#123;</span><br><span class="line">                <span class="keyword">int</span> nei_r = di[<span class="number">0</span>] + node.zero_r;</span><br><span class="line">                <span class="keyword">int</span> nei_c = di[<span class="number">1</span>] + node.zero_c;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 如果邻居不在版上，或者行列错误</span></span><br><span class="line">                <span class="keyword">if</span> ((Math.abs(nei_r - node.zero_r) + Math.abs(nei_c - node.zero_c) != <span class="number">1</span>) ||</span><br><span class="line">                        nei_r &lt; <span class="number">0</span> || nei_r &gt;= R || nei_c &lt; <span class="number">0</span> || nei_c &gt;= C)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span>[][] newboard = <span class="keyword">new</span> <span class="keyword">int</span>[R][C];</span><br><span class="line">                <span class="keyword">int</span> t = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span>[] row: node.board)</span><br><span class="line">                    newboard[t++] = row.clone();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 在新版上交换元素</span></span><br><span class="line">                newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];</span><br><span class="line">                newboard[nei_r][nei_c] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                Node nei = <span class="keyword">new</span> Node(newboard, nei_r, nei_c, node.depth+<span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (nei.depth + nei.heuristic &gt;= cost.getOrDefault(nei.boardstring, <span class="number">9999999</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                heap.add(nei);</span><br><span class="line">                cost.put(nei.boardstring, nei.depth + nei.heuristic);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[][] board;</span><br><span class="line">    String boardstring;</span><br><span class="line">    <span class="keyword">int</span> heuristic;</span><br><span class="line">    <span class="keyword">int</span> zero_r;</span><br><span class="line">    <span class="keyword">int</span> zero_c;</span><br><span class="line">    <span class="keyword">int</span> depth;</span><br><span class="line">    Node(<span class="keyword">int</span>[][] B, <span class="keyword">int</span> zr, <span class="keyword">int</span> zc, <span class="keyword">int</span> d) &#123;</span><br><span class="line">        board = B;</span><br><span class="line">        boardstring = Arrays.deepToString(board);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//计算启发（heuristic）式</span></span><br><span class="line">        heuristic = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> R = B.length, C = B[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> r = <span class="number">0</span>; r &lt; R; ++r)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> c = <span class="number">0</span>; c &lt; C; ++c) &#123;</span><br><span class="line">                <span class="keyword">if</span> (board[r][c] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">int</span> v = (board[r][c] + R*C - <span class="number">1</span>) % (R*C);</span><br><span class="line">                <span class="comment">// v/C, v%C: board[r][c]应该到哪里的最短路径（用于评估函数</span></span><br><span class="line">                ）</span><br><span class="line">                heuristic += Math.abs(r - v/C) + Math.abs(c - v%C);</span><br><span class="line">            &#125;</span><br><span class="line">        heuristic /= <span class="number">2</span>;</span><br><span class="line">        zero_r = zr;</span><br><span class="line">        zero_c = zc;</span><br><span class="line">        depth = d;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="博弈树"><a href="#博弈树" class="headerlink" title="博弈树"></a>博弈树</h3><p> 极大极小算法 python 实现(以解决 tic tac toe 井字棋问题为例) evaluate 方法功能是是对当前棋盘状态相对于 player 打分，分数越高对 player 越有利 </p>
+<h4 id="极小极大算法"><a href="#极小极大算法" class="headerlink" title="极小极大算法"></a>极小极大算法</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MaxMinSearch</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxMinSearch</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;<span class="comment">//一维化二维平面x=graph.len/len;y=graph.len%len</span></span><br><span class="line">        <span class="keyword">int</span> bestValue,value;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;<span class="comment">//达到叶子节点，返回估值，在井字棋中博弈树中深度为8</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">            bestValue = -INF;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            bestValue = INF;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                value = maxMinSearch(graph,vis,len,depth-<span class="number">1</span>);</span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">                    bestValue = Math.max(value, bestValue);</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    bestValue = Math.min(value, bestValue);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bestValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">ismax</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ab剪枝"><a href="#ab剪枝" class="headerlink" title="ab剪枝"></a>ab剪枝</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ABMaxMinS</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">AlphaBeta</span><span class="params">(String graph, Set&lt;Integer&gt; vis,<span class="keyword">int</span> len,<span class="keyword">int</span> nPlay,<span class="keyword">int</span> nA,<span class="keyword">int</span> nB)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(nPlay==<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(isMinNode())&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span>(vis.contains(i))&#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay-<span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span>(score&lt;nB)&#123;</span><br><span class="line">                        nB = score;</span><br><span class="line">                        <span class="keyword">if</span>(nA&gt;=nB)&#123;</span><br><span class="line">                            <span class="keyword">return</span> nA;<span class="comment">//alpha剪枝,选大的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (vis.contains(i)) &#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay - <span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span> (score &gt; nA) &#123;</span><br><span class="line">                        nA = score;</span><br><span class="line">                        <span class="keyword">if</span> (nB &lt;= nA) &#123;</span><br><span class="line">                            <span class="keyword">return</span> nB;<span class="comment">//alpha剪枝，选小的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nA;<span class="comment">//返回最小的</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isMinNode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evelution</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="负极小值极大"><a href="#负极小值极大" class="headerlink" title="负极小值极大"></a>负极小值极大</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NegaMax</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nageMax</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> best = -INF;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                <span class="keyword">int</span> value = -nageMax(graph,vis,len,depth-<span class="number">1</span>);<span class="comment">//这里是负号</span></span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(value&lt;best)&#123;</span><br><span class="line">                    best = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> best;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><h4 id="神经网络神经元模型"><a href="#神经网络神经元模型" class="headerlink" title="神经网络神经元模型"></a>神经网络神经元模型</h4><p><img src="/.top//Users\admin\AppData\Roaming\Typora\typora-user-images\image-20201026151434846.png" alt="image-20201026151434846"></p>
+<h4 id="反向传播算法-Back-Propagation"><a href="#反向传播算法-Back-Propagation" class="headerlink" title="反向传播算法(Back Propagation)"></a>反向传播算法(Back Propagation)</h4><p>步骤：</p>
+<ol>
+<li><p>前向传播（正向数据传播） 样本从输入层输入网络，随机初始化权重和偏置，通过求和及激活函数计算，直到输出层输出结果 </p>
+<p>反向误差传播 计算前向传播阶段网络的输出与期望输出（样本标签）之间的误差，从输出层到隐含层，最后到输入 层，逐层调节各层每个神经元的连接权重和偏置 </p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -1905,81 +2044,6 @@
 ]]></content>
       <tags>
         <tag>BIO_NIO_AIO</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>人工智能基础</title>
-    <url>/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<h1 id="人工智能基础复习材料"><a href="#人工智能基础复习材料" class="headerlink" title="人工智能基础复习材料"></a>人工智能基础复习材料</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="人工智能-Artificial-Intelligence-："><a href="#人工智能-Artificial-Intelligence-：" class="headerlink" title="人工智能(Artificial Intelligence)："></a>人工智能(Artificial Intelligence)：</h3><p> 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。</p>
-<a id="more"></a>
-
-<h3 id="机器学习-Machine-Learning"><a href="#机器学习-Machine-Learning" class="headerlink" title="机器学习(Machine Learning)"></a>机器学习(Machine Learning)</h3><p>机器学习是一门专门研究计算机模拟或实现人类的学习行为，重新组织已有的知识结构，并获取新的知 识和技能，进而使之不断改善自身性能的学科。 </p>
-<h3 id="深度学习-Deep-Learning"><a href="#深度学习-Deep-Learning" class="headerlink" title="深度学习(Deep Learning)"></a>深度学习(Deep Learning)</h3><p>深度学习一般采用多层非线性变换，通过对数据特征的自动抽象和逐层提取，来实现分类或回归的学习 目的。 </p>
-<h3 id="物联网-IoT-Internet-of-things"><a href="#物联网-IoT-Internet-of-things" class="headerlink" title="物联网(IoT, Internet of things)"></a>物联网(IoT, Internet of things)</h3><p>物联网即“万物相连的互联网”，是互联网基础上的延伸和扩展的网络，将各种信息传感设备与互联网 结合起来而形成的一个巨大网络，实现在任何时间、任何地点，人、机、物的互联互通。 </p>
-<h3 id="专家系统-Expert-system"><a href="#专家系统-Expert-system" class="headerlink" title="专家系统(Expert system)"></a>专家系统(Expert system)</h3><p>专家系统是一个智能计算机程序系统，其内部含有大量的某个领域专家水平的知识与经验，能够利用人 类专家的知识和解决问题的方法来处理该领域问题。也就是说，专家系统是一个具有大量的专门知识与经验 的程序系统，它应用人工智能技术和计算机技术，根据某领域一个或多个专家提供的知识和经验，进行推理 和判断，模拟人类专家的决策过程，以便解决那些需要人类专家处理的复杂问题，简而言之，专家系统是一 种模拟人类专家解决领域问题的计算机程序系统。 </p>
-<h3 id="有监督学习-Supervised-Learning"><a href="#有监督学习-Supervised-Learning" class="headerlink" title="有监督学习(Supervised Learning)"></a>有监督学习(Supervised Learning)</h3><p>训练数据由一组训练实例组成。在监督学习中，每一个例子都是一对由一个输入对象（通常是一个向量） 和一个期望的输出值（也被称为监督信号）。有监督学习算法分析训练数据，并产生一个推断的功能，它可 以用于映射新的例子。一个最佳的方案将允许该算法正确地在标签不可见的情况下确定类标签。 用已知某种或某些特性的样本作为训练集，以建立一个数学模型(如模式识别中的判别模型，人工神经 网络法中的权重模型等)，再用已建立的模型来预测未知样本，此种方法称为有监督学习。是最常见的机器 学习方法。 </p>
-<h3 id="无监督学习-Unsupervised-Learning"><a href="#无监督学习-Unsupervised-Learning" class="headerlink" title="无监督学习(Unsupervised Learning)"></a>无监督学习(Unsupervised Learning)</h3><p>根据类别未知(没有被标记)的训练样本解决模式识别中的各种问题，称之为无监督学习。 不同于有监督学习，不需要用历史经验知识作为指导，，而是不断地自主从数据本身特性认知数据的特 征，自主归纳和巩固，形成对知识的认知结果。 </p>
-<h3 id="人工神经网络-ANN-Artificial-Neural-Network"><a href="#人工神经网络-ANN-Artificial-Neural-Network" class="headerlink" title="人工神经网络(ANN, Artificial Neural Network)"></a>人工神经网络(ANN, Artificial Neural Network)</h3><p>也简称为神经网络(NN)，是模仿生物脑神经的工作原理，由大量简单的处理单元广泛互联形成复杂的 网络系统，从而对模糊的随机性的非线性数据表现出强大的逼近能力。 </p>
-<h3 id="代价函数-lost-function"><a href="#代价函数-lost-function" class="headerlink" title="代价函数(lost function)"></a>代价函数(lost function)</h3><p>(或者损失函数 loss function) 代价函数或损失函数是衡量学习模型的预测值与实际值之间误差的函数。这个误差被称为模型误差，函 数值越小表示误差越小，也就意味着预测值越接近实际值，认为所构建的模型性能越好。 二、各章节算法等信息补充 生成与测试范式 解决问题的直接方法是提出可能的解，然后检查每个提议，看是否有提议构成了解。 </p>
-<h2 id="算法与源码"><a href="#算法与源码" class="headerlink" title="算法与源码"></a>算法与源码</h2><h3 id="n皇后回溯解法"><a href="#n皇后回溯解法" class="headerlink" title="n皇后回溯解法"></a>n皇后回溯解法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> List&lt;List&lt;String&gt;&gt; solveNQueens(<span class="keyword">int</span> n) &#123;</span><br><span class="line">        <span class="keyword">char</span>[][] chess = <span class="keyword">new</span> <span class="keyword">char</span>[n][n];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">                chess[i][j] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">        List&lt;List&lt;String&gt;&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        solve(res, chess, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">solve</span><span class="params">(List&lt;List&lt;String&gt;&gt; res, <span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (row == chess.length) &#123;</span><br><span class="line">            res.add(construct(chess));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; chess.length; col++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (valid(chess, row, col)) &#123;</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;Q&#x27;</span>;</span><br><span class="line">                solve(res, chess, row + <span class="number">1</span>);</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//row表示第几行，col表示第几列</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">valid</span><span class="params">(<span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row, <span class="keyword">int</span> col)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//判断当前列有没有皇后,因为他是一行一行往下走的，</span></span><br><span class="line">        <span class="comment">//我们只需要检查走过的行数即可，通俗一点就是判断当前</span></span><br><span class="line">        <span class="comment">//坐标位置的上面有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; row; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][col] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的右上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col + <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &lt; chess.length; i--, j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的左上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col - <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &gt;= <span class="number">0</span>; i--, j--) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//把数组转为list</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">construct</span><span class="params">(<span class="keyword">char</span>[][] chess)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; path = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; chess.length; i++) &#123;</span><br><span class="line">            path.add(<span class="keyword">new</span> String(chess[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> path;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="贪婪-贪心算法"><a href="#贪婪-贪心算法" class="headerlink" title="贪婪(贪心算法)"></a>贪婪(贪心算法)</h3><p> 贪心算法(Greedy Algorithm)，又称贪婪算法，是一种<strong>在每一步选择中都采取在当前状态下最好或最 优(即最有利)的选择</strong>，从而希望导致结果是最好或最优的算法。比如在旅行销售员问题中，如果销售员每次 都选择最近的城市，那这就是一种贪心算法。Dijkstra 算法就算采用了贪心策略的实例，每次扩展最短的节 点，更新距离表。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择。也就是说，不从 整体最优上加以考虑，做出的只是在某种意义上的局部最优解</p>
-<h3 id="TSP-旅行商问题-TSP-最短路径问题"><a href="#TSP-旅行商问题-TSP-最短路径问题" class="headerlink" title="TSP 旅行商问题(TSP 最短路径问题)"></a>TSP 旅行商问题(TSP 最短路径问题)</h3><p>(Travelling Salesman Problem, TSP)是这样一个问题：给定一系列城 市和每对城市之间的距离，求解访问每一座城市一次并回到起始城市的最短回路。它是组合优化中的一个 NP Hard 问题，在运筹学和理论计算机科学中非常重要。TSP 的暴力解法时间复杂度是 O(n!)，目前现有的 非暴力算法只能无限逼近其最优解，而不能保证得到通解</p>
-<h3 id="盲目搜索"><a href="#盲目搜索" class="headerlink" title="盲目搜索"></a>盲目搜索</h3><h4 id="DFS"><a href="#DFS" class="headerlink" title="DFS"></a>DFS</h4><p> 实现借助 Stack/递归 在树很深、分支因子不大、解出现的位置较深的情况下适合 </p>
-<h4 id="BFS"><a href="#BFS" class="headerlink" title="BFS"></a>BFS</h4><p>实现借助 Queue 在分支因子很大，解出现的位置合理深度、路径不是非常深的情况下适合</p>
-<h4 id="DFS-ID"><a href="#DFS-ID" class="headerlink" title="DFS-ID"></a>DFS-ID</h4><p>迭代加深的深度优先搜索 实质上就是限定下界的深度优先搜索。即首先允许深度优先搜索 K 层搜索树，若没有发现可行解，再 将 K+1 后重复以上步骤搜索，直到搜索到可行解。在迭代加深搜索的算法中，连续的深度优先搜索被引入， 每一个深度约束逐次加 1，直到搜索到目标为止。迭代加深搜索算法就是仿广度优先搜索的深度优先搜索。 既能满足深度优先搜索的线性存储要求，又能保证发现一个最小深度的目标结点。从实际应用来看，迭代加 深搜索的效果比较好，并不比广度优先搜索慢很多，但是空间复杂度却与深度优先搜索相同，比广度优先搜 索小很多，在一些层次遍历的题目中，迭代加深不失为一种好方法 </p>
-<h3 id="知情搜索-分支定界法"><a href="#知情搜索-分支定界法" class="headerlink" title="知情搜索-分支定界法"></a>知情搜索-分支定界法</h3><p> 代价评估函数 f(n) = g(n) + h*(n)表示从初始节点 S 到目标节点 n 的代价，g(n):从初始节点 S 到目标 节点 n 的距离，h*(n)从当前位置 n 经过最短路径到达 G 的剩余距离，然而在过程中无法直接求出 h*(n)， 因此使用一个估计值 h(n)代替，只有对所有节点 h(n)&lt;=h*(n)才有意义，此时 h(n)被视为可接受的启发， 因此最终评估函数是 f(n) = g(n) + h(n) </p>
-<h4 id="UCS"><a href="#UCS" class="headerlink" title="UCS"></a>UCS</h4><p>一致代价搜索（普通的分支定界） 一致代价搜索的特点是 f(n)=g(n)，也就是说对任意 n 都有 h(n)=0，非常类似 BFS，不过 BFS 是努力 找一条通往目标的路径，而 UCS 是努力找一条最优路径。 </p>
-<h4 id="A"><a href="#A" class="headerlink" title="A*"></a>A*</h4><p> A*算法实际上是综合 BFS、Dijkstra、最佳优先搜索算法的特点于一身的（或者说是采用了剩余距离估 计值和动态规划的分支定界法）。f(n)是节点 n 的综合优先级。当我们选择下一个要遍历的节点时，我们总 会选取综合优先级最高（值最小）的节点。g(n) 是节点 n 距离起点的代价。h(n)是节点 n 距离终点的预计 代价，这也就是 A<em>算法的启发函数。关于启发函数我们在下面详细讲解。A</em>算法在运算过程中，每次从优 先队列中选取 f(n)值最小（优先级最高）的节点作为下一个待遍历的节点。 另外，A*算法使用两个集合来表示待遍历的节点，与已经遍历过的节点，这通常称之为 open_set 和 close_set。 </p>
-<p>完整A*算法过程</p>
-<ul>
-<li><p>初始化openSet和closeSet</p>
-</li>
-<li><p>把起点加入openSet中</p>
-</li>
-<li><p>如果openSet!=null,就从openSet中选择第一个节点n：</p>
-<ul>
-<li><p>如果n为终点</p>
-<p>就从双面开始逐步最终parent节点，一直到达起点，返回结果路径，算法结束</p>
-</li>
-<li><p>如果n不是终点</p>
-<p>把节点n从openSet中移除，并加入到closeSet中</p>
-<p>遍历n节点的所有临近节点 </p>
-<ul>
-<li>如果临近节点在closeSet中，就跳过，选择下一个临近节点</li>
-<li>如果临近节点m不在openSet中<ol>
-<li>设置m的parent节点为n</li>
-<li>计算m到终点的代价f（n）</li>
-<li>把m节点加入到openSet中</li>
-</ol>
-</li>
-<li>对openSet中的节点按照代价从小到大的排序（openSet可以使用优先队列优化）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>返回找不到路径的错误</p>
-</li>
-</ul>
-<h4 id="八数码"><a href="#八数码" class="headerlink" title="八数码"></a>八数码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">slidingPuzzle</span><span class="params">(<span class="keyword">int</span>[][] board)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> R = board.length, C = board[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">int</span> sr = <span class="number">0</span>, sc = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Find sr, sc</span></span><br><span class="line">        search:<span class="comment">//跳转</span></span><br><span class="line">            <span class="keyword">for</span> (sr = <span class="number">0</span>; sr &lt; R; sr++)</span><br><span class="line">                <span class="keyword">for</span> (sc = <span class="number">0</span>; sc &lt; C; sc++)</span><br><span class="line">                    <span class="keyword">if</span> (board[sr][sc] == <span class="number">0</span>)</span><br><span class="line">                        <span class="keyword">break</span> search;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[][] directions = <span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;-<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">0</span>, -<span class="number">1</span>&#125;&#125;;</span><br><span class="line">        PriorityQueue&lt;Node&gt; heap = <span class="keyword">new</span> PriorityQueue&lt;Node&gt;((a, b) -&gt;</span><br><span class="line">            (a.heuristic + a.depth) - (b.heuristic + b.depth));</span><br><span class="line">        Node start = <span class="keyword">new</span> Node(board, sr, sc, <span class="number">0</span>);</span><br><span class="line">        heap.add(start);</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Integer&gt; cost = <span class="keyword">new</span> HashMap();</span><br><span class="line">        cost.put(start.boardstring, <span class="number">9999999</span>);</span><br><span class="line"></span><br><span class="line">        String target = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);<span class="comment">//这里改成目标</span></span><br><span class="line">        String targetWrong = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!heap.isEmpty()) &#123;</span><br><span class="line">            Node node = heap.poll();</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(target))</span><br><span class="line">                <span class="keyword">return</span> node.depth;</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(targetWrong))</span><br><span class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.depth + node.heuristic &gt; cost.get(node.boardstring))</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span>[] di: directions) &#123;</span><br><span class="line">                <span class="keyword">int</span> nei_r = di[<span class="number">0</span>] + node.zero_r;</span><br><span class="line">                <span class="keyword">int</span> nei_c = di[<span class="number">1</span>] + node.zero_c;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 如果邻居不在版上，或者行列错误</span></span><br><span class="line">                <span class="keyword">if</span> ((Math.abs(nei_r - node.zero_r) + Math.abs(nei_c - node.zero_c) != <span class="number">1</span>) ||</span><br><span class="line">                        nei_r &lt; <span class="number">0</span> || nei_r &gt;= R || nei_c &lt; <span class="number">0</span> || nei_c &gt;= C)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span>[][] newboard = <span class="keyword">new</span> <span class="keyword">int</span>[R][C];</span><br><span class="line">                <span class="keyword">int</span> t = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span>[] row: node.board)</span><br><span class="line">                    newboard[t++] = row.clone();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 在新版上交换元素</span></span><br><span class="line">                newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];</span><br><span class="line">                newboard[nei_r][nei_c] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                Node nei = <span class="keyword">new</span> Node(newboard, nei_r, nei_c, node.depth+<span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (nei.depth + nei.heuristic &gt;= cost.getOrDefault(nei.boardstring, <span class="number">9999999</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                heap.add(nei);</span><br><span class="line">                cost.put(nei.boardstring, nei.depth + nei.heuristic);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[][] board;</span><br><span class="line">    String boardstring;</span><br><span class="line">    <span class="keyword">int</span> heuristic;</span><br><span class="line">    <span class="keyword">int</span> zero_r;</span><br><span class="line">    <span class="keyword">int</span> zero_c;</span><br><span class="line">    <span class="keyword">int</span> depth;</span><br><span class="line">    Node(<span class="keyword">int</span>[][] B, <span class="keyword">int</span> zr, <span class="keyword">int</span> zc, <span class="keyword">int</span> d) &#123;</span><br><span class="line">        board = B;</span><br><span class="line">        boardstring = Arrays.deepToString(board);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//计算启发（heuristic）式</span></span><br><span class="line">        heuristic = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> R = B.length, C = B[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> r = <span class="number">0</span>; r &lt; R; ++r)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> c = <span class="number">0</span>; c &lt; C; ++c) &#123;</span><br><span class="line">                <span class="keyword">if</span> (board[r][c] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">int</span> v = (board[r][c] + R*C - <span class="number">1</span>) % (R*C);</span><br><span class="line">                <span class="comment">// v/C, v%C: board[r][c]应该到哪里的最短路径（用于评估函数</span></span><br><span class="line">                ）</span><br><span class="line">                heuristic += Math.abs(r - v/C) + Math.abs(c - v%C);</span><br><span class="line">            &#125;</span><br><span class="line">        heuristic /= <span class="number">2</span>;</span><br><span class="line">        zero_r = zr;</span><br><span class="line">        zero_c = zc;</span><br><span class="line">        depth = d;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="博弈树"><a href="#博弈树" class="headerlink" title="博弈树"></a>博弈树</h3><p> 极大极小算法 python 实现(以解决 tic tac toe 井字棋问题为例) evaluate 方法功能是是对当前棋盘状态相对于 player 打分，分数越高对 player 越有利 </p>
-<h4 id="极小极大算法"><a href="#极小极大算法" class="headerlink" title="极小极大算法"></a>极小极大算法</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MaxMinSearch</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxMinSearch</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;<span class="comment">//一维化二维平面x=graph.len/len;y=graph.len%len</span></span><br><span class="line">        <span class="keyword">int</span> bestValue,value;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;<span class="comment">//达到叶子节点，返回估值，在井字棋中博弈树中深度为8</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">            bestValue = -INF;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            bestValue = INF;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                value = maxMinSearch(graph,vis,len,depth-<span class="number">1</span>);</span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">                    bestValue = Math.max(value, bestValue);</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    bestValue = Math.min(value, bestValue);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bestValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">ismax</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="ab剪枝"><a href="#ab剪枝" class="headerlink" title="ab剪枝"></a>ab剪枝</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ABMaxMinS</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">AlphaBeta</span><span class="params">(String graph, Set&lt;Integer&gt; vis,<span class="keyword">int</span> len,<span class="keyword">int</span> nPlay,<span class="keyword">int</span> nA,<span class="keyword">int</span> nB)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(nPlay==<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(isMinNode())&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span>(vis.contains(i))&#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay-<span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span>(score&lt;nB)&#123;</span><br><span class="line">                        nB = score;</span><br><span class="line">                        <span class="keyword">if</span>(nA&gt;=nB)&#123;</span><br><span class="line">                            <span class="keyword">return</span> nA;<span class="comment">//alpha剪枝,选大的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (vis.contains(i)) &#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay - <span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span> (score &gt; nA) &#123;</span><br><span class="line">                        nA = score;</span><br><span class="line">                        <span class="keyword">if</span> (nB &lt;= nA) &#123;</span><br><span class="line">                            <span class="keyword">return</span> nB;<span class="comment">//alpha剪枝，选小的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nA;<span class="comment">//返回最小的</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isMinNode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evelution</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="负极小值极大"><a href="#负极小值极大" class="headerlink" title="负极小值极大"></a>负极小值极大</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NegaMax</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nageMax</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> best = -INF;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                <span class="keyword">int</span> value = -nageMax(graph,vis,len,depth-<span class="number">1</span>);<span class="comment">//这里是负号</span></span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(value&lt;best)&#123;</span><br><span class="line">                    best = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> best;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><h4 id="神经网络神经元模型"><a href="#神经网络神经元模型" class="headerlink" title="神经网络神经元模型"></a>神经网络神经元模型</h4><p><img src="/.top//Users\admin\AppData\Roaming\Typora\typora-user-images\image-20201026151434846.png" alt="image-20201026151434846"></p>
-<h4 id="反向传播算法-Back-Propagation"><a href="#反向传播算法-Back-Propagation" class="headerlink" title="反向传播算法(Back Propagation)"></a>反向传播算法(Back Propagation)</h4><p>步骤：</p>
-<ol>
-<li><p>前向传播（正向数据传播） 样本从输入层输入网络，随机初始化权重和偏置，通过求和及激活函数计算，直到输出层输出结果 </p>
-<p>反向误差传播 计算前向传播阶段网络的输出与期望输出（样本标签）之间的误差，从输出层到隐含层，最后到输入 层，逐层调节各层每个神经元的连接权重和偏置 </p>
-</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
