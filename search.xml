@@ -95,6 +95,78 @@
       </tags>
   </entry>
   <entry>
+    <title>JavaJUC(二)——Concurrent包</title>
+    <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
+    <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
+<a id="more"></a>
+
+<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>内存可见性：不同线程对一个共享数据进行操作的时候，都是先把数据读到自己方法区缓存中去，所以当线程1更改了数据时在 ，线程2是对这个更改的数据不可见的，所以在声明这个数据时候，可以添加一个关键字<code>volatile</code>，保证某一个线程在更改这个数据时候，会马上把结果返回主存中（另一个效率很低的方法是每次指向前进行同步，加<code>synchronized</code>互斥   锁）</p>
+<p>volatile使用底层的内存栅栏</p>
+<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>java.util.concurrent.atomic：</p>
+<ul>
+<li>使用volatile保证内存可见性</li>
+<li>CAS（compare-And-Swap）算法保证数据原子性<ul>
+<li>cas有三个操作数：<ol>
+<li>内存值 V</li>
+<li>预估值A</li>
+<li>更新值B</li>
+</ol>
+</li>
+<li>当且仅当V==A时，V=B，else，不做任何操作</li>
+</ul>
+</li>
+</ul>
+<p>i++不是原子性的，AtomicXXX（比如：AtomicInteger）类的 getAndIncrement()解决了这个问题，</p>
+<p>i–就使用getAndDecrement()解决</p>
+<h2 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h2><p>ConcurrentHashMap采用锁分段机制【Concurrent：并存的】</p>
+<h2 id="Callable接口"><a href="#Callable接口" class="headerlink" title="Callable接口"></a>Callable接口</h2><p>可以有返回值</p>
+<p>结果需要用FutureTask接收</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public static void main(String[] args) throws ExecutionException, InterruptedException &#123;</span><br><span class="line">    DemoThread demoThread &#x3D; new DemoThread();</span><br><span class="line">    FutureTask&lt;Integer&gt; futureTask &#x3D; new FutureTask&lt;&gt;(demoThread);</span><br><span class="line">    new Thread(futureTask).start();</span><br><span class="line">    final Integer sum &#x3D; futureTask.get();</span><br><span class="line">    System.out.println(sum);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoThread</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] range = IntStream.range(<span class="number">1</span>, <span class="number">100</span>).toArray();</span><br><span class="line">        <span class="keyword">for</span> (Integer i:range) &#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="lock同步锁"><a href="#lock同步锁" class="headerlink" title="lock同步锁"></a>lock同步锁</h2><p>ReentrantLock，这是一个显示的锁，需要通过lock()方法上锁，用unlock()释放锁。 </p>
+<h3 id="自动释放锁"><a href="#自动释放锁" class="headerlink" title="自动释放锁"></a>自动释放锁</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.Lock;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AutoLock</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Lock lock;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AutoLock</span><span class="params">(Lock lock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lock = lock;</span><br><span class="line">        lock.lock();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="生成者和消费者"><a href="#生成者和消费者" class="headerlink" title="生成者和消费者"></a>生成者和消费者</h2><ul>
+<li><p>使用wait（）让线程等待</p>
+</li>
+<li><p>notify()/notifyAll()唤醒其他wait的线程</p>
+</li>
+<li><p>直接使用会造成虚假唤醒，所以应该总是使用在循环中</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(obj)&#123;</span><br><span class="line">    <span class="keyword">while</span> ()&#123;</span><br><span class="line">        obj.wait();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>ReadWriteLock</p>
+<ul>
+<li><strong>解决了写写/读写需要互斥而读读不需要互斥的操作</strong></li>
+</ul>
+<h2 id="线程8锁"><a href="#线程8锁" class="headerlink" title="线程8锁"></a>线程8锁</h2><ul>
+<li>非静态方法的锁默认为thhis，静态方法的锁默认为对应的Class实例</li>
+<li>某一个时刻内，只有一个线程持有锁，无论几个方法 </li>
+</ul>
+<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>提供了一个线程队列。队列中保存着所有的等待状态的线程，避免了创建和销毁的开销，提高了性能</p>
+<h3 id="interface-Executor"><a href="#interface-Executor" class="headerlink" title="interface Executor"></a>interface Executor</h3><ul>
+<li><p>ExecutorService newFixsdThreadPool():创建固定大小的线程池</p>
+</li>
+<li><p>ExecutorService newCachedThreadPool()  创建缓存线程池，可以根据需要自动更改数量</p>
+</li>
+<li><p>ExecutorService newSingleThreadExecutor() 创建单个线程池，这里面只有一个线程</p>
+</li>
+<li><p>ScheduledExecutorService newScheduledThreadPool() 创建固定大小的线程，可以延时或者定时执行任务</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService pool =Executor.newFixsdThreadPool();</span><br><span class="line">ThreadDemo task  = <span class="keyword">new</span> ThreadDemo();</span><br><span class="line"><span class="comment">//为线程池中的线程分配任务</span></span><br><span class="line">pool.submit(task);</span><br><span class="line"><span class="comment">//关闭线程池</span></span><br><span class="line">pool.shutdown();</span><br></pre></td></tr></table></figure>
+
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><h2 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h2><p>在必要的情况下，把一个大任务拆分（fork）成若干个小任务（拆到不可以在拆的时候），再把一个个小任务运算的结果进行join汇总</p>
+<p>在stream处理中，要是开启多线程，内部使用此框架</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JavaJUC(一)——线程</title>
     <url>/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/</url>
     <content><![CDATA[<h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><p>进程是系统资源分配的基本单位</p>
@@ -242,78 +314,6 @@
 <blockquote>
 <p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
 </blockquote>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>JavaJUC(二)——Concurrent包</title>
-    <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
-    <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
-<a id="more"></a>
-
-<h2 id="volatile关键字"><a href="#volatile关键字" class="headerlink" title="volatile关键字"></a>volatile关键字</h2><p>内存可见性：不同线程对一个共享数据进行操作的时候，都是先把数据读到自己方法区缓存中去，所以当线程1更改了数据时在 ，线程2是对这个更改的数据不可见的，所以在声明这个数据时候，可以添加一个关键字<code>volatile</code>，保证某一个线程在更改这个数据时候，会马上把结果返回主存中（另一个效率很低的方法是每次指向前进行同步，加<code>synchronized</code>互斥   锁）</p>
-<p>volatile使用底层的内存栅栏</p>
-<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>java.util.concurrent.atomic：</p>
-<ul>
-<li>使用volatile保证内存可见性</li>
-<li>CAS（compare-And-Swap）算法保证数据原子性<ul>
-<li>cas有三个操作数：<ol>
-<li>内存值 V</li>
-<li>预估值A</li>
-<li>更新值B</li>
-</ol>
-</li>
-<li>当且仅当V==A时，V=B，else，不做任何操作</li>
-</ul>
-</li>
-</ul>
-<p>i++不是原子性的，AtomicXXX（比如：AtomicInteger）类的 getAndIncrement()解决了这个问题，</p>
-<p>i–就使用getAndDecrement()解决</p>
-<h2 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h2><p>ConcurrentHashMap采用锁分段机制【Concurrent：并存的】</p>
-<h2 id="Callable接口"><a href="#Callable接口" class="headerlink" title="Callable接口"></a>Callable接口</h2><p>可以有返回值</p>
-<p>结果需要用FutureTask接收</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">public static void main(String[] args) throws ExecutionException, InterruptedException &#123;</span><br><span class="line">    DemoThread demoThread &#x3D; new DemoThread();</span><br><span class="line">    FutureTask&lt;Integer&gt; futureTask &#x3D; new FutureTask&lt;&gt;(demoThread);</span><br><span class="line">    new Thread(futureTask).start();</span><br><span class="line">    final Integer sum &#x3D; futureTask.get();</span><br><span class="line">    System.out.println(sum);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DemoThread</span> <span class="keyword">implements</span> <span class="title">Callable</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] range = IntStream.range(<span class="number">1</span>, <span class="number">100</span>).toArray();</span><br><span class="line">        <span class="keyword">for</span> (Integer i:range) &#123;</span><br><span class="line">            System.out.println(i);</span><br><span class="line">            <span class="keyword">return</span> i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="lock同步锁"><a href="#lock同步锁" class="headerlink" title="lock同步锁"></a>lock同步锁</h2><p>ReentrantLock，这是一个显示的锁，需要通过lock()方法上锁，用unlock()释放锁。 </p>
-<h3 id="自动释放锁"><a href="#自动释放锁" class="headerlink" title="自动释放锁"></a>自动释放锁</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.concurrent.locks.Lock;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AutoLock</span> <span class="keyword">implements</span> <span class="title">AutoCloseable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Lock lock;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AutoLock</span><span class="params">(Lock lock)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lock = lock;</span><br><span class="line">        lock.lock();</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="生成者和消费者"><a href="#生成者和消费者" class="headerlink" title="生成者和消费者"></a>生成者和消费者</h2><ul>
-<li><p>使用wait（）让线程等待</p>
-</li>
-<li><p>notify()/notifyAll()唤醒其他wait的线程</p>
-</li>
-<li><p>直接使用会造成虚假唤醒，所以应该总是使用在循环中</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(obj)&#123;</span><br><span class="line">    <span class="keyword">while</span> ()&#123;</span><br><span class="line">        obj.wait();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><p>ReadWriteLock</p>
-<ul>
-<li><strong>解决了写写/读写需要互斥而读读不需要互斥的操作</strong></li>
-</ul>
-<h2 id="线程8锁"><a href="#线程8锁" class="headerlink" title="线程8锁"></a>线程8锁</h2><ul>
-<li>非静态方法的锁默认为thhis，静态方法的锁默认为对应的Class实例</li>
-<li>某一个时刻内，只有一个线程持有锁，无论几个方法 </li>
-</ul>
-<h2 id="线程池"><a href="#线程池" class="headerlink" title="线程池"></a>线程池</h2><p>提供了一个线程队列。队列中保存着所有的等待状态的线程，避免了创建和销毁的开销，提高了性能</p>
-<h3 id="interface-Executor"><a href="#interface-Executor" class="headerlink" title="interface Executor"></a>interface Executor</h3><ul>
-<li><p>ExecutorService newFixsdThreadPool():创建固定大小的线程池</p>
-</li>
-<li><p>ExecutorService newCachedThreadPool()  创建缓存线程池，可以根据需要自动更改数量</p>
-</li>
-<li><p>ExecutorService newSingleThreadExecutor() 创建单个线程池，这里面只有一个线程</p>
-</li>
-<li><p>ScheduledExecutorService newScheduledThreadPool() 创建固定大小的线程，可以延时或者定时执行任务</p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//创建线程池</span></span><br><span class="line">ExecutorService pool =Executor.newFixsdThreadPool();</span><br><span class="line">ThreadDemo task  = <span class="keyword">new</span> ThreadDemo();</span><br><span class="line"><span class="comment">//为线程池中的线程分配任务</span></span><br><span class="line">pool.submit(task);</span><br><span class="line"><span class="comment">//关闭线程池</span></span><br><span class="line">pool.shutdown();</span><br></pre></td></tr></table></figure>
-
-<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><h2 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h2><p>在必要的情况下，把一个大任务拆分（fork）成若干个小任务（拆到不可以在拆的时候），再把一个个小任务运算的结果进行join汇总</p>
-<p>在stream处理中，要是开启多线程，内部使用此框架</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -805,6 +805,28 @@
       </tags>
   </entry>
   <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql数据字段类型</title>
     <url>/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>MySQL中定义数据字段的类型对你数据库的优化是非常重要的。</p>
@@ -1006,25 +1028,77 @@
       </tags>
   </entry>
   <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+    <title>RabbitMQ消息队列</title>
+    <url>/2020/12/02/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</url>
+    <content><![CDATA[<h1 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h1><p>消息队列可以发送 字符串、字节数组、序列化对象，需要对象实现序列化接口</p>
+<p>直接使用docker启动容器,于是就可以愉快的使用了</p>
+<blockquote>
+<p>docker run -d -p 5672:5672 -p 15672:15672 –name –restart=always rabbit rabbitmq</p>
+</blockquote>
+<h2 id="RabbitMQ构建基础生产者消费者模式"><a href="#RabbitMQ构建基础生产者消费者模式" class="headerlink" title="RabbitMQ构建基础生产者消费者模式"></a>RabbitMQ构建基础生产者消费者模式</h2><blockquote>
+<p>构建连接工厂</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.ConnectionFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Do</span> 连接类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConnectionUtil</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String RABBIT_HOST= <span class="string">&quot;192.168.3.31&quot;</span>;<span class="comment">//填RabbitMQ所在ip</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String RABBIT_USERNAME = <span class="string">&quot;guest&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String RABBIT_PASSWORD = <span class="string">&quot;guest&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Connection connection = <span class="keyword">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">getConnection</span><span class="params">()</span></span>&#123;</span><br><span class="line">        ConnectionFactory connectionFactory = <span class="keyword">new</span> ConnectionFactory();</span><br><span class="line">        connectionFactory.setHost(RABBIT_HOST);</span><br><span class="line">        connectionFactory.setUsername(RABBIT_USERNAME);</span><br><span class="line">        connectionFactory.setPassword(RABBIT_PASSWORD);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            connection = connectionFactory.newConnection();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (TimeoutException | IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> connection;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>生产者</p>
+</blockquote>
+<p>主要流程：</p>
 <ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+<li>获取连接Connection</li>
+<li>创建通道<ul>
+<li>parma1:队列名称</li>
+<li>parma2:持久化，重启server队列不会消失</li>
+<li>parma3:是否为独占队列。若队列只能被一个connect使用那么其他连接建立时抛出异常</li>
+<li>parma4:队列使用完全是否自动删除（queue为空，并且没有连接时）</li>
+<li>parma5:建立队列时的其他参数,Map类型</li>
+</ul>
+</li>
+<li>使用<code>basicPublish</code>进行广播</li>
 </ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import com.rabbitmq.client.Channel;</span><br><span class="line">import com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line">import java.util.concurrent.TimeoutException;</span><br><span class="line"></span><br><span class="line">public class Producer &#123;</span><br><span class="line"></span><br><span class="line">    private static final String QUEUE_NAME &#x3D; &quot;queue&quot;;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) throws IOException, InterruptedException, TimeoutException &#123;</span><br><span class="line">        &#x2F;&#x2F;获取连接</span><br><span class="line">        Connection connection &#x3D; ConnectionUtil.getConnection();</span><br><span class="line">        System.out.println(connection);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;创建通道</span><br><span class="line">        Channel channel &#x3D; connection.createChannel();</span><br><span class="line">        &#x2F;**</span><br><span class="line">         * parma1:队列名称</span><br><span class="line">         * parma2:持久化，重启server队列不会消失</span><br><span class="line">         * parma3:是否为独占队列。若队列只能被一个connect使用那么其他连接建立时抛出异常</span><br><span class="line">         * parma4:队列使用完全是否自动删除（queue为空，并且没有连接时）</span><br><span class="line">         * parma5:建立队列时的其他参数,Map类型</span><br><span class="line">         *&#x2F;</span><br><span class="line">        channel.queueDeclare(QUEUE_NAME,true,false,false,null);</span><br><span class="line">        StringBuilder msg &#x3D; new StringBuilder(&quot;hello&quot;);</span><br><span class="line">        System.out.println(msg.toString());</span><br><span class="line">        for (int i&#x3D;0;i&lt;20;i++)&#123;</span><br><span class="line">            msg.append(&quot;i&quot;);</span><br><span class="line">            channel.basicPublish(&quot;&quot;,QUEUE_NAME,null,msg.toString().getBytes());</span><br><span class="line">            TimeUnit.SECONDS.sleep(1);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(msg.toString());</span><br><span class="line">        channel.close();</span><br><span class="line">        connection.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>消费者</p>
+</blockquote>
+<p>主要流程：</p>
+<ol>
+<li>创建连接</li>
+<li>创建通道</li>
+<li>获取信息</li>
+<li>消费者在消费消息时，要通过ack确认（即：消费者没有确认消息消费不返回ack）;</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">import com.rabbitmq.client.*;</span><br><span class="line"></span><br><span class="line">import java.io.IOException;</span><br><span class="line">import java.nio.charset.StandardCharsets;</span><br><span class="line">import java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line">public class Consumer &#123;</span><br><span class="line">    private static final String QUEUE_NAME &#x3D; &quot;queue&quot;;</span><br><span class="line"></span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        try (Connection connection &#x3D; ConnectionUtil.getConnection()) &#123;</span><br><span class="line">            Channel channel &#x3D; connection.createChannel();</span><br><span class="line">           &#x2F;&#x2F; channel.queueDeclare(QUEUE_NAME,true,false,false,null);</span><br><span class="line">            StringBuffer msg &#x3D; new StringBuffer();</span><br><span class="line">            &#x2F;&#x2F;TimeUnit.SECONDS.sleep(2);</span><br><span class="line">            while (true)&#123;</span><br><span class="line">                try &#123;</span><br><span class="line">                    TimeUnit.SECONDS.sleep(2);</span><br><span class="line">                &#125; catch (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">                final com.rabbitmq.client.Consumer consumer &#x3D; new DefaultConsumer(channel)&#123;</span><br><span class="line">                    @Override</span><br><span class="line">                    public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException &#123;</span><br><span class="line">                        super.handleDelivery(consumerTag, envelope, properties, body);</span><br><span class="line">                        msg.append(new String(body, StandardCharsets.UTF_8));&#x2F;&#x2F;  System.out.println(msg.toString());</span><br><span class="line">                    &#125;</span><br><span class="line">                    &#x2F;&#x2F;监听队列，当参数2为true时，为自动提交（只要消息从队列中获取，</span><br><span class="line">                    &#x2F;&#x2F; 无论消费者获取到消息后是否成功消息，都认为是消息已经成功消费）</span><br><span class="line">                    &#x2F;&#x2F;当b为false时，为手动提交（消费者从队列中获取消息后，服务器会将该消息标记为不可用状态，等待消费者的反馈，</span><br><span class="line">                    &#x2F;&#x2F;如果选用自动确认,在消费者拿走消息执行过程中出现宕机时,消息可能就会丢失！！）</span><br><span class="line">                    &#x2F;&#x2F;使用channel.basicAck(envelope.getDeliveryTag(),false);进行消息确认</span><br><span class="line">                &#125;;</span><br><span class="line">                System.out.println(&quot;结果&quot;+msg.toString());</span><br><span class="line">                channel.basicConsume(QUEUE_NAME,true,consumer);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125; catch (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="工作模式"><a href="#工作模式" class="headerlink" title="工作模式"></a>工作模式</h2><p>一个生产者，数个消费者</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> working;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Producer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;输入信息&quot;</span>);</span><br><span class="line">        Scanner scanner = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        String msg = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span> (!<span class="string">&quot;quit&quot;</span>.equals(msg = scanner.nextLine())) &#123;</span><br><span class="line">            Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">            Channel channel = connection.createChannel();</span><br><span class="line">            channel.queueDeclare(<span class="string">&quot;queue2&quot;</span>,<span class="keyword">true</span>,<span class="keyword">false</span>,<span class="keyword">false</span>,<span class="keyword">null</span>);</span><br><span class="line">            channel.basicPublish(<span class="string">&quot;&quot;</span>, <span class="string">&quot;queue2&quot;</span>, <span class="keyword">null</span>, msg.getBytes());</span><br><span class="line">            System.out.println(<span class="string">&quot;发送：&quot;</span> + msg);</span><br><span class="line"></span><br><span class="line">            channel.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>两个消费者</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> working;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Consumer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Comsumer2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">        Channel channel = connection.createChannel();</span><br><span class="line"></span><br><span class="line">        Consumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> </span>&#123;</span><br><span class="line">                <span class="comment">//body就是从队列中获取的数据</span></span><br><span class="line">                String msg = <span class="keyword">new</span> String(body);</span><br><span class="line">                System.out.println(<span class="string">&quot;Consumer2接收：&quot;</span> + msg);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        channel.basicConsume(<span class="string">&quot;queue2&quot;</span>,<span class="keyword">true</span>,consumer);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> working;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.charset.StandardCharsets;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Consumer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">        Channel channel = connection.createChannel();</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            com.rabbitmq.client.Consumer consumer = <span class="keyword">new</span> DefaultConsumer(channel) &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleDelivery</span><span class="params">(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, <span class="keyword">byte</span>[] body)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">                    <span class="comment">//body就是从队列中获取的数据</span></span><br><span class="line">                    String msg = <span class="keyword">new</span> String(body, StandardCharsets.UTF_8);</span><br><span class="line">                    System.out.println(<span class="string">&quot;Consumer1接收：&quot;</span> + msg);</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        Thread.sleep(<span class="number">10000</span>);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line">            channel.basicConsume(<span class="string">&quot;queue2&quot;</span>, <span class="keyword">true</span>, consumer);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="订阅模式"><a href="#订阅模式" class="headerlink" title="订阅模式"></a>订阅模式</h2><p><strong>发送者 发送消息到交换机</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> working;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Channel;</span><br><span class="line"><span class="keyword">import</span> com.rabbitmq.client.Connection;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Producer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;输入信息&quot;</span>);</span><br><span class="line">        Scanner scanner = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        String msg = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span> (!<span class="string">&quot;quit&quot;</span>.equals(msg = scanner.nextLine())) &#123;</span><br><span class="line">            Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">            Channel channel = connection.createChannel();</span><br><span class="line">            channel.queueDeclare(<span class="string">&quot;queue2&quot;</span>,<span class="keyword">true</span>,<span class="keyword">false</span>,<span class="keyword">false</span>,<span class="keyword">null</span>);</span><br><span class="line">            channel.basicPublish(<span class="string">&quot;exchange1&quot;</span>, <span class="string">&quot;queue2&quot;</span>, <span class="keyword">null</span>, msg.getBytes());<span class="comment">//主要就是这行改了</span></span><br><span class="line">            System.out.println(<span class="string">&quot;发送：&quot;</span> + msg);</span><br><span class="line"></span><br><span class="line">            channel.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="路由模式"><a href="#路由模式" class="headerlink" title="路由模式"></a>路由模式</h2><p>通过信息来决定选择哪个路由</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SendMsg</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception</span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;请输入消息：&quot;</span>);</span><br><span class="line">        Scanner scanner = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        String msg = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">while</span>(!<span class="string">&quot;quit&quot;</span>.equals(msg = scanner.nextLine()))&#123;</span><br><span class="line">            Connection connection = ConnectionUtil.getConnection();</span><br><span class="line">            Channel channel = connection.createChannel();</span><br><span class="line">			</span><br><span class="line">            <span class="keyword">if</span>(msg.startsWith(<span class="string">&quot;a&quot;</span>))&#123;</span><br><span class="line">                channel.queueDeclare(<span class="string">&quot;a&quot;</span>,<span class="keyword">true</span>,<span class="keyword">false</span>,<span class="keyword">false</span>,<span class="keyword">null</span>);</span><br><span class="line">                channel.basicPublish(<span class="string">&quot;ex2&quot;</span>,<span class="string">&quot;a&quot;</span>,<span class="keyword">null</span>,msg.getBytes());</span><br><span class="line">            &#125;<span class="keyword">else</span> <span class="keyword">if</span>(msg.startsWith(<span class="string">&quot;b&quot;</span>))&#123;</span><br><span class="line">                channel.queueDeclare(<span class="string">&quot;b&quot;</span>,<span class="keyword">true</span>,<span class="keyword">false</span>,<span class="keyword">false</span>,<span class="keyword">null</span>);</span><br><span class="line">                channel.basicPublish(<span class="string">&quot;ex2&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="keyword">null</span>,msg.getBytes());</span><br><span class="line">            &#125;</span><br><span class="line">            System.out.println(<span class="string">&quot;发送：&quot;</span> + msg);</span><br><span class="line"></span><br><span class="line">            channel.close();</span><br><span class="line">            connection.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Springboot中使用RabbitMQ"><a href="#Springboot中使用RabbitMQ" class="headerlink" title="Springboot中使用RabbitMQ"></a>Springboot中使用RabbitMQ</h2><ol>
+<li><p>配置yml</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 9001</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    name: producer</span><br><span class="line">  rabbitmq:</span><br><span class="line">    host: 192.168.3.1</span><br><span class="line">    port: 5672</span><br><span class="line">    virtual-host: host1</span><br><span class="line">    username: guest</span><br><span class="line">    password: guest</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>发送信息（主要是重载参数的区别）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Service</span><br><span class="line">public class TestService &#123;</span><br><span class="line"></span><br><span class="line">    @Resource</span><br><span class="line">    private AmqpTemplate amqpTemplate;</span><br><span class="line"></span><br><span class="line">    public void sendMsg(String msg)&#123;</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;1. 发送消息到队列</span><br><span class="line">        amqpTemplate.convertAndSend(&quot;queue1&quot;,msg);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;2. 发送消息到交换机(订阅交换机)</span><br><span class="line">        amqpTemplate.convertAndSend(&quot;ex1&quot;,&quot;&quot;,msg);</span><br><span class="line"></span><br><span class="line">        &#x2F;&#x2F;3. 发送消息到交换机(路由交换机)</span><br><span class="line">        amqpTemplate.convertAndSend(&quot;ex2&quot;,&quot;a&quot;,msg);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>接受信息</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">@Service</span><br><span class="line">&#x2F;&#x2F;@RabbitListener(queues &#x3D; &#123;&quot;queue1&quot;,&quot;queue2&quot;&#125;)</span><br><span class="line">@RabbitListener(queues &#x3D; &quot;queue1&quot;)</span><br><span class="line">public class ReceiveMsgService &#123;</span><br><span class="line"></span><br><span class="line">    @RabbitHandler</span><br><span class="line">    public void receiveMsg(String msg)&#123;</span><br><span class="line">        System.out.println(&quot;接收MSG：&quot;+msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    &#x2F;&#x2F;@RabbitHandler</span><br><span class="line">    &#x2F;&#x2F;public void receiveMsg(byte[] bs)&#123;</span><br><span class="line">    &#x2F;&#x2F;</span><br><span class="line">    &#x2F;&#x2F;&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
 </ol>
 ]]></content>
       <tags>
-        <tag>NIO</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -1110,135 +1184,6 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String CHANNEL_KEY = <span class="string">&quot;channel:1&quot;</span>;<span class="comment">//频道</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String EXIT_COMMAND = <span class="string">&quot;exit&quot;</span>;<span class="comment">//结束程序的消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MyJedisPubSub myJedisPubSub = <span class="keyword">new</span> MyJedisPubSub();<span class="comment">//处理接收消息</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">consumerMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Jedis jedis = JedisPoolUtils.getJedis();</span><br><span class="line">        jedis.subscribe(myJedisPubSub, CHANNEL_KEY);<span class="comment">//第一个参数是处理接收消息，第二个参数是订阅的消息频道</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            consumerMessage();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MessageConsumer messageConsumer = <span class="keyword">new</span> MessageConsumer();</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(messageConsumer, <span class="string">&quot;thread5&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(messageConsumer, <span class="string">&quot;thread6&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyJedisPubSub</span> <span class="keyword">extends</span> <span class="title">JedisPubSub</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">/** JedisPubSub类是一个没有抽象方法的抽象类,里面方法都是一些空实现</span></span><br><span class="line"><span class="comment">     * 所以可以选择需要的方法覆盖,这儿使用的是SUBSCRIBE指令，所以覆盖了onMessage</span></span><br><span class="line"><span class="comment">     * 如果使用PSUBSCRIBE指令，则覆盖onPMessage方法</span></span><br><span class="line"><span class="comment">     * 当然也可以选择BinaryJedisPubSub,同样是抽象类，但方法参数为byte[]</span></span><br><span class="line"><span class="comment">     **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span><span class="params">(String channel, String message)</span> </span>&#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName()+<span class="string">&quot;-接收到消息:channel=&quot;</span> + channel + <span class="string">&quot;,message=&quot;</span> + message);</span><br><span class="line">        <span class="comment">//接收到exit消息后退出</span></span><br><span class="line">        <span class="keyword">if</span> (MessageConsumer.EXIT_COMMAND.equals(message)) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
       <tags>
         <tag>Redis</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Springboot核心注解详解</title>
-    <url>/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h2><h3 id="spring相关"><a href="#spring相关" class="headerlink" title="spring相关"></a>spring相关</h3><blockquote>
-<p><strong>@Configuration</strong></p>
-<p>用于定义配置类，代替以前的xml文件</p>
-</blockquote>
-<blockquote>
-<p><strong>@ComponentScan</strong></p>
-<p>包扫描组件，</p>
-</blockquote>
-<blockquote>
-<p><strong>@Conditional</strong></p>
-<p>为根据代码中的不同条件来注册bean</p>
-</blockquote>
-<blockquote>
-<p><strong>@Import</strong></p>
-<p>把没有被spring容器管理的类添加到Spring容器中</p>
-</blockquote>
-<blockquote>
-<p><strong>@Component</strong></p>
-<p>带有这个注解的类被称为组件，为@Controller，@Service, @Respositoryu的共同注解（这三个注解也就是这个注解的特殊注解），</p>
-</blockquote>
-<a id="more"></a>
-
-<h3 id="SpringBoot相关"><a href="#SpringBoot相关" class="headerlink" title="SpringBoot相关"></a>SpringBoot相关</h3><blockquote>
-<p><strong>@SpringBootApplication</strong></p>
-<p>用于springboot的主类上，标识这是一个springboot应用，是**@Configuration,@EnableAutoConfiguration,@ComponentScan**的共同注解。</p>
-</blockquote>
-<blockquote>
-<p><strong>@EnableAutoConfigration</strong></p>
-<p>允许springboot自动配置注解,尝试根据你添加的jar依赖自动配置你的Spring应用。</p>
-</blockquote>
-<blockquote>
-<p><strong>@SpringbootConfiguration</strong></p>
-<p>等价于@Configuration</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnBean</strong></p>
-<p>条件化创建Bean，@ConditionalOnBean（A.class)，只有上下文（applicationContext）存在A.class时，才注入这个bean</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnMissingBean</strong></p>
-<p>和上面那个相反</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnClass</strong></p>
-<p>顾名思义，只有在存在某个类时候才创建这个bean</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnMissingClass</strong></p>
-<p>和上面那个相反</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnWebApplication</strong></p>
-<p>是web应用时候去配置</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnNotWebApplication</strong></p>
-<p>和上面那个相反</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnProperty</strong></p>
-<p>有指定属性的值才开启这个bean，其有两个属性name以及havingValue</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConditionalOnExpression</strong></p>
-<p>满足SpEL表达式时创建</p>
-</blockquote>
-<blockquote>
-<p><strong>@ConfigurationProperties</strong></p>
-<p>可以把自定义的配做文件映射到实体类的bean中，application.properties中修改那些基础属性映射到这个标注的类中</p>
-</blockquote>
-<blockquote>
-<p><strong>@EnableConfigurationProperties</strong></p>
-<p>任何使用@ConfigurationProperties的beans都会被环境属性配置</p>
-</blockquote>
-<blockquote>
-<p><strong>@AutoConfigAfter/@AutoConfigBefore</strong></p>
-<p>这个配置需要在某个配置配置完成之后（前）进行配置</p>
-</blockquote>
-<h3 id="应用相关"><a href="#应用相关" class="headerlink" title="应用相关"></a>应用相关</h3><blockquote>
-<p><strong>@ResponseBody</strong></p>
-<p>这个方法返回的结果直接写入Http response body中，一般配合@RequestMapping一起使用</p>
-</blockquote>
-<blockquote>
-<p><strong>@RequestMapping</strong></p>
-<p>提供路由信息，负责URL到Controller之间具体函数之间的映射</p>
-</blockquote>
-<blockquote>
-<p><strong>@Autowired</strong></p>
-<p>自动导入依赖的bean</p>
-</blockquote>
-<blockquote>
-<p><strong>@Bean</strong></p>
-<p>往容器中注入bean</p>
-</blockquote>
-<blockquote>
-<p><strong>@Resource(name=”name”,type=”type”)</strong></p>
-<p>没有括号内内容的话，默认byName。与@Autowired干类似的事。</p>
-</blockquote>
-<h3 id="MVC相关"><a href="#MVC相关" class="headerlink" title="MVC相关"></a>MVC相关</h3><blockquote>
-<p><strong>@RequestMapping</strong></p>
-<p>上面有说</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&gt;<span class="meta">@RestController</span></span><br><span class="line">&gt;<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloController</span> </span>&#123;</span><br><span class="line">&gt;<span class="meta">@RequestMapping(value=&quot;/hello&quot;,method= RequestMethod.GET)</span></span><br><span class="line">&gt;<span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="meta">@RequestParam(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">&gt;<span class="keyword">return</span> <span class="string">&quot;id:&quot;</span>+id;</span><br><span class="line">&gt;&#125;</span><br><span class="line">&gt;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中输入地址： localhost:8080/hello?id=1000 ，可以看到如下的结果： </p>
-<p>id:1000</p>
-</blockquote>
-<blockquote>
-<p><strong>@RequestParam</strong></p>
-<p>用于方法参数的前面，是接收普通参数的注解，当@GetMapping带参数时，获取其参数，可以在required=false设置没参数时候也不会报错，也可以设置默认值</p>
-</blockquote>
-<blockquote>
-<p><strong>@GetMapping</strong></p>
-<p>组合注解，是 @RequestMapping(method = RequestMethod.GET) 的缩写，同样的还有@PostMapping</p>
-</blockquote>
-<blockquote>
-<p><strong>@PathVaribale</strong> 获取url中的数据</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&gt;<span class="meta">@RestController</span></span><br><span class="line">&gt;<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloController</span> </span>&#123;</span><br><span class="line">&gt;<span class="meta">@RequestMapping(value=&quot;/hello/&#123;id&#125;/&#123;name&#125;&quot;,method= RequestMethod.GET)</span></span><br><span class="line">&gt;<span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id,<span class="meta">@PathVariable(&quot;name&quot;)</span> String name)</span></span>&#123;</span><br><span class="line">&gt;<span class="keyword">return</span> <span class="string">&quot;id:&quot;</span>+id+<span class="string">&quot; name:&quot;</span>+name;</span><br><span class="line">&gt;&#125;</span><br><span class="line">&gt;&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在浏览器中输入地址： localhost：8080/hello/100/helloworld 然后会在html页面上打印出：</p>
-<p>id：100 name：helloworld</p>
-</blockquote>
-]]></content>
-      <tags>
-        <tag>Spring</tag>
       </tags>
   </entry>
   <entry>
@@ -1413,6 +1358,135 @@
       </tags>
   </entry>
   <entry>
+    <title>Springboot核心注解详解</title>
+    <url>/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</url>
+    <content><![CDATA[<h2 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h2><h3 id="spring相关"><a href="#spring相关" class="headerlink" title="spring相关"></a>spring相关</h3><blockquote>
+<p><strong>@Configuration</strong></p>
+<p>用于定义配置类，代替以前的xml文件</p>
+</blockquote>
+<blockquote>
+<p><strong>@ComponentScan</strong></p>
+<p>包扫描组件，</p>
+</blockquote>
+<blockquote>
+<p><strong>@Conditional</strong></p>
+<p>为根据代码中的不同条件来注册bean</p>
+</blockquote>
+<blockquote>
+<p><strong>@Import</strong></p>
+<p>把没有被spring容器管理的类添加到Spring容器中</p>
+</blockquote>
+<blockquote>
+<p><strong>@Component</strong></p>
+<p>带有这个注解的类被称为组件，为@Controller，@Service, @Respositoryu的共同注解（这三个注解也就是这个注解的特殊注解），</p>
+</blockquote>
+<a id="more"></a>
+
+<h3 id="SpringBoot相关"><a href="#SpringBoot相关" class="headerlink" title="SpringBoot相关"></a>SpringBoot相关</h3><blockquote>
+<p><strong>@SpringBootApplication</strong></p>
+<p>用于springboot的主类上，标识这是一个springboot应用，是**@Configuration,@EnableAutoConfiguration,@ComponentScan**的共同注解。</p>
+</blockquote>
+<blockquote>
+<p><strong>@EnableAutoConfigration</strong></p>
+<p>允许springboot自动配置注解,尝试根据你添加的jar依赖自动配置你的Spring应用。</p>
+</blockquote>
+<blockquote>
+<p><strong>@SpringbootConfiguration</strong></p>
+<p>等价于@Configuration</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnBean</strong></p>
+<p>条件化创建Bean，@ConditionalOnBean（A.class)，只有上下文（applicationContext）存在A.class时，才注入这个bean</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnMissingBean</strong></p>
+<p>和上面那个相反</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnClass</strong></p>
+<p>顾名思义，只有在存在某个类时候才创建这个bean</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnMissingClass</strong></p>
+<p>和上面那个相反</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnWebApplication</strong></p>
+<p>是web应用时候去配置</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnNotWebApplication</strong></p>
+<p>和上面那个相反</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnProperty</strong></p>
+<p>有指定属性的值才开启这个bean，其有两个属性name以及havingValue</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConditionalOnExpression</strong></p>
+<p>满足SpEL表达式时创建</p>
+</blockquote>
+<blockquote>
+<p><strong>@ConfigurationProperties</strong></p>
+<p>可以把自定义的配做文件映射到实体类的bean中，application.properties中修改那些基础属性映射到这个标注的类中</p>
+</blockquote>
+<blockquote>
+<p><strong>@EnableConfigurationProperties</strong></p>
+<p>任何使用@ConfigurationProperties的beans都会被环境属性配置</p>
+</blockquote>
+<blockquote>
+<p><strong>@AutoConfigAfter/@AutoConfigBefore</strong></p>
+<p>这个配置需要在某个配置配置完成之后（前）进行配置</p>
+</blockquote>
+<h3 id="应用相关"><a href="#应用相关" class="headerlink" title="应用相关"></a>应用相关</h3><blockquote>
+<p><strong>@ResponseBody</strong></p>
+<p>这个方法返回的结果直接写入Http response body中，一般配合@RequestMapping一起使用</p>
+</blockquote>
+<blockquote>
+<p><strong>@RequestMapping</strong></p>
+<p>提供路由信息，负责URL到Controller之间具体函数之间的映射</p>
+</blockquote>
+<blockquote>
+<p><strong>@Autowired</strong></p>
+<p>自动导入依赖的bean</p>
+</blockquote>
+<blockquote>
+<p><strong>@Bean</strong></p>
+<p>往容器中注入bean</p>
+</blockquote>
+<blockquote>
+<p><strong>@Resource(name=”name”,type=”type”)</strong></p>
+<p>没有括号内内容的话，默认byName。与@Autowired干类似的事。</p>
+</blockquote>
+<h3 id="MVC相关"><a href="#MVC相关" class="headerlink" title="MVC相关"></a>MVC相关</h3><blockquote>
+<p><strong>@RequestMapping</strong></p>
+<p>上面有说</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&gt;<span class="meta">@RestController</span></span><br><span class="line">&gt;<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloController</span> </span>&#123;</span><br><span class="line">&gt;<span class="meta">@RequestMapping(value=&quot;/hello&quot;,method= RequestMethod.GET)</span></span><br><span class="line">&gt;<span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="meta">@RequestParam(&quot;id&quot;)</span> Integer id)</span></span>&#123;</span><br><span class="line">&gt;<span class="keyword">return</span> <span class="string">&quot;id:&quot;</span>+id;</span><br><span class="line">&gt;&#125;</span><br><span class="line">&gt;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中输入地址： localhost:8080/hello?id=1000 ，可以看到如下的结果： </p>
+<p>id:1000</p>
+</blockquote>
+<blockquote>
+<p><strong>@RequestParam</strong></p>
+<p>用于方法参数的前面，是接收普通参数的注解，当@GetMapping带参数时，获取其参数，可以在required=false设置没参数时候也不会报错，也可以设置默认值</p>
+</blockquote>
+<blockquote>
+<p><strong>@GetMapping</strong></p>
+<p>组合注解，是 @RequestMapping(method = RequestMethod.GET) 的缩写，同样的还有@PostMapping</p>
+</blockquote>
+<blockquote>
+<p><strong>@PathVaribale</strong> 获取url中的数据</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">&gt;<span class="meta">@RestController</span></span><br><span class="line">&gt;<span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloController</span> </span>&#123;</span><br><span class="line">&gt;<span class="meta">@RequestMapping(value=&quot;/hello/&#123;id&#125;/&#123;name&#125;&quot;,method= RequestMethod.GET)</span></span><br><span class="line">&gt;<span class="function"><span class="keyword">public</span> String <span class="title">sayHello</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span> Integer id,<span class="meta">@PathVariable(&quot;name&quot;)</span> String name)</span></span>&#123;</span><br><span class="line">&gt;<span class="keyword">return</span> <span class="string">&quot;id:&quot;</span>+id+<span class="string">&quot; name:&quot;</span>+name;</span><br><span class="line">&gt;&#125;</span><br><span class="line">&gt;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在浏览器中输入地址： localhost：8080/hello/100/helloworld 然后会在html页面上打印出：</p>
+<p>id：100 name：helloworld</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>创建型模式——单例模式</title>
     <url>/2020/11/16/%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
@@ -1540,93 +1614,6 @@
       </tags>
   </entry>
   <entry>
-    <title>设计模式设计原则</title>
-    <url>/2020/11/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
-    <content><![CDATA[<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
-<li>找出应用中的变化之处，独立出来，不要和不需要编号的代码混在一起</li>
-<li>面向接口编程而不是面向实现编程</li>
-<li>为了交互对象的松耦合设计</li>
-</ul>
-<a id="more"></a>
-
-<ol>
-<li><p>单一职责原则</p>
-<ul>
-<li><p>一个类，应当只有一个引起它变化的原因；即一个类应该只有一个职责。</p>
-<p>■ 降低类的复杂性；</p>
-<p>■ 提高类的可读性；</p>
-<p>■ 提高代码的可维护性和复用性；</p>
-<p>■ 降低因变更引起的风险。</p>
-</li>
-</ul>
-</li>
-<li><p>接口隔离原则</p>
-<ul>
-<li>客户端不应该依赖它不需要的接口。</li>
-<li>类间的依赖关系应该建立在最小的接口上。</li>
-</ul>
-</li>
-<li><p>依赖倒置原则（依赖倒置原则更加精确的定义就是“面向接口编程”）</p>
-<ul>
-<li>高层模块不应该依赖低层模块，两者都依赖其抽象；</li>
-<li>抽象不依赖细节；</li>
-<li>细节应该依赖于抽象。</li>
-</ul>
-</li>
-<li><p>开闭原则</p>
-<p>一个软件实体应当对扩展开放，对修改关闭。</p>
-<ul>
-<li>提高复用性。</li>
-<li>提高可维护性。</li>
-<li>提高灵活性。</li>
-<li>易于测试。</li>
-</ul>
-</li>
-<li><p>里氏替换原则</p>
-<p>如果对一个类型为S的对象o1，都有类型为T的对象o2，使得以S定义的所有程序P在所有的对象o1都代换成o2时，程序P的行为没有发生变化，那么类型T是类型S的子类型。（请说人话）</p>
-<ul>
-<li>子类必须完全实现父类的方法；</li>
-<li>子类可以有自己的个性；</li>
-<li>覆盖或实现父类的方法时输入参数可以被放大；</li>
-<li>覆盖或实现父类的方法时输出结果可以被缩小。（子类不能使用一个低访问权限的方法覆盖基类中的高访问权限的方法。）</li>
-</ul>
-</li>
-<li><p>迪米特法则（最少知识原则）</p>
-<p>是一个对象应当对其他对象尽可能少的了解</p>
-</li>
-<li><p>合成复用原则</p>
-<p>使用一个其他类的方法时，<strong>能使用组合/聚合，就不要用继承</strong></p>
-<p><code>组合：class B中new A</code></p>
-<p><code>聚合: class B中set()方法调用A</code></p>
-<p>继承（抽象类）是 is-a </p>
-<p>组合（接口）是has-a </p>
-<p>继承之后重写并新增是is-like -a</p>
-</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>螺旋矩阵</title>
-    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
-    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
-<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
-<blockquote>
-<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
-</blockquote>
-<a id="more"></a>
-
-<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
-<p>然后递归下一圈。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -1705,57 +1692,90 @@
       </tags>
   </entry>
   <entry>
-    <title>转发与重定向</title>
-    <url>/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</url>
-    <content><![CDATA[<h1 id="转发与重定向"><a href="#转发与重定向" class="headerlink" title="转发与重定向"></a>转发与重定向</h1><p> 转发和重定向都是作为实现页面跳转的方法，他们的区别</p>
-<ul>
-<li><p>转发：</p>
-<ul>
-<li><p>由服务器进行的页面跳转，一个对oneServlet的请求，服务器使用twoServlet响应</p>
-</li>
-<li><blockquote>
-<p>request.getRequestDispatcher(“/目标地址”).forward(request,response);</p>
+    <title>螺旋矩阵</title>
+    <url>/2020/11/12/%E8%9E%BA%E6%97%8B%E7%9F%A9%E9%98%B5/</url>
+    <content><![CDATA[<h3 id="螺旋矩阵"><a href="#螺旋矩阵" class="headerlink" title="螺旋矩阵"></a>螺旋矩阵</h3><p>一个 n<em>n</em> 行 n<em>n</em> 列的螺旋矩阵可由如下方法生成：</p>
+<p>从矩阵的左上角（第 11 行第 11 列）出发，初始时向右移动；如果前方是未曾经过的格子，则继续前进，否则右转；重复上述操作直至经过矩阵中所有格子。根据经过顺序，在格子中依次填入 1, 2, 3, … , n^21,2,3,…,<em>n</em>2，便构成了一个螺旋矩阵。</p>
+<blockquote>
+<p>下图是一个 <strong>n=4</strong> 时的螺旋矩阵。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1     2     3     4</span><br><span class="line">12    13    14     5</span><br><span class="line">11    16    15     6</span><br><span class="line">10     9     8     7</span><br></pre></td></tr></table></figure>
 </blockquote>
-</li>
-<li><p>特点：</p>
-<ul>
-<li>地址栏不发生变化，显示的是上一个页面的地址</li>
-<li>只有一次请求</li>
-<li>请求域中的数据不会丢失</li>
-<li>根目录：<a href="http://localhost:8080/%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80/%EF%BC%8C%E5%8C%85%E5%90%AB%E4%BA%86%E9%A1%B9%E7%9B%AE%E7%9A%84%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80">http://localhost:8080/项目地址/，包含了项目的访问地址</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>重定向：</p>
-<ul>
-<li><p>由浏览器进行的页面跳转，浏览器对服务器1进行访问，服务器1响应返回让浏览器进行访问服务器2的操作</p>
-</li>
-<li><blockquote>
-<p>response.sendRedirect(“要跳转的地址”)</p>
-</blockquote>
-<ul>
-<li>地址栏显示新的地址</li>
-<li>请求2次</li>
-<li>请求域中的数据会丢失</li>
-<li>根目录：<a href="http://localhost:8080/">http://localhost:8080/</a> 没有项目的名字</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><p>问：什么时候使用转发，什么时候使用重定向？</p>
-<pre><code>如果要保留请求域中的数据，使用转发，否则使用重定向。
+<a id="more"></a>
 
-以后访问数据库，增删改使用重定向，查询使用转发。</code></pre>
-</li>
-<li><p>问：转发或重定向后续的代码是否还会运行？</p>
-<pre><code>无论转发或重定向后续的代码都会执行</code></pre>
+<h3 id="solution"><a href="#solution" class="headerlink" title="solution"></a>solution</h3><p>一圈一圈的找，如果不在这一圈，就把最外围的一圈算上（4*（n-1）），</p>
+<p>然后递归下一圈。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpiralMatrix</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">find</span><span class="params">(<span class="keyword">int</span> n ,<span class="keyword">int</span> i, <span class="keyword">int</span> j )</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(i==<span class="number">1</span>) <span class="keyword">return</span> j;</span><br><span class="line">        <span class="keyword">if</span>(j==n) <span class="keyword">return</span> n+i-<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(i==n) <span class="keyword">return</span> <span class="number">3</span>*n-<span class="number">2</span> -j+<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span>(j==<span class="number">1</span>) <span class="keyword">return</span> <span class="number">4</span>*n - i -<span class="number">2</span>;</span><br><span class="line">        <span class="keyword">return</span> find(n-<span class="number">2</span>,i-<span class="number">1</span>,j-<span class="number">1</span>)+<span class="number">4</span>*(n-<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpiralMatrix a = <span class="keyword">new</span> SpiralMatrix();</span><br><span class="line">        System.out.println(a.find(<span class="number">5</span>, <span class="number">3</span>, <span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>设计模式设计原则</title>
+    <url>/2020/11/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99/</url>
+    <content><![CDATA[<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><ul>
+<li>找出应用中的变化之处，独立出来，不要和不需要编号的代码混在一起</li>
+<li>面向接口编程而不是面向实现编程</li>
+<li>为了交互对象的松耦合设计</li>
+</ul>
+<a id="more"></a>
+
+<ol>
+<li><p>单一职责原则</p>
+<ul>
+<li><p>一个类，应当只有一个引起它变化的原因；即一个类应该只有一个职责。</p>
+<p>■ 降低类的复杂性；</p>
+<p>■ 提高类的可读性；</p>
+<p>■ 提高代码的可维护性和复用性；</p>
+<p>■ 降低因变更引起的风险。</p>
 </li>
 </ul>
-<p>​          </p>
+</li>
+<li><p>接口隔离原则</p>
+<ul>
+<li>客户端不应该依赖它不需要的接口。</li>
+<li>类间的依赖关系应该建立在最小的接口上。</li>
+</ul>
+</li>
+<li><p>依赖倒置原则（依赖倒置原则更加精确的定义就是“面向接口编程”）</p>
+<ul>
+<li>高层模块不应该依赖低层模块，两者都依赖其抽象；</li>
+<li>抽象不依赖细节；</li>
+<li>细节应该依赖于抽象。</li>
+</ul>
+</li>
+<li><p>开闭原则</p>
+<p>一个软件实体应当对扩展开放，对修改关闭。</p>
+<ul>
+<li>提高复用性。</li>
+<li>提高可维护性。</li>
+<li>提高灵活性。</li>
+<li>易于测试。</li>
+</ul>
+</li>
+<li><p>里氏替换原则</p>
+<p>如果对一个类型为S的对象o1，都有类型为T的对象o2，使得以S定义的所有程序P在所有的对象o1都代换成o2时，程序P的行为没有发生变化，那么类型T是类型S的子类型。（请说人话）</p>
+<ul>
+<li>子类必须完全实现父类的方法；</li>
+<li>子类可以有自己的个性；</li>
+<li>覆盖或实现父类的方法时输入参数可以被放大；</li>
+<li>覆盖或实现父类的方法时输出结果可以被缩小。（子类不能使用一个低访问权限的方法覆盖基类中的高访问权限的方法。）</li>
+</ul>
+</li>
+<li><p>迪米特法则（最少知识原则）</p>
+<p>是一个对象应当对其他对象尽可能少的了解</p>
+</li>
+<li><p>合成复用原则</p>
+<p>使用一个其他类的方法时，<strong>能使用组合/聚合，就不要用继承</strong></p>
+<p><code>组合：class B中new A</code></p>
+<p><code>聚合: class B中set()方法调用A</code></p>
+<p>继承（抽象类）是 is-a </p>
+<p>组合（接口）是has-a </p>
+<p>继承之后重写并新增是is-like -a</p>
+</li>
+</ol>
 ]]></content>
       <tags>
-        <tag>web</tag>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -1811,78 +1831,57 @@
       </tags>
   </entry>
   <entry>
-    <title>人工智能基础</title>
-    <url>/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</url>
-    <content><![CDATA[<h1 id="人工智能基础复习材料"><a href="#人工智能基础复习材料" class="headerlink" title="人工智能基础复习材料"></a>人工智能基础复习材料</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="人工智能-Artificial-Intelligence-："><a href="#人工智能-Artificial-Intelligence-：" class="headerlink" title="人工智能(Artificial Intelligence)："></a>人工智能(Artificial Intelligence)：</h3><p> 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。</p>
-<a id="more"></a>
-
-<h3 id="机器学习-Machine-Learning"><a href="#机器学习-Machine-Learning" class="headerlink" title="机器学习(Machine Learning)"></a>机器学习(Machine Learning)</h3><p>机器学习是一门专门研究计算机模拟或实现人类的学习行为，重新组织已有的知识结构，并获取新的知 识和技能，进而使之不断改善自身性能的学科。 </p>
-<h3 id="深度学习-Deep-Learning"><a href="#深度学习-Deep-Learning" class="headerlink" title="深度学习(Deep Learning)"></a>深度学习(Deep Learning)</h3><p>深度学习一般采用多层非线性变换，通过对数据特征的自动抽象和逐层提取，来实现分类或回归的学习 目的。 </p>
-<h3 id="物联网-IoT-Internet-of-things"><a href="#物联网-IoT-Internet-of-things" class="headerlink" title="物联网(IoT, Internet of things)"></a>物联网(IoT, Internet of things)</h3><p>物联网即“万物相连的互联网”，是互联网基础上的延伸和扩展的网络，将各种信息传感设备与互联网 结合起来而形成的一个巨大网络，实现在任何时间、任何地点，人、机、物的互联互通。 </p>
-<h3 id="专家系统-Expert-system"><a href="#专家系统-Expert-system" class="headerlink" title="专家系统(Expert system)"></a>专家系统(Expert system)</h3><p>专家系统是一个智能计算机程序系统，其内部含有大量的某个领域专家水平的知识与经验，能够利用人 类专家的知识和解决问题的方法来处理该领域问题。也就是说，专家系统是一个具有大量的专门知识与经验 的程序系统，它应用人工智能技术和计算机技术，根据某领域一个或多个专家提供的知识和经验，进行推理 和判断，模拟人类专家的决策过程，以便解决那些需要人类专家处理的复杂问题，简而言之，专家系统是一 种模拟人类专家解决领域问题的计算机程序系统。 </p>
-<h3 id="有监督学习-Supervised-Learning"><a href="#有监督学习-Supervised-Learning" class="headerlink" title="有监督学习(Supervised Learning)"></a>有监督学习(Supervised Learning)</h3><p>训练数据由一组训练实例组成。在监督学习中，每一个例子都是一对由一个输入对象（通常是一个向量） 和一个期望的输出值（也被称为监督信号）。有监督学习算法分析训练数据，并产生一个推断的功能，它可 以用于映射新的例子。一个最佳的方案将允许该算法正确地在标签不可见的情况下确定类标签。 用已知某种或某些特性的样本作为训练集，以建立一个数学模型(如模式识别中的判别模型，人工神经 网络法中的权重模型等)，再用已建立的模型来预测未知样本，此种方法称为有监督学习。是最常见的机器 学习方法。 </p>
-<h3 id="无监督学习-Unsupervised-Learning"><a href="#无监督学习-Unsupervised-Learning" class="headerlink" title="无监督学习(Unsupervised Learning)"></a>无监督学习(Unsupervised Learning)</h3><p>根据类别未知(没有被标记)的训练样本解决模式识别中的各种问题，称之为无监督学习。 不同于有监督学习，不需要用历史经验知识作为指导，，而是不断地自主从数据本身特性认知数据的特 征，自主归纳和巩固，形成对知识的认知结果。 </p>
-<h3 id="人工神经网络-ANN-Artificial-Neural-Network"><a href="#人工神经网络-ANN-Artificial-Neural-Network" class="headerlink" title="人工神经网络(ANN, Artificial Neural Network)"></a>人工神经网络(ANN, Artificial Neural Network)</h3><p>也简称为神经网络(NN)，是模仿生物脑神经的工作原理，由大量简单的处理单元广泛互联形成复杂的 网络系统，从而对模糊的随机性的非线性数据表现出强大的逼近能力。 </p>
-<h3 id="代价函数-lost-function"><a href="#代价函数-lost-function" class="headerlink" title="代价函数(lost function)"></a>代价函数(lost function)</h3><p>(或者损失函数 loss function) 代价函数或损失函数是衡量学习模型的预测值与实际值之间误差的函数。这个误差被称为模型误差，函 数值越小表示误差越小，也就意味着预测值越接近实际值，认为所构建的模型性能越好。 二、各章节算法等信息补充 生成与测试范式 解决问题的直接方法是提出可能的解，然后检查每个提议，看是否有提议构成了解。 </p>
-<h2 id="算法与源码"><a href="#算法与源码" class="headerlink" title="算法与源码"></a>算法与源码</h2><h3 id="n皇后回溯解法"><a href="#n皇后回溯解法" class="headerlink" title="n皇后回溯解法"></a>n皇后回溯解法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> List&lt;List&lt;String&gt;&gt; solveNQueens(<span class="keyword">int</span> n) &#123;</span><br><span class="line">        <span class="keyword">char</span>[][] chess = <span class="keyword">new</span> <span class="keyword">char</span>[n][n];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">                chess[i][j] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">        List&lt;List&lt;String&gt;&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        solve(res, chess, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">solve</span><span class="params">(List&lt;List&lt;String&gt;&gt; res, <span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (row == chess.length) &#123;</span><br><span class="line">            res.add(construct(chess));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; chess.length; col++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (valid(chess, row, col)) &#123;</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;Q&#x27;</span>;</span><br><span class="line">                solve(res, chess, row + <span class="number">1</span>);</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//row表示第几行，col表示第几列</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">valid</span><span class="params">(<span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row, <span class="keyword">int</span> col)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//判断当前列有没有皇后,因为他是一行一行往下走的，</span></span><br><span class="line">        <span class="comment">//我们只需要检查走过的行数即可，通俗一点就是判断当前</span></span><br><span class="line">        <span class="comment">//坐标位置的上面有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; row; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][col] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的右上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col + <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &lt; chess.length; i--, j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的左上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col - <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &gt;= <span class="number">0</span>; i--, j--) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//把数组转为list</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">construct</span><span class="params">(<span class="keyword">char</span>[][] chess)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; path = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; chess.length; i++) &#123;</span><br><span class="line">            path.add(<span class="keyword">new</span> String(chess[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> path;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="贪婪-贪心算法"><a href="#贪婪-贪心算法" class="headerlink" title="贪婪(贪心算法)"></a>贪婪(贪心算法)</h3><p> 贪心算法(Greedy Algorithm)，又称贪婪算法，是一种<strong>在每一步选择中都采取在当前状态下最好或最 优(即最有利)的选择</strong>，从而希望导致结果是最好或最优的算法。比如在旅行销售员问题中，如果销售员每次 都选择最近的城市，那这就是一种贪心算法。Dijkstra 算法就算采用了贪心策略的实例，每次扩展最短的节 点，更新距离表。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择。也就是说，不从 整体最优上加以考虑，做出的只是在某种意义上的局部最优解</p>
-<h3 id="TSP-旅行商问题-TSP-最短路径问题"><a href="#TSP-旅行商问题-TSP-最短路径问题" class="headerlink" title="TSP 旅行商问题(TSP 最短路径问题)"></a>TSP 旅行商问题(TSP 最短路径问题)</h3><p>(Travelling Salesman Problem, TSP)是这样一个问题：给定一系列城 市和每对城市之间的距离，求解访问每一座城市一次并回到起始城市的最短回路。它是组合优化中的一个 NP Hard 问题，在运筹学和理论计算机科学中非常重要。TSP 的暴力解法时间复杂度是 O(n!)，目前现有的 非暴力算法只能无限逼近其最优解，而不能保证得到通解</p>
-<h3 id="盲目搜索"><a href="#盲目搜索" class="headerlink" title="盲目搜索"></a>盲目搜索</h3><h4 id="DFS"><a href="#DFS" class="headerlink" title="DFS"></a>DFS</h4><p> 实现借助 Stack/递归 在树很深、分支因子不大、解出现的位置较深的情况下适合 </p>
-<h4 id="BFS"><a href="#BFS" class="headerlink" title="BFS"></a>BFS</h4><p>实现借助 Queue 在分支因子很大，解出现的位置合理深度、路径不是非常深的情况下适合</p>
-<h4 id="DFS-ID"><a href="#DFS-ID" class="headerlink" title="DFS-ID"></a>DFS-ID</h4><p>迭代加深的深度优先搜索 实质上就是限定下界的深度优先搜索。即首先允许深度优先搜索 K 层搜索树，若没有发现可行解，再 将 K+1 后重复以上步骤搜索，直到搜索到可行解。在迭代加深搜索的算法中，连续的深度优先搜索被引入， 每一个深度约束逐次加 1，直到搜索到目标为止。迭代加深搜索算法就是仿广度优先搜索的深度优先搜索。 既能满足深度优先搜索的线性存储要求，又能保证发现一个最小深度的目标结点。从实际应用来看，迭代加 深搜索的效果比较好，并不比广度优先搜索慢很多，但是空间复杂度却与深度优先搜索相同，比广度优先搜 索小很多，在一些层次遍历的题目中，迭代加深不失为一种好方法 </p>
-<h3 id="知情搜索-分支定界法"><a href="#知情搜索-分支定界法" class="headerlink" title="知情搜索-分支定界法"></a>知情搜索-分支定界法</h3><p> 代价评估函数 f(n) = g(n) + h*(n)表示从初始节点 S 到目标节点 n 的代价，g(n):从初始节点 S 到目标 节点 n 的距离，h*(n)从当前位置 n 经过最短路径到达 G 的剩余距离，然而在过程中无法直接求出 h*(n)， 因此使用一个估计值 h(n)代替，只有对所有节点 h(n)&lt;=h*(n)才有意义，此时 h(n)被视为可接受的启发， 因此最终评估函数是 f(n) = g(n) + h(n) </p>
-<h4 id="UCS"><a href="#UCS" class="headerlink" title="UCS"></a>UCS</h4><p>一致代价搜索（普通的分支定界） 一致代价搜索的特点是 f(n)=g(n)，也就是说对任意 n 都有 h(n)=0，非常类似 BFS，不过 BFS 是努力 找一条通往目标的路径，而 UCS 是努力找一条最优路径。 </p>
-<h4 id="A"><a href="#A" class="headerlink" title="A*"></a>A*</h4><p> A*算法实际上是综合 BFS、Dijkstra、最佳优先搜索算法的特点于一身的（或者说是采用了剩余距离估 计值和动态规划的分支定界法）。f(n)是节点 n 的综合优先级。当我们选择下一个要遍历的节点时，我们总 会选取综合优先级最高（值最小）的节点。g(n) 是节点 n 距离起点的代价。h(n)是节点 n 距离终点的预计 代价，这也就是 A<em>算法的启发函数。关于启发函数我们在下面详细讲解。A</em>算法在运算过程中，每次从优 先队列中选取 f(n)值最小（优先级最高）的节点作为下一个待遍历的节点。 另外，A*算法使用两个集合来表示待遍历的节点，与已经遍历过的节点，这通常称之为 open_set 和 close_set。 </p>
-<p>完整A*算法过程</p>
+    <title>转发与重定向</title>
+    <url>/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</url>
+    <content><![CDATA[<h1 id="转发与重定向"><a href="#转发与重定向" class="headerlink" title="转发与重定向"></a>转发与重定向</h1><p> 转发和重定向都是作为实现页面跳转的方法，他们的区别</p>
 <ul>
-<li><p>初始化openSet和closeSet</p>
-</li>
-<li><p>把起点加入openSet中</p>
-</li>
-<li><p>如果openSet!=null,就从openSet中选择第一个节点n：</p>
+<li><p>转发：</p>
 <ul>
-<li><p>如果n为终点</p>
-<p>就从双面开始逐步最终parent节点，一直到达起点，返回结果路径，算法结束</p>
+<li><p>由服务器进行的页面跳转，一个对oneServlet的请求，服务器使用twoServlet响应</p>
 </li>
-<li><p>如果n不是终点</p>
-<p>把节点n从openSet中移除，并加入到closeSet中</p>
-<p>遍历n节点的所有临近节点 </p>
+<li><blockquote>
+<p>request.getRequestDispatcher(“/目标地址”).forward(request,response);</p>
+</blockquote>
+</li>
+<li><p>特点：</p>
 <ul>
-<li>如果临近节点在closeSet中，就跳过，选择下一个临近节点</li>
-<li>如果临近节点m不在openSet中<ol>
-<li>设置m的parent节点为n</li>
-<li>计算m到终点的代价f（n）</li>
-<li>把m节点加入到openSet中</li>
-</ol>
-</li>
-<li>对openSet中的节点按照代价从小到大的排序（openSet可以使用优先队列优化）</li>
+<li>地址栏不发生变化，显示的是上一个页面的地址</li>
+<li>只有一次请求</li>
+<li>请求域中的数据不会丢失</li>
+<li>根目录：<a href="http://localhost:8080/%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80/%EF%BC%8C%E5%8C%85%E5%90%AB%E4%BA%86%E9%A1%B9%E7%9B%AE%E7%9A%84%E8%AE%BF%E9%97%AE%E5%9C%B0%E5%9D%80">http://localhost:8080/项目地址/，包含了项目的访问地址</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><p>返回找不到路径的错误</p>
+<li><p>重定向：</p>
+<ul>
+<li><p>由浏览器进行的页面跳转，浏览器对服务器1进行访问，服务器1响应返回让浏览器进行访问服务器2的操作</p>
+</li>
+<li><blockquote>
+<p>response.sendRedirect(“要跳转的地址”)</p>
+</blockquote>
+<ul>
+<li>地址栏显示新的地址</li>
+<li>请求2次</li>
+<li>请求域中的数据会丢失</li>
+<li>根目录：<a href="http://localhost:8080/">http://localhost:8080/</a> 没有项目的名字</li>
+</ul>
 </li>
 </ul>
-<h4 id="八数码"><a href="#八数码" class="headerlink" title="八数码"></a>八数码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">slidingPuzzle</span><span class="params">(<span class="keyword">int</span>[][] board)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> R = board.length, C = board[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">int</span> sr = <span class="number">0</span>, sc = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Find sr, sc</span></span><br><span class="line">        search:<span class="comment">//跳转</span></span><br><span class="line">            <span class="keyword">for</span> (sr = <span class="number">0</span>; sr &lt; R; sr++)</span><br><span class="line">                <span class="keyword">for</span> (sc = <span class="number">0</span>; sc &lt; C; sc++)</span><br><span class="line">                    <span class="keyword">if</span> (board[sr][sc] == <span class="number">0</span>)</span><br><span class="line">                        <span class="keyword">break</span> search;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[][] directions = <span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;-<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">0</span>, -<span class="number">1</span>&#125;&#125;;</span><br><span class="line">        PriorityQueue&lt;Node&gt; heap = <span class="keyword">new</span> PriorityQueue&lt;Node&gt;((a, b) -&gt;</span><br><span class="line">            (a.heuristic + a.depth) - (b.heuristic + b.depth));</span><br><span class="line">        Node start = <span class="keyword">new</span> Node(board, sr, sc, <span class="number">0</span>);</span><br><span class="line">        heap.add(start);</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Integer&gt; cost = <span class="keyword">new</span> HashMap();</span><br><span class="line">        cost.put(start.boardstring, <span class="number">9999999</span>);</span><br><span class="line"></span><br><span class="line">        String target = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);<span class="comment">//这里改成目标</span></span><br><span class="line">        String targetWrong = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!heap.isEmpty()) &#123;</span><br><span class="line">            Node node = heap.poll();</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(target))</span><br><span class="line">                <span class="keyword">return</span> node.depth;</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(targetWrong))</span><br><span class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.depth + node.heuristic &gt; cost.get(node.boardstring))</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span>[] di: directions) &#123;</span><br><span class="line">                <span class="keyword">int</span> nei_r = di[<span class="number">0</span>] + node.zero_r;</span><br><span class="line">                <span class="keyword">int</span> nei_c = di[<span class="number">1</span>] + node.zero_c;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 如果邻居不在版上，或者行列错误</span></span><br><span class="line">                <span class="keyword">if</span> ((Math.abs(nei_r - node.zero_r) + Math.abs(nei_c - node.zero_c) != <span class="number">1</span>) ||</span><br><span class="line">                        nei_r &lt; <span class="number">0</span> || nei_r &gt;= R || nei_c &lt; <span class="number">0</span> || nei_c &gt;= C)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span>[][] newboard = <span class="keyword">new</span> <span class="keyword">int</span>[R][C];</span><br><span class="line">                <span class="keyword">int</span> t = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span>[] row: node.board)</span><br><span class="line">                    newboard[t++] = row.clone();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 在新版上交换元素</span></span><br><span class="line">                newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];</span><br><span class="line">                newboard[nei_r][nei_c] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                Node nei = <span class="keyword">new</span> Node(newboard, nei_r, nei_c, node.depth+<span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (nei.depth + nei.heuristic &gt;= cost.getOrDefault(nei.boardstring, <span class="number">9999999</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                heap.add(nei);</span><br><span class="line">                cost.put(nei.boardstring, nei.depth + nei.heuristic);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[][] board;</span><br><span class="line">    String boardstring;</span><br><span class="line">    <span class="keyword">int</span> heuristic;</span><br><span class="line">    <span class="keyword">int</span> zero_r;</span><br><span class="line">    <span class="keyword">int</span> zero_c;</span><br><span class="line">    <span class="keyword">int</span> depth;</span><br><span class="line">    Node(<span class="keyword">int</span>[][] B, <span class="keyword">int</span> zr, <span class="keyword">int</span> zc, <span class="keyword">int</span> d) &#123;</span><br><span class="line">        board = B;</span><br><span class="line">        boardstring = Arrays.deepToString(board);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//计算启发（heuristic）式</span></span><br><span class="line">        heuristic = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> R = B.length, C = B[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> r = <span class="number">0</span>; r &lt; R; ++r)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> c = <span class="number">0</span>; c &lt; C; ++c) &#123;</span><br><span class="line">                <span class="keyword">if</span> (board[r][c] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">int</span> v = (board[r][c] + R*C - <span class="number">1</span>) % (R*C);</span><br><span class="line">                <span class="comment">// v/C, v%C: board[r][c]应该到哪里的最短路径（用于评估函数</span></span><br><span class="line">                ）</span><br><span class="line">                heuristic += Math.abs(r - v/C) + Math.abs(c - v%C);</span><br><span class="line">            &#125;</span><br><span class="line">        heuristic /= <span class="number">2</span>;</span><br><span class="line">        zero_r = zr;</span><br><span class="line">        zero_c = zc;</span><br><span class="line">        depth = d;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h3 id="博弈树"><a href="#博弈树" class="headerlink" title="博弈树"></a>博弈树</h3><p> 极大极小算法 python 实现(以解决 tic tac toe 井字棋问题为例) evaluate 方法功能是是对当前棋盘状态相对于 player 打分，分数越高对 player 越有利 </p>
-<h4 id="极小极大算法"><a href="#极小极大算法" class="headerlink" title="极小极大算法"></a>极小极大算法</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MaxMinSearch</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxMinSearch</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;<span class="comment">//一维化二维平面x=graph.len/len;y=graph.len%len</span></span><br><span class="line">        <span class="keyword">int</span> bestValue,value;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;<span class="comment">//达到叶子节点，返回估值，在井字棋中博弈树中深度为8</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">            bestValue = -INF;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            bestValue = INF;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                value = maxMinSearch(graph,vis,len,depth-<span class="number">1</span>);</span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">                    bestValue = Math.max(value, bestValue);</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    bestValue = Math.min(value, bestValue);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bestValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">ismax</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="ab剪枝"><a href="#ab剪枝" class="headerlink" title="ab剪枝"></a>ab剪枝</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ABMaxMinS</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">AlphaBeta</span><span class="params">(String graph, Set&lt;Integer&gt; vis,<span class="keyword">int</span> len,<span class="keyword">int</span> nPlay,<span class="keyword">int</span> nA,<span class="keyword">int</span> nB)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(nPlay==<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(isMinNode())&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span>(vis.contains(i))&#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay-<span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span>(score&lt;nB)&#123;</span><br><span class="line">                        nB = score;</span><br><span class="line">                        <span class="keyword">if</span>(nA&gt;=nB)&#123;</span><br><span class="line">                            <span class="keyword">return</span> nA;<span class="comment">//alpha剪枝,选大的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (vis.contains(i)) &#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay - <span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span> (score &gt; nA) &#123;</span><br><span class="line">                        nA = score;</span><br><span class="line">                        <span class="keyword">if</span> (nB &lt;= nA) &#123;</span><br><span class="line">                            <span class="keyword">return</span> nB;<span class="comment">//alpha剪枝，选小的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nA;<span class="comment">//返回最小的</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isMinNode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evelution</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="负极小值极大"><a href="#负极小值极大" class="headerlink" title="负极小值极大"></a>负极小值极大</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NegaMax</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nageMax</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> best = -INF;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                <span class="keyword">int</span> value = -nageMax(graph,vis,len,depth-<span class="number">1</span>);<span class="comment">//这里是负号</span></span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(value&lt;best)&#123;</span><br><span class="line">                    best = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> best;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><h4 id="神经网络神经元模型"><a href="#神经网络神经元模型" class="headerlink" title="神经网络神经元模型"></a>神经网络神经元模型</h4><p><img src="/.top//Users\admin\AppData\Roaming\Typora\typora-user-images\image-20201026151434846.png" alt="image-20201026151434846"></p>
-<h4 id="反向传播算法-Back-Propagation"><a href="#反向传播算法-Back-Propagation" class="headerlink" title="反向传播算法(Back Propagation)"></a>反向传播算法(Back Propagation)</h4><p>步骤：</p>
-<ol>
-<li><p>前向传播（正向数据传播） 样本从输入层输入网络，随机初始化权重和偏置，通过求和及激活函数计算，直到输出层输出结果 </p>
-<p>反向误差传播 计算前向传播阶段网络的输出与期望输出（样本标签）之间的误差，从输出层到隐含层，最后到输入 层，逐层调节各层每个神经元的连接权重和偏置 </p>
 </li>
-</ol>
+<li><p>问：什么时候使用转发，什么时候使用重定向？</p>
+<pre><code>如果要保留请求域中的数据，使用转发，否则使用重定向。
+
+以后访问数据库，增删改使用重定向，查询使用转发。</code></pre>
+</li>
+<li><p>问：转发或重定向后续的代码是否还会运行？</p>
+<pre><code>无论转发或重定向后续的代码都会执行</code></pre>
+</li>
+</ul>
+<p>​          </p>
 ]]></content>
       <tags>
-        <tag>算法</tag>
+        <tag>web</tag>
       </tags>
   </entry>
   <entry>
@@ -2044,6 +2043,81 @@
 ]]></content>
       <tags>
         <tag>BIO_NIO_AIO</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>人工智能基础</title>
+    <url>/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h1 id="人工智能基础复习材料"><a href="#人工智能基础复习材料" class="headerlink" title="人工智能基础复习材料"></a>人工智能基础复习材料</h1><h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="人工智能-Artificial-Intelligence-："><a href="#人工智能-Artificial-Intelligence-：" class="headerlink" title="人工智能(Artificial Intelligence)："></a>人工智能(Artificial Intelligence)：</h3><p> 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。</p>
+<a id="more"></a>
+
+<h3 id="机器学习-Machine-Learning"><a href="#机器学习-Machine-Learning" class="headerlink" title="机器学习(Machine Learning)"></a>机器学习(Machine Learning)</h3><p>机器学习是一门专门研究计算机模拟或实现人类的学习行为，重新组织已有的知识结构，并获取新的知 识和技能，进而使之不断改善自身性能的学科。 </p>
+<h3 id="深度学习-Deep-Learning"><a href="#深度学习-Deep-Learning" class="headerlink" title="深度学习(Deep Learning)"></a>深度学习(Deep Learning)</h3><p>深度学习一般采用多层非线性变换，通过对数据特征的自动抽象和逐层提取，来实现分类或回归的学习 目的。 </p>
+<h3 id="物联网-IoT-Internet-of-things"><a href="#物联网-IoT-Internet-of-things" class="headerlink" title="物联网(IoT, Internet of things)"></a>物联网(IoT, Internet of things)</h3><p>物联网即“万物相连的互联网”，是互联网基础上的延伸和扩展的网络，将各种信息传感设备与互联网 结合起来而形成的一个巨大网络，实现在任何时间、任何地点，人、机、物的互联互通。 </p>
+<h3 id="专家系统-Expert-system"><a href="#专家系统-Expert-system" class="headerlink" title="专家系统(Expert system)"></a>专家系统(Expert system)</h3><p>专家系统是一个智能计算机程序系统，其内部含有大量的某个领域专家水平的知识与经验，能够利用人 类专家的知识和解决问题的方法来处理该领域问题。也就是说，专家系统是一个具有大量的专门知识与经验 的程序系统，它应用人工智能技术和计算机技术，根据某领域一个或多个专家提供的知识和经验，进行推理 和判断，模拟人类专家的决策过程，以便解决那些需要人类专家处理的复杂问题，简而言之，专家系统是一 种模拟人类专家解决领域问题的计算机程序系统。 </p>
+<h3 id="有监督学习-Supervised-Learning"><a href="#有监督学习-Supervised-Learning" class="headerlink" title="有监督学习(Supervised Learning)"></a>有监督学习(Supervised Learning)</h3><p>训练数据由一组训练实例组成。在监督学习中，每一个例子都是一对由一个输入对象（通常是一个向量） 和一个期望的输出值（也被称为监督信号）。有监督学习算法分析训练数据，并产生一个推断的功能，它可 以用于映射新的例子。一个最佳的方案将允许该算法正确地在标签不可见的情况下确定类标签。 用已知某种或某些特性的样本作为训练集，以建立一个数学模型(如模式识别中的判别模型，人工神经 网络法中的权重模型等)，再用已建立的模型来预测未知样本，此种方法称为有监督学习。是最常见的机器 学习方法。 </p>
+<h3 id="无监督学习-Unsupervised-Learning"><a href="#无监督学习-Unsupervised-Learning" class="headerlink" title="无监督学习(Unsupervised Learning)"></a>无监督学习(Unsupervised Learning)</h3><p>根据类别未知(没有被标记)的训练样本解决模式识别中的各种问题，称之为无监督学习。 不同于有监督学习，不需要用历史经验知识作为指导，，而是不断地自主从数据本身特性认知数据的特 征，自主归纳和巩固，形成对知识的认知结果。 </p>
+<h3 id="人工神经网络-ANN-Artificial-Neural-Network"><a href="#人工神经网络-ANN-Artificial-Neural-Network" class="headerlink" title="人工神经网络(ANN, Artificial Neural Network)"></a>人工神经网络(ANN, Artificial Neural Network)</h3><p>也简称为神经网络(NN)，是模仿生物脑神经的工作原理，由大量简单的处理单元广泛互联形成复杂的 网络系统，从而对模糊的随机性的非线性数据表现出强大的逼近能力。 </p>
+<h3 id="代价函数-lost-function"><a href="#代价函数-lost-function" class="headerlink" title="代价函数(lost function)"></a>代价函数(lost function)</h3><p>(或者损失函数 loss function) 代价函数或损失函数是衡量学习模型的预测值与实际值之间误差的函数。这个误差被称为模型误差，函 数值越小表示误差越小，也就意味着预测值越接近实际值，认为所构建的模型性能越好。 二、各章节算法等信息补充 生成与测试范式 解决问题的直接方法是提出可能的解，然后检查每个提议，看是否有提议构成了解。 </p>
+<h2 id="算法与源码"><a href="#算法与源码" class="headerlink" title="算法与源码"></a>算法与源码</h2><h3 id="n皇后回溯解法"><a href="#n皇后回溯解法" class="headerlink" title="n皇后回溯解法"></a>n皇后回溯解法</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> List&lt;List&lt;String&gt;&gt; solveNQueens(<span class="keyword">int</span> n) &#123;</span><br><span class="line">        <span class="keyword">char</span>[][] chess = <span class="keyword">new</span> <span class="keyword">char</span>[n][n];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; n; j++)</span><br><span class="line">                chess[i][j] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">        List&lt;List&lt;String&gt;&gt; res = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        solve(res, chess, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">solve</span><span class="params">(List&lt;List&lt;String&gt;&gt; res, <span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (row == chess.length) &#123;</span><br><span class="line">            res.add(construct(chess));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> col = <span class="number">0</span>; col &lt; chess.length; col++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (valid(chess, row, col)) &#123;</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;Q&#x27;</span>;</span><br><span class="line">                solve(res, chess, row + <span class="number">1</span>);</span><br><span class="line">                chess[row][col] = <span class="string">&#x27;.&#x27;</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//row表示第几行，col表示第几列</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">valid</span><span class="params">(<span class="keyword">char</span>[][] chess, <span class="keyword">int</span> row, <span class="keyword">int</span> col)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//判断当前列有没有皇后,因为他是一行一行往下走的，</span></span><br><span class="line">        <span class="comment">//我们只需要检查走过的行数即可，通俗一点就是判断当前</span></span><br><span class="line">        <span class="comment">//坐标位置的上面有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; row; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][col] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的右上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col + <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &lt; chess.length; i--, j++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//判断当前坐标的左上角有没有皇后</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = row - <span class="number">1</span>, j = col - <span class="number">1</span>; i &gt;= <span class="number">0</span> &amp;&amp; j &gt;= <span class="number">0</span>; i--, j--) &#123;</span><br><span class="line">            <span class="keyword">if</span> (chess[i][j] == <span class="string">&#x27;Q&#x27;</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//把数组转为list</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">construct</span><span class="params">(<span class="keyword">char</span>[][] chess)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; path = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; chess.length; i++) &#123;</span><br><span class="line">            path.add(<span class="keyword">new</span> String(chess[i]));</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> path;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="贪婪-贪心算法"><a href="#贪婪-贪心算法" class="headerlink" title="贪婪(贪心算法)"></a>贪婪(贪心算法)</h3><p> 贪心算法(Greedy Algorithm)，又称贪婪算法，是一种<strong>在每一步选择中都采取在当前状态下最好或最 优(即最有利)的选择</strong>，从而希望导致结果是最好或最优的算法。比如在旅行销售员问题中，如果销售员每次 都选择最近的城市，那这就是一种贪心算法。Dijkstra 算法就算采用了贪心策略的实例，每次扩展最短的节 点，更新距离表。贪心算法不是对所有问题都能得到整体最优解，关键是贪心策略的选择。也就是说，不从 整体最优上加以考虑，做出的只是在某种意义上的局部最优解</p>
+<h3 id="TSP-旅行商问题-TSP-最短路径问题"><a href="#TSP-旅行商问题-TSP-最短路径问题" class="headerlink" title="TSP 旅行商问题(TSP 最短路径问题)"></a>TSP 旅行商问题(TSP 最短路径问题)</h3><p>(Travelling Salesman Problem, TSP)是这样一个问题：给定一系列城 市和每对城市之间的距离，求解访问每一座城市一次并回到起始城市的最短回路。它是组合优化中的一个 NP Hard 问题，在运筹学和理论计算机科学中非常重要。TSP 的暴力解法时间复杂度是 O(n!)，目前现有的 非暴力算法只能无限逼近其最优解，而不能保证得到通解</p>
+<h3 id="盲目搜索"><a href="#盲目搜索" class="headerlink" title="盲目搜索"></a>盲目搜索</h3><h4 id="DFS"><a href="#DFS" class="headerlink" title="DFS"></a>DFS</h4><p> 实现借助 Stack/递归 在树很深、分支因子不大、解出现的位置较深的情况下适合 </p>
+<h4 id="BFS"><a href="#BFS" class="headerlink" title="BFS"></a>BFS</h4><p>实现借助 Queue 在分支因子很大，解出现的位置合理深度、路径不是非常深的情况下适合</p>
+<h4 id="DFS-ID"><a href="#DFS-ID" class="headerlink" title="DFS-ID"></a>DFS-ID</h4><p>迭代加深的深度优先搜索 实质上就是限定下界的深度优先搜索。即首先允许深度优先搜索 K 层搜索树，若没有发现可行解，再 将 K+1 后重复以上步骤搜索，直到搜索到可行解。在迭代加深搜索的算法中，连续的深度优先搜索被引入， 每一个深度约束逐次加 1，直到搜索到目标为止。迭代加深搜索算法就是仿广度优先搜索的深度优先搜索。 既能满足深度优先搜索的线性存储要求，又能保证发现一个最小深度的目标结点。从实际应用来看，迭代加 深搜索的效果比较好，并不比广度优先搜索慢很多，但是空间复杂度却与深度优先搜索相同，比广度优先搜 索小很多，在一些层次遍历的题目中，迭代加深不失为一种好方法 </p>
+<h3 id="知情搜索-分支定界法"><a href="#知情搜索-分支定界法" class="headerlink" title="知情搜索-分支定界法"></a>知情搜索-分支定界法</h3><p> 代价评估函数 f(n) = g(n) + h*(n)表示从初始节点 S 到目标节点 n 的代价，g(n):从初始节点 S 到目标 节点 n 的距离，h*(n)从当前位置 n 经过最短路径到达 G 的剩余距离，然而在过程中无法直接求出 h*(n)， 因此使用一个估计值 h(n)代替，只有对所有节点 h(n)&lt;=h*(n)才有意义，此时 h(n)被视为可接受的启发， 因此最终评估函数是 f(n) = g(n) + h(n) </p>
+<h4 id="UCS"><a href="#UCS" class="headerlink" title="UCS"></a>UCS</h4><p>一致代价搜索（普通的分支定界） 一致代价搜索的特点是 f(n)=g(n)，也就是说对任意 n 都有 h(n)=0，非常类似 BFS，不过 BFS 是努力 找一条通往目标的路径，而 UCS 是努力找一条最优路径。 </p>
+<h4 id="A"><a href="#A" class="headerlink" title="A*"></a>A*</h4><p> A*算法实际上是综合 BFS、Dijkstra、最佳优先搜索算法的特点于一身的（或者说是采用了剩余距离估 计值和动态规划的分支定界法）。f(n)是节点 n 的综合优先级。当我们选择下一个要遍历的节点时，我们总 会选取综合优先级最高（值最小）的节点。g(n) 是节点 n 距离起点的代价。h(n)是节点 n 距离终点的预计 代价，这也就是 A<em>算法的启发函数。关于启发函数我们在下面详细讲解。A</em>算法在运算过程中，每次从优 先队列中选取 f(n)值最小（优先级最高）的节点作为下一个待遍历的节点。 另外，A*算法使用两个集合来表示待遍历的节点，与已经遍历过的节点，这通常称之为 open_set 和 close_set。 </p>
+<p>完整A*算法过程</p>
+<ul>
+<li><p>初始化openSet和closeSet</p>
+</li>
+<li><p>把起点加入openSet中</p>
+</li>
+<li><p>如果openSet!=null,就从openSet中选择第一个节点n：</p>
+<ul>
+<li><p>如果n为终点</p>
+<p>就从双面开始逐步最终parent节点，一直到达起点，返回结果路径，算法结束</p>
+</li>
+<li><p>如果n不是终点</p>
+<p>把节点n从openSet中移除，并加入到closeSet中</p>
+<p>遍历n节点的所有临近节点 </p>
+<ul>
+<li>如果临近节点在closeSet中，就跳过，选择下一个临近节点</li>
+<li>如果临近节点m不在openSet中<ol>
+<li>设置m的parent节点为n</li>
+<li>计算m到终点的代价f（n）</li>
+<li>把m节点加入到openSet中</li>
+</ol>
+</li>
+<li>对openSet中的节点按照代价从小到大的排序（openSet可以使用优先队列优化）</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>返回找不到路径的错误</p>
+</li>
+</ul>
+<h4 id="八数码"><a href="#八数码" class="headerlink" title="八数码"></a>八数码</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">slidingPuzzle</span><span class="params">(<span class="keyword">int</span>[][] board)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> R = board.length, C = board[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">int</span> sr = <span class="number">0</span>, sc = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//Find sr, sc</span></span><br><span class="line">        search:<span class="comment">//跳转</span></span><br><span class="line">            <span class="keyword">for</span> (sr = <span class="number">0</span>; sr &lt; R; sr++)</span><br><span class="line">                <span class="keyword">for</span> (sc = <span class="number">0</span>; sc &lt; C; sc++)</span><br><span class="line">                    <span class="keyword">if</span> (board[sr][sc] == <span class="number">0</span>)</span><br><span class="line">                        <span class="keyword">break</span> search;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span>[][] directions = <span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;-<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;, &#123;<span class="number">0</span>, -<span class="number">1</span>&#125;&#125;;</span><br><span class="line">        PriorityQueue&lt;Node&gt; heap = <span class="keyword">new</span> PriorityQueue&lt;Node&gt;((a, b) -&gt;</span><br><span class="line">            (a.heuristic + a.depth) - (b.heuristic + b.depth));</span><br><span class="line">        Node start = <span class="keyword">new</span> Node(board, sr, sc, <span class="number">0</span>);</span><br><span class="line">        heap.add(start);</span><br><span class="line"></span><br><span class="line">        Map&lt;String, Integer&gt; cost = <span class="keyword">new</span> HashMap();</span><br><span class="line">        cost.put(start.boardstring, <span class="number">9999999</span>);</span><br><span class="line"></span><br><span class="line">        String target = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">4</span>,<span class="number">5</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);<span class="comment">//这里改成目标</span></span><br><span class="line">        String targetWrong = Arrays.deepToString(<span class="keyword">new</span> <span class="keyword">int</span>[][]&#123;&#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>&#125;, &#123;<span class="number">5</span>,<span class="number">4</span>,<span class="number">0</span>&#125;,&#123;<span class="number">7</span>,<span class="number">8</span>,<span class="number">9</span>&#125;&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!heap.isEmpty()) &#123;</span><br><span class="line">            Node node = heap.poll();</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(target))</span><br><span class="line">                <span class="keyword">return</span> node.depth;</span><br><span class="line">            <span class="keyword">if</span> (node.boardstring.equals(targetWrong))</span><br><span class="line">                <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (node.depth + node.heuristic &gt; cost.get(node.boardstring))</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span>[] di: directions) &#123;</span><br><span class="line">                <span class="keyword">int</span> nei_r = di[<span class="number">0</span>] + node.zero_r;</span><br><span class="line">                <span class="keyword">int</span> nei_c = di[<span class="number">1</span>] + node.zero_c;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 如果邻居不在版上，或者行列错误</span></span><br><span class="line">                <span class="keyword">if</span> ((Math.abs(nei_r - node.zero_r) + Math.abs(nei_c - node.zero_c) != <span class="number">1</span>) ||</span><br><span class="line">                        nei_r &lt; <span class="number">0</span> || nei_r &gt;= R || nei_c &lt; <span class="number">0</span> || nei_c &gt;= C)</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">int</span>[][] newboard = <span class="keyword">new</span> <span class="keyword">int</span>[R][C];</span><br><span class="line">                <span class="keyword">int</span> t = <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span>[] row: node.board)</span><br><span class="line">                    newboard[t++] = row.clone();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 在新版上交换元素</span></span><br><span class="line">                newboard[node.zero_r][node.zero_c] = newboard[nei_r][nei_c];</span><br><span class="line">                newboard[nei_r][nei_c] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">                Node nei = <span class="keyword">new</span> Node(newboard, nei_r, nei_c, node.depth+<span class="number">1</span>);</span><br><span class="line">                <span class="keyword">if</span> (nei.depth + nei.heuristic &gt;= cost.getOrDefault(nei.boardstring, <span class="number">9999999</span>))</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                heap.add(nei);</span><br><span class="line">                cost.put(nei.boardstring, nei.depth + nei.heuristic);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Node</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span>[][] board;</span><br><span class="line">    String boardstring;</span><br><span class="line">    <span class="keyword">int</span> heuristic;</span><br><span class="line">    <span class="keyword">int</span> zero_r;</span><br><span class="line">    <span class="keyword">int</span> zero_c;</span><br><span class="line">    <span class="keyword">int</span> depth;</span><br><span class="line">    Node(<span class="keyword">int</span>[][] B, <span class="keyword">int</span> zr, <span class="keyword">int</span> zc, <span class="keyword">int</span> d) &#123;</span><br><span class="line">        board = B;</span><br><span class="line">        boardstring = Arrays.deepToString(board);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//计算启发（heuristic）式</span></span><br><span class="line">        heuristic = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> R = B.length, C = B[<span class="number">0</span>].length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> r = <span class="number">0</span>; r &lt; R; ++r)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> c = <span class="number">0</span>; c &lt; C; ++c) &#123;</span><br><span class="line">                <span class="keyword">if</span> (board[r][c] == <span class="number">0</span>) <span class="keyword">continue</span>;</span><br><span class="line">                <span class="keyword">int</span> v = (board[r][c] + R*C - <span class="number">1</span>) % (R*C);</span><br><span class="line">                <span class="comment">// v/C, v%C: board[r][c]应该到哪里的最短路径（用于评估函数</span></span><br><span class="line">                ）</span><br><span class="line">                heuristic += Math.abs(r - v/C) + Math.abs(c - v%C);</span><br><span class="line">            &#125;</span><br><span class="line">        heuristic /= <span class="number">2</span>;</span><br><span class="line">        zero_r = zr;</span><br><span class="line">        zero_c = zc;</span><br><span class="line">        depth = d;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="博弈树"><a href="#博弈树" class="headerlink" title="博弈树"></a>博弈树</h3><p> 极大极小算法 python 实现(以解决 tic tac toe 井字棋问题为例) evaluate 方法功能是是对当前棋盘状态相对于 player 打分，分数越高对 player 越有利 </p>
+<h4 id="极小极大算法"><a href="#极小极大算法" class="headerlink" title="极小极大算法"></a>极小极大算法</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MaxMinSearch</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">maxMinSearch</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;<span class="comment">//一维化二维平面x=graph.len/len;y=graph.len%len</span></span><br><span class="line">        <span class="keyword">int</span> bestValue,value;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;<span class="comment">//达到叶子节点，返回估值，在井字棋中博弈树中深度为8</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">            bestValue = -INF;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            bestValue = INF;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                value = maxMinSearch(graph,vis,len,depth-<span class="number">1</span>);</span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(ismax())&#123;</span><br><span class="line">                    bestValue = Math.max(value, bestValue);</span><br><span class="line">                &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                    bestValue = Math.min(value, bestValue);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> bestValue;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">ismax</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="ab剪枝"><a href="#ab剪枝" class="headerlink" title="ab剪枝"></a>ab剪枝</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ABMaxMinS</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">AlphaBeta</span><span class="params">(String graph, Set&lt;Integer&gt; vis,<span class="keyword">int</span> len,<span class="keyword">int</span> nPlay,<span class="keyword">int</span> nA,<span class="keyword">int</span> nB)</span></span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(nPlay==<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evelution(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(isMinNode())&#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span>(vis.contains(i))&#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay-<span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span>(score&lt;nB)&#123;</span><br><span class="line">                        nB = score;</span><br><span class="line">                        <span class="keyword">if</span>(nA&gt;=nB)&#123;</span><br><span class="line">                            <span class="keyword">return</span> nA;<span class="comment">//alpha剪枝,选大的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; graph.length(); i++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (vis.contains(i)) &#123;</span><br><span class="line">                    vis.add(i);</span><br><span class="line">                    <span class="keyword">int</span> score = AlphaBeta(graph, vis, len, nPlay - <span class="number">1</span>, nA, nB);</span><br><span class="line">                    vis.remove(i);</span><br><span class="line">                    <span class="keyword">if</span> (score &gt; nA) &#123;</span><br><span class="line">                        nA = score;</span><br><span class="line">                        <span class="keyword">if</span> (nB &lt;= nA) &#123;</span><br><span class="line">                            <span class="keyword">return</span> nB;<span class="comment">//alpha剪枝，选小的</span></span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> nA;<span class="comment">//返回最小的</span></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isMinNode</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evelution</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="负极小值极大"><a href="#负极小值极大" class="headerlink" title="负极小值极大"></a>负极小值极大</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NegaMax</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> INF = <span class="number">0x3f3f3f3f</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">nageMax</span><span class="params">(String graph, Set&lt;Integer&gt; vis, <span class="keyword">int</span> len, <span class="keyword">int</span> depth)</span></span>&#123;</span><br><span class="line">        <span class="keyword">int</span> best = -INF;</span><br><span class="line">        <span class="keyword">if</span>(isGameOver())&#123;<span class="comment">//游戏结束，满足三连或者平局</span></span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);<span class="comment">//返回评估值</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(depth&lt;=<span class="number">0</span>)&#123;</span><br><span class="line">            <span class="keyword">return</span> evaluation(graph);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;graph.length();i++)&#123;</span><br><span class="line">            <span class="keyword">if</span>(!vis.contains(i))&#123;</span><br><span class="line">                vis.add(i);<span class="comment">//走棋</span></span><br><span class="line">                <span class="keyword">int</span> value = -nageMax(graph,vis,len,depth-<span class="number">1</span>);<span class="comment">//这里是负号</span></span><br><span class="line">                vis.remove(i);<span class="comment">//回溯</span></span><br><span class="line">                <span class="keyword">if</span>(value&lt;best)&#123;</span><br><span class="line">                    best = value;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> best;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">evaluation</span><span class="params">(String graph)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isGameOver</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="神经网络"><a href="#神经网络" class="headerlink" title="神经网络"></a>神经网络</h3><h4 id="神经网络神经元模型"><a href="#神经网络神经元模型" class="headerlink" title="神经网络神经元模型"></a>神经网络神经元模型</h4><p><img src="/.top//Users\admin\AppData\Roaming\Typora\typora-user-images\image-20201026151434846.png" alt="image-20201026151434846"></p>
+<h4 id="反向传播算法-Back-Propagation"><a href="#反向传播算法-Back-Propagation" class="headerlink" title="反向传播算法(Back Propagation)"></a>反向传播算法(Back Propagation)</h4><p>步骤：</p>
+<ol>
+<li><p>前向传播（正向数据传播） 样本从输入层输入网络，随机初始化权重和偏置，通过求和及激活函数计算，直到输出层输出结果 </p>
+<p>反向误差传播 计算前向传播阶段网络的输出与期望输出（样本标签）之间的误差，从输出层到隐含层，最后到输入 层，逐层调节各层每个神经元的连接权重和偏置 </p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
