@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-12-02T15:30:47.020Z</updated>
+  <updated>2020-12-11T01:45:37.298Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,36 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>单例模式</title>
+    <link href="http://bilikings.top/2020/12/11/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/"/>
+    <id>http://bilikings.top/2020/12/11/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</id>
+    <published>2020-12-11T01:45:14.000Z</published>
+    <updated>2020-12-11T01:45:37.298Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;1-单例模式&quot;&gt;&lt;a href=&quot;#1-单例模式&quot; class=&quot;headerlink&quot; title=&quot;1.单例模式&quot;&gt;&lt;/a&gt;1.单例模式&lt;/h3&gt;&lt;p&gt;   &lt;strong&gt;确保一个类只有一个实例&lt;/strong&gt;，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。&lt;/p&gt;
+&lt;h4 id=&quot;饿汉式（静态常量）&quot;&gt;&lt;a href=&quot;#饿汉式（静态常量）&quot; class=&quot;headerlink&quot; title=&quot;饿汉式（静态常量）&quot;&gt;&lt;/a&gt;饿汉式（静态常量）&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;构造器私有化（防止new）&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;类的内部创建对象&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;向外暴露一个静态公共方法&lt;/p&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;9&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;10&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;11&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Single&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//1构造器私有化&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Single&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;&amp;#123;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;comment&quot;&gt;//内部创建实例对象&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;static&lt;/span&gt; Single instance =&lt;span class=&quot;keyword&quot;&gt;new&lt;/span&gt; Single();&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;keyword&quot;&gt;static&lt;/span&gt; Single &lt;span class=&quot;title&quot;&gt;getInstance&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt; &lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;        &lt;span class=&quot;keyword&quot;&gt;return&lt;/span&gt; instance;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &amp;#125;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;优点：写法简单，类装载的时候实例化，避免了线程同步&lt;/li&gt;
+&lt;li&gt;缺点：可能造成内存的浪费&lt;/li&gt;
+&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="设计模式" scheme="http://bilikings.top/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/"/>
+    
+  </entry>
   
   <entry>
     <title>RabbitMQ消息队列</title>
@@ -443,23 +473,6 @@
     
     
     <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>人工智能基础</title>
-    <link href="http://bilikings.top/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/"/>
-    <id>http://bilikings.top/2020/11/14/%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD%E5%9F%BA%E7%A1%80/</id>
-    <published>2020-11-14T08:38:49.000Z</published>
-    <updated>2020-11-14T08:40:57.305Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;人工智能基础复习材料&quot;&gt;&lt;a href=&quot;#人工智能基础复习材料&quot; class=&quot;headerlink&quot; title=&quot;人工智能基础复习材料&quot;&gt;&lt;/a&gt;人工智能基础复习材料&lt;/h1&gt;&lt;h2 id=&quot;名词解释&quot;&gt;&lt;a href=&quot;#名词解释&quot; class=&quot;headerlink&quot; title=&quot;名词解释&quot;&gt;&lt;/a&gt;名词解释&lt;/h2&gt;&lt;h3 id=&quot;人工智能-Artificial-Intelligence-：&quot;&gt;&lt;a href=&quot;#人工智能-Artificial-Intelligence-：&quot; class=&quot;headerlink&quot; title=&quot;人工智能(Artificial Intelligence)：&quot;&gt;&lt;/a&gt;人工智能(Artificial Intelligence)：&lt;/h3&gt;&lt;p&gt; 人工智能是研究、开发用于模拟、延伸和扩展人智能的理论、方法、技术及应用系统的一门新技术科学。 人工智能领域的研究包括机器人、语言识别、图像识别、自然语言处理和专家系统等。智能的定义：智能是 个人从经验中学习、理性思考、记忆重要信息、以及应付日常生活需求的认知能力。&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="算法" scheme="http://bilikings.top/tags/%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
