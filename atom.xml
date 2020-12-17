@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-12-11T01:45:37.298Z</updated>
+  <updated>2020-12-17T00:48:04.931Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>排序与查找</title>
+    <link href="http://bilikings.top/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/"/>
+    <id>http://bilikings.top/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/</id>
+    <published>2020-12-17T00:46:18.000Z</published>
+    <updated>2020-12-17T00:48:04.931Z</updated>
+    
+    
+    <summary type="html">&lt;h3 id=&quot;选择排序&quot;&gt;&lt;a href=&quot;#选择排序&quot; class=&quot;headerlink&quot; title=&quot;选择排序&quot;&gt;&lt;/a&gt;选择排序&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;最没用的算法&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;一遍又一遍过滤这个数组，找到最小的放到前面来&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="数据结构与算法" scheme="http://bilikings.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
+    
+  </entry>
   
   <entry>
     <title>单例模式</title>
@@ -450,24 +470,6 @@
     
     <summary type="html">&lt;h1 id=&quot;线程&quot;&gt;&lt;a href=&quot;#线程&quot; class=&quot;headerlink&quot; title=&quot;线程&quot;&gt;&lt;/a&gt;线程&lt;/h1&gt;&lt;p&gt;进程是系统资源分配的基本单位&lt;/p&gt;
 &lt;p&gt;线程是cpu进行调度的基本单位&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>通过反射定义注解</title>
-    <link href="http://bilikings.top/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/"/>
-    <id>http://bilikings.top/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</id>
-    <published>2020-11-15T03:11:52.000Z</published>
-    <updated>2020-11-15T03:12:35.440Z</updated>
-    
-    
-    <summary type="html">&lt;p&gt;本文则以输入校验的 &lt;code&gt;@Length&lt;/code&gt;注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。&lt;/p&gt;
-&lt;h2 id=&quot;第一步：首先定义注解：-Length&quot;&gt;&lt;a href=&quot;#第一步：首先定义注解：-Length&quot; class=&quot;headerlink&quot; title=&quot;第一步：首先定义注解：@Length&quot;&gt;&lt;/a&gt;第一步：首先定义注解：@Length&lt;/h2&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@Target(&amp;#123;ElementType.FIELD&amp;#125;)&lt;/span&gt;&lt;span class=&quot;comment&quot;&gt;//元注解&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;meta&quot;&gt;@Retention(RetentionPolicy.RUNTIME)&lt;/span&gt;&lt;span class=&quot;comment&quot;&gt;//元注解&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;meta&quot;&gt;@interface&lt;/span&gt; Length&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;min&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 允许字符串长度的最小值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 允许字符串长度的最大值&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;String &lt;span class=&quot;title&quot;&gt;errorMsg&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;; &lt;span class=&quot;comment&quot;&gt;// 自定义的错误提示信息&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;</summary>
     
     
     
