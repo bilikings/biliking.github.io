@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-01-31T00:41:45.625Z</updated>
+  <updated>2021-01-31T00:44:25.584Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -21,16 +21,25 @@
     <link href="http://bilikings.top/2021/01/31/%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E5%8C%96/"/>
     <id>http://bilikings.top/2021/01/31/%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E5%8C%96/</id>
     <published>2021-01-31T00:40:28.000Z</published>
-    <updated>2021-01-31T00:41:45.625Z</updated>
+    <updated>2021-01-31T00:44:25.584Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h2 id=&quot;应用容器化&quot;&gt;&lt;a href=&quot;#应用容器化&quot; class=&quot;headerlink&quot;</summary>
-        
-      
+    <summary type="html">&lt;h2 id=&quot;应用容器化&quot;&gt;&lt;a href=&quot;#应用容器化&quot; class=&quot;headerlink&quot; title=&quot;应用容器化&quot;&gt;&lt;/a&gt;应用容器化&lt;/h2&gt;&lt;p&gt;完整应用容器化的过程主要分为以下几个步骤&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;编写应用代码&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;创建DockerFile，包括应用描述，依赖，以及如何运行这个应用&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;对这个DockerFile执行docker image build命令&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;docker build -t yourmirrorname .&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;等待容器化完成&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&quot;什么是dockerFile&quot;&gt;&lt;a href=&quot;#什么是dockerFile&quot; class=&quot;headerlink&quot; title=&quot;什么是dockerFile&quot;&gt;&lt;/a&gt;什么是dockerFile&lt;/h4&gt;&lt;p&gt;在代码目录当中，有个名称为Dockerfile的文件。这个文件包含了对当前应用的描述，并且能指导Docker完成镜像的构建&lt;/p&gt;
+&lt;p&gt;Dockerfile 一般分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令，’#’ 为 Dockerfile 中的注释&lt;/p&gt;</summary>
     
     
     

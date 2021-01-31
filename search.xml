@@ -424,36 +424,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(3)——对象的组合</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
-    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
-<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
-<ol>
-<li>找出构成对象的所有变量</li>
-<li>找出约束状态条件的不变性条件</li>
-<li>建立对象状态的并发访问管理策略</li>
-</ol>
-<a id="more"></a>
-
-<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
-<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
-<blockquote>
-<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
-</blockquote>
-<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
-<blockquote>
-<p>通过一个私有锁来保护状态</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>委托模型</p>
-<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
-<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(4)——同步工具类</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
     <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
@@ -664,6 +634,70 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(3)——对象的组合</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
+    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
+<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
+<ol>
+<li>找出构成对象的所有变量</li>
+<li>找出约束状态条件的不变性条件</li>
+<li>建立对象状态的并发访问管理策略</li>
+</ol>
+<a id="more"></a>
+
+<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
+<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
+<blockquote>
+<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
+</blockquote>
+<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
+<blockquote>
+<p>通过一个私有锁来保护状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>委托模型</p>
+<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
+<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(8)——显式锁</title>
+    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
+    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
+<a id="more"></a>
+
+<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
+<ul>
+<li>公平：FIFO</li>
+<li>非公平：先请求的锁不一定先取得</li>
+</ul>
+<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
+<p>内置的synchronize的锁也是非公平的</p>
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
+<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
+<ul>
+<li>await</li>
+<li>signal</li>
+</ul>
+<p>相当于Object类中提供的wait和notify方法</p>
+<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
+<li>ReentranLock</li>
+<li>Semaphore</li>
+<li>CountDownLatch</li>
+<li>FutureTask</li>
+<li>ReentrantReadWriteLock</li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java并发编程笔记(7)——线程池</title>
     <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
     <content><![CDATA[<h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
@@ -717,40 +751,6 @@
 
 <p>可以通过自定义的线程工厂，创建了新的myThread。</p>
 <h4 id="定制ThreadPoolExecutor"><a href="#定制ThreadPoolExecutor" class="headerlink" title="定制ThreadPoolExecutor"></a>定制ThreadPoolExecutor</h4><p>调用完构造函数之后，仍然可以通过set来修改大多数传递给它的构造参数。 </p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(8)——显式锁</title>
-    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
-    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
-<a id="more"></a>
-
-<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
-<ul>
-<li>公平：FIFO</li>
-<li>非公平：先请求的锁不一定先取得</li>
-</ul>
-<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
-<p>内置的synchronize的锁也是非公平的</p>
-<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
-<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
-<ul>
-<li>await</li>
-<li>signal</li>
-</ul>
-<p>相当于Object类中提供的wait和notify方法</p>
-<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
-<li>ReentranLock</li>
-<li>Semaphore</li>
-<li>CountDownLatch</li>
-<li>FutureTask</li>
-<li>ReentrantReadWriteLock</li>
-</ul>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -1087,28 +1087,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>RedisMQ</title>
     <url>/2020/11/19/RedisMQ/</url>
     <content><![CDATA[<p>Redis实现轻量级的消息队列与消息中间件相比，没有高级特性也没有ACK保证，无法做到数据不重不漏，如果业务简单而且对消息的可靠性不是那么严格可以尝试使用。</p>
@@ -1191,6 +1169,28 @@
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageConsumer</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String CHANNEL_KEY = <span class="string">&quot;channel:1&quot;</span>;<span class="comment">//频道</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String EXIT_COMMAND = <span class="string">&quot;exit&quot;</span>;<span class="comment">//结束程序的消息</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> MyJedisPubSub myJedisPubSub = <span class="keyword">new</span> MyJedisPubSub();<span class="comment">//处理接收消息</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">consumerMessage</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Jedis jedis = JedisPoolUtils.getJedis();</span><br><span class="line">        jedis.subscribe(myJedisPubSub, CHANNEL_KEY);<span class="comment">//第一个参数是处理接收消息，第二个参数是订阅的消息频道</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            consumerMessage();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        MessageConsumer messageConsumer = <span class="keyword">new</span> MessageConsumer();</span><br><span class="line">        Thread t1 = <span class="keyword">new</span> Thread(messageConsumer, <span class="string">&quot;thread5&quot;</span>);</span><br><span class="line">        Thread t2 = <span class="keyword">new</span> Thread(messageConsumer, <span class="string">&quot;thread6&quot;</span>);</span><br><span class="line">        t1.start();</span><br><span class="line">        t2.start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyJedisPubSub</span> <span class="keyword">extends</span> <span class="title">JedisPubSub</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">/** JedisPubSub类是一个没有抽象方法的抽象类,里面方法都是一些空实现</span></span><br><span class="line"><span class="comment">     * 所以可以选择需要的方法覆盖,这儿使用的是SUBSCRIBE指令，所以覆盖了onMessage</span></span><br><span class="line"><span class="comment">     * 如果使用PSUBSCRIBE指令，则覆盖onPMessage方法</span></span><br><span class="line"><span class="comment">     * 当然也可以选择BinaryJedisPubSub,同样是抽象类，但方法参数为byte[]</span></span><br><span class="line"><span class="comment">     **/</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span><span class="params">(String channel, String message)</span> </span>&#123;</span><br><span class="line">        System.out.println(Thread.currentThread().getName()+<span class="string">&quot;-接收到消息:channel=&quot;</span> + channel + <span class="string">&quot;,message=&quot;</span> + message);</span><br><span class="line">        <span class="comment">//接收到exit消息后退出</span></span><br><span class="line">        <span class="keyword">if</span> (MessageConsumer.EXIT_COMMAND.equals(message)) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
       <tags>
         <tag>Redis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
       </tags>
   </entry>
   <entry>
@@ -1701,6 +1701,8 @@
 </ol>
 <h4 id="什么是dockerFile"><a href="#什么是dockerFile" class="headerlink" title="什么是dockerFile"></a>什么是dockerFile</h4><p>在代码目录当中，有个名称为Dockerfile的文件。这个文件包含了对当前应用的描述，并且能指导Docker完成镜像的构建</p>
 <p>Dockerfile 一般分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令，’#’ 为 Dockerfile 中的注释</p>
+<a id="more"></a>
+
 <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">FROM centos</span><br><span class="line">RUN yum install wget \</span><br><span class="line">    &amp;&amp; wget -O redis.tar.gz &quot;http://download.redis.io/releases/redis-5.0.3.tar.gz&quot; \</span><br><span class="line">    &amp;&amp; tar -xvf redis.tar.gz</span><br><span class="line"> ENTRYPOINT command param1 param2 (shell内部命令)</span><br></pre></td></tr></table></figure>
 
 <p>每个Dockerfile文件第一行都是FROM指令。FROM指令指定的镜像，会作为当前镜像的一个基础镜像层，当前应用的剩余内容会作为新增镜像层添加到基础镜像层之上。</p>
