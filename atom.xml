@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2020-12-17T00:48:04.931Z</updated>
+  <updated>2021-01-31T00:41:45.625Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,42 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>应用容器化</title>
+    <link href="http://bilikings.top/2021/01/31/%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E5%8C%96/"/>
+    <id>http://bilikings.top/2021/01/31/%E5%BA%94%E7%94%A8%E5%AE%B9%E5%99%A8%E5%8C%96/</id>
+    <published>2021-01-31T00:40:28.000Z</published>
+    <updated>2021-01-31T00:41:45.625Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2 id=&quot;应用容器化&quot;&gt;&lt;a href=&quot;#应用容器化&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Docker" scheme="http://bilikings.top/tags/Docker/"/>
+    
+  </entry>
+  
+  <entry>
+    <title></title>
+    <link href="http://bilikings.top/2020/12/18/Untitled/"/>
+    <id>http://bilikings.top/2020/12/18/Untitled/</id>
+    <published>2020-12-18T00:54:08.344Z</published>
+    <updated>2020-12-18T00:54:08.344Z</updated>
+    
+    
+    
+    
+    
+  </entry>
   
   <entry>
     <title>排序与查找</title>
@@ -435,41 +471,6 @@
 &lt;li&gt;面向接口编程而不是面向实现编程&lt;/li&gt;
 &lt;li&gt;为了交互对象的松耦合设计&lt;/li&gt;
 &lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>JavaJUC(二)——Concurrent包</title>
-    <link href="http://bilikings.top/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/"/>
-    <id>http://bilikings.top/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</id>
-    <published>2020-11-15T09:05:31.000Z</published>
-    <updated>2020-11-15T09:06:43.539Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;java-util-concurrent&quot;&gt;&lt;a href=&quot;#java-util-concurrent&quot; class=&quot;headerlink&quot; title=&quot;java.util.concurrent&quot;&gt;&lt;/a&gt;java.util.concurrent&lt;/h1&gt;&lt;p&gt;这是一个jdk1.5之后的一个有关多线程的包&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>JavaJUC(一)——线程</title>
-    <link href="http://bilikings.top/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/"/>
-    <id>http://bilikings.top/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/</id>
-    <published>2020-11-15T09:03:28.000Z</published>
-    <updated>2020-11-15T09:05:05.265Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;线程&quot;&gt;&lt;a href=&quot;#线程&quot; class=&quot;headerlink&quot; title=&quot;线程&quot;&gt;&lt;/a&gt;线程&lt;/h1&gt;&lt;p&gt;进程是系统资源分配的基本单位&lt;/p&gt;
-&lt;p&gt;线程是cpu进行调度的基本单位&lt;/p&gt;</summary>
     
     
     

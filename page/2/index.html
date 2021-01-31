@@ -177,6 +177,150 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/" class="post-title-link" itemprop="url">Java并发编程笔记(7)——线程池</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-22 20:19:12 / 修改时间：20:23:07" itemprop="dateCreated datePublished" datetime="2020-11-22T20:19:12+08:00">2020-11-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
+<ul>
+<li>依赖性任务：如果线程池中的任务需要依赖其他任务的活动，那么就隐含的给执行策略带来了约束</li>
+<li>使用线程封闭机制的任务：单线程的Executor可以对并发性做出更强的承诺，对象封闭在任务线程中，使得线程中的任务访问这个对象时不会同步，</li>
+<li>对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性</li>
+<li>使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/" class="post-title-link" itemprop="url">Java并发编程笔记(6)——任务</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-22 20:18:58 / 修改时间：20:20:58" itemprop="dateCreated datePublished" datetime="2020-11-22T20:18:58+08:00">2020-11-22</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h2><p><strong>任务</strong>通常是一项抽象并且离散的一些单元。</p>
+<p>可以把应用程序分解到多个任务中，可以简化程序的组织结构，提供一种自然的事务边界来优化错误的恢复过程</p>
+<h3 id="在线程中执行任务"><a href="#在线程中执行任务" class="headerlink" title="在线程中执行任务"></a>在线程中执行任务</h3><ol>
+<li>找出任务边界</li>
+<li>任务并不依赖其他的任务的状态、结果、边界效应。</li>
+<li>多数web服务器的任务边界是一独立的客户请求为边界</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/19/RedisMQ/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -751,139 +895,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/" class="post-title-link" itemprop="url">JavaJUC(二)——Concurrent包</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-15 17:05:31 / 修改时间：17:06:43" itemprop="dateCreated datePublished" datetime="2020-11-15T17:05:31+08:00">2020-11-15</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">JavaJUC(一)——线程</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-15 17:03:28 / 修改时间：17:05:05" itemprop="dateCreated datePublished" datetime="2020-11-15T17:03:28+08:00">2020-11-15</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><p>进程是系统资源分配的基本单位</p>
-<p>线程是cpu进行调度的基本单位</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -955,12 +966,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-count">34</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
@@ -1008,7 +1019,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2020</span>
+  <span itemprop="copyrightYear">2021</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
