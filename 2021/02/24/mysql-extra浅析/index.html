@@ -20,20 +20,20 @@
     var CONFIG = {"hostname":"bilikings.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="基本数据类型MySQL中定义数据字段的类型对你数据库的优化是非常重要的。 MySQL支持多种类型，大致可以分为三类：数值、日期&#x2F;时间和字符串(字符)类型。">
+  <meta name="description" content="Mysql_Explain_Extra的索引优化在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Mysql数据字段类型">
-<meta property="og:url" content="http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/index.html">
+<meta property="og:title" content="mysql_extra浅析">
+<meta property="og:url" content="http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/index.html">
 <meta property="og:site_name" content="Groza&#39;s">
-<meta property="og:description" content="基本数据类型MySQL中定义数据字段的类型对你数据库的优化是非常重要的。 MySQL支持多种类型，大致可以分为三类：数值、日期&#x2F;时间和字符串(字符)类型。">
+<meta property="og:description" content="Mysql_Explain_Extra的索引优化在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-11-29T07:11:29.000Z">
-<meta property="article:modified_time" content="2020-11-29T07:13:23.081Z">
+<meta property="article:published_time" content="2021-02-24T07:42:26.000Z">
+<meta property="article:modified_time" content="2021-02-24T07:42:45.993Z">
 <meta property="article:author" content="Biliking">
 <meta property="article:tag" content="Mysql">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">
+<link rel="canonical" href="http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/">
 
 
 <script id="page-configurations">
@@ -46,7 +46,7 @@
   };
 </script>
 
-  <title>Mysql数据字段类型 | Groza's</title>
+  <title>mysql_extra浅析 | Groza's</title>
   
 
 
@@ -183,7 +183,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/peiky.png">
@@ -196,7 +196,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Mysql数据字段类型
+          mysql_extra浅析
         </h1>
 
         <div class="post-meta">
@@ -207,7 +207,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2020-11-29 15:11:29 / 修改时间：15:13:23" itemprop="dateCreated datePublished" datetime="2020-11-29T15:11:29+08:00">2020-11-29</time>
+              <time title="创建时间：2021-02-24 15:42:26 / 修改时间：15:42:45" itemprop="dateCreated datePublished" datetime="2021-02-24T15:42:26+08:00">2021-02-24</time>
             </span>
 
           
@@ -228,199 +228,17 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>MySQL中定义数据字段的类型对你数据库的优化是非常重要的。</p>
-<p>MySQL支持多种类型，大致可以分为三类：数值、日期/时间和字符串(字符)类型。</p>
+        <h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
 <a id="more"></a>
 
-<h3 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h3><table>
-<thead>
-<tr>
-<th align="center">类型</th>
-<th align="center">大小</th>
-<th align="center">范围（有符号）</th>
-<th align="center">范围（无符号）</th>
-<th align="center">用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">TINYINT</td>
-<td align="center">1 字节</td>
-<td align="center">(-128，127)</td>
-<td align="center">(0，255)</td>
-<td align="center">小整数值</td>
-</tr>
-<tr>
-<td align="center">SMALLINT</td>
-<td align="center">2 字节</td>
-<td align="center">(-32 768，32 767)</td>
-<td align="center">(0，65 535)</td>
-<td align="center">大整数值</td>
-</tr>
-<tr>
-<td align="center">MEDIUMINT</td>
-<td align="center">3 字节</td>
-<td align="center">(-8 388 608，8 388 607)</td>
-<td align="center">(0，16 777 215)</td>
-<td align="center">大整数值</td>
-</tr>
-<tr>
-<td align="center">INT或<strong>INTEGER</strong></td>
-<td align="center">4 字节</td>
-<td align="center">(-2 147 483 648，2 147 483 647)</td>
-<td align="center">(0，4 294 967 295)</td>
-<td align="center">大整数值</td>
-</tr>
-<tr>
-<td align="center">BIGINT</td>
-<td align="center">8 字节</td>
-<td align="center">(-9,223,372,036,854,775,808，9 223 372 036 854 775 807)</td>
-<td align="center">(0，18 446 744 073 709 551 615)</td>
-<td align="center">极大整数值</td>
-</tr>
-<tr>
-<td align="center">FLOAT</td>
-<td align="center">4 字节</td>
-<td align="center">(-3.402 823 466 E+38，-1.175 494 351 E-38)，0，(1.175 494 351 E-38，3.402 823 466 351 E+38)</td>
-<td align="center">0，(1.175 494 351 E-38，3.402 823 466 E+38)</td>
-<td align="center">单精度浮点数值</td>
-</tr>
-<tr>
-<td align="center">DOUBLE</td>
-<td align="center">8 字节</td>
-<td align="center">(-1.797 693 134 862 315 7 E+308，-2.225 073 858 507 201 4 E-308)，0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308)</td>
-<td align="center">0，(2.225 073 858 507 201 4 E-308，1.797 693 134 862 315 7 E+308)</td>
-<td align="center">双精度浮点数值</td>
-</tr>
-<tr>
-<td align="center">DECIMAL</td>
-<td align="center">对DECIMAL(M,D) ，如果M&gt;D，为M+2否则为D+2</td>
-<td align="center">依赖于M和D的值</td>
-<td align="center">依赖于M和D的值</td>
-<td align="center">小数值</td>
-</tr>
-</tbody></table>
-<h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><table>
-<thead>
-<tr>
-<th align="center">字符串类型</th>
-<th align="center">字节大小</th>
-<th align="center">描述及存储需求</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">CHAR</td>
-<td align="center">0~255字节</td>
-<td align="center">定长字符串</td>
-</tr>
-<tr>
-<td align="center"><strong>VARCHAR</strong></td>
-<td align="center">0~255字节</td>
-<td align="center">变长字符串</td>
-</tr>
-<tr>
-<td align="center">TINYBLOB</td>
-<td align="center">0~255字节</td>
-<td align="center">不超过 255 个字符的二进制字符串</td>
-</tr>
-<tr>
-<td align="center">TINYTEXT</td>
-<td align="center">0~255字节</td>
-<td align="center">短文本字符串</td>
-</tr>
-<tr>
-<td align="center">BLOB</td>
-<td align="center">0-65535字节</td>
-<td align="center">二进制形式的长文本数据</td>
-</tr>
-<tr>
-<td align="center">TEXT</td>
-<td align="center">0-65535字节</td>
-<td align="center">长文本数据</td>
-</tr>
-<tr>
-<td align="center">MEDIUMBLOB</td>
-<td align="center">0-16 777 215字节</td>
-<td align="center">二进制形式的中等长度文本数据</td>
-</tr>
-<tr>
-<td align="center">MEDIUMTEXT</td>
-<td align="center">0-16 777 215字节</td>
-<td align="center">中等长度文本数据</td>
-</tr>
-<tr>
-<td align="center">LOGNGBLOB</td>
-<td align="center">0-4 294 967 295字节</td>
-<td align="center">二进制形式的极大文本数据</td>
-</tr>
-<tr>
-<td align="center">LONGTEXT</td>
-<td align="center">0-4 294 967 295字节</td>
-<td align="center">极大文本数据</td>
-</tr>
-<tr>
-<td align="center">VARBINARY(M)</td>
-<td align="center">允许长度0-M个字节的定长字节符串，值的长度+1个字节</td>
-<td align="center">定长字符串</td>
-</tr>
-<tr>
-<td align="center">BINARY(M)</td>
-<td align="center">M允许长度0-M个字节的定长字节符串</td>
-<td align="center">定长字符串</td>
-</tr>
-</tbody></table>
-<p><strong>BLOB 类型区分大小写，而 TEXT 不区分大小写。大小修饰符不用于各种 BLOB 和 TEXT 子类型。</strong></p>
-<h3 id="日期与时间类型"><a href="#日期与时间类型" class="headerlink" title="日期与时间类型"></a>日期与时间类型</h3><table>
-<thead>
-<tr>
-<th align="center">类型</th>
-<th align="center">大小(字节)</th>
-<th align="center">范围</th>
-<th align="center">格式</th>
-<th align="center">用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">DATE</td>
-<td align="center">4</td>
-<td align="center">1000-01-01/9999-12-31</td>
-<td align="center">YYYY-MM-DD</td>
-<td align="center">日期值</td>
-</tr>
-<tr>
-<td align="center">TIME</td>
-<td align="center">3</td>
-<td align="center">‘-838:59:59’/‘838:59:59’</td>
-<td align="center">HH:MM:SS</td>
-<td align="center">时间值或持续时间</td>
-</tr>
-<tr>
-<td align="center">YEAR</td>
-<td align="center">1</td>
-<td align="center">1901/2155</td>
-<td align="center">YYYY</td>
-<td align="center">年份值</td>
-</tr>
-<tr>
-<td align="center"><strong>DATETIME</strong></td>
-<td align="center">8</td>
-<td align="center">1000-01-01 00:00:00/9999-12-31 23:59:59</td>
-<td align="center">YYYY-MM-DD HH:MM:SS</td>
-<td align="center">混合日期和时间值</td>
-</tr>
-<tr>
-<td align="center"><strong>TIMESTAMP</strong></td>
-<td align="center">4</td>
-<td align="center">1970-01-01 00:00:00/2037</td>
-<td align="center">年某时 YYYYMMDD HHMMSS</td>
-<td align="center">混合日期和时间值，时间戳</td>
-</tr>
-</tbody></table>
-<p><strong>DATE 类型的值应该使用连字号作为分隔符分开，而 TIME 类型的值应该使用冒号作为分隔符分开。</strong></p>
-<h3 id="枚举类型（ENUM）"><a href="#枚举类型（ENUM）" class="headerlink" title="枚举类型（ENUM）"></a>枚举类型（ENUM）</h3><p>ENUM 类型因为只允许在集合中取得一个值，有点类似于单选项。在处理相互排拆的数据时容易让人理解，比如人类的性别。</p>
-<p>ENUM 类型字段可以从集合中取得一个值或使用 null 值， 除此之外的输入将会使 MySQL 在这个字段中插入一个空字符串。另外如果插入值的大小写与集合中值的大小写不匹配，MySQL 会自动使用插入值的大小写转换成与集合中大小写一致的值。  </p>
-<p>  ENUM 类型在系统内部可以存储为数字，并且从 1 开始用数字做索引。一个 ENUM 类型最多可以包含 65536 个元素，其中一个元素被 MySQL 保留，用来存储错误信息， 这个错误值用索引 0 或者一个空字符串表示。</p>
-<p> MySQL 认为 ENUM 类型集合中出现的值是合法输入，除此之外其它任何输入都将失败。这说明通过搜索包含空字符串或对应数字索引为 0 的行就可以很容易地找到错误记录的位置。</p>
-<h3 id="集合类型（SET）"><a href="#集合类型（SET）" class="headerlink" title="集合类型（SET）"></a>集合类型（SET）</h3><p>　SET 类型与 ENUM 类型相似但不相同。SET类型可以从预定义的集合中取得任意数量的值。并且与 ENUM 类型相同的是任何试图在 SET 类型字段中插入非预定义的值都会使MySQL 插入一个空字符串。如果插入一个即有合法的元素又有非法的元素的记录，MySQL 将会保留合法的元素，除去非法的元素。</p>
+<h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
+<p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
+<p>解决方案：如果放在数据库这边实现，查询次数又非常大的话，尽量考虑把字段直接冗余到索引中去，避免Mysql自身的排序机制可能会引起的性能下降。就是说让排序走索引</p>
+<h3 id="Using-temporary"><a href="#Using-temporary" class="headerlink" title="Using temporary"></a>Using temporary</h3><p><code>Using temporary</code>表示由于排序没有走索引、使用<code>union</code>、子查询连接查询、使用某些视图等原因，因此创建了一个内部临时表。注意这里的临时表可能是内存上的临时表，也有可能是硬盘上的临时表，理所当然基于内存的临时表的时间消耗肯定要比基于硬盘的临时表的实际消耗小。</p>
+<p>常见于排序和分组查询，常见 group by ; order by</p>
+<h3 id="Using-where"><a href="#Using-where" class="headerlink" title="Using where"></a>Using where</h3><p>在查找使用索引的情况下，需要回表去查询所需的数据</p>
+<h3 id="Using-index"><a href="#Using-index" class="headerlink" title="Using index"></a>Using index</h3><p>直接使用索引可获取数据</p>
+<h3 id="ALL"><a href="#ALL" class="headerlink" title="ALL"></a>ALL</h3><p>对于每个来自于先前的表的行组合，进行完整的表扫描。如果表是第一个没标记const的表，这通常不好，并且通常在它情况下很差。通常可以增加更多的索引而不要使用ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
 
     </div>
 
@@ -436,7 +254,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/" title="Mysql数据字段类型">http://bilikings.top/2020/11/29/Mysql数据字段类型/</a>
+    <a href="http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/" title="mysql_extra浅析">http://bilikings.top/2021/02/24/mysql-extra浅析/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -456,13 +274,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/" rel="prev" title="常用数据库引擎对比">
-      <i class="fa fa-chevron-left"></i> 常用数据库引擎对比
+    <a href="/2021/02/13/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E6%B5%85%E6%9E%90/" rel="prev" title="代理模式浅析">
+      <i class="fa fa-chevron-left"></i> 代理模式浅析
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/" rel="next" title="Springboot核心注解详解">
-      Springboot核心注解详解 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -521,7 +336,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">基本数据类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.</span> <span class="nav-text">数值类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.2.</span> <span class="nav-text">字符串类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E4%B8%8E%E6%97%B6%E9%97%B4%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.</span> <span class="nav-text">日期与时间类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B%EF%BC%88ENUM%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">枚举类型（ENUM）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B%EF%BC%88SET%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">集合类型（SET）</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Mysql-Explain-Extra%E7%9A%84%E7%B4%A2%E5%BC%95%E4%BC%98%E5%8C%96"><span class="nav-number">1.</span> <span class="nav-text">Mysql_Explain_Extra的索引优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Using-filsort"><span class="nav-number">1.0.1.</span> <span class="nav-text">Using filsort</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Using-temporary"><span class="nav-number">1.0.2.</span> <span class="nav-text">Using temporary</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Using-where"><span class="nav-number">1.0.3.</span> <span class="nav-text">Using where</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Using-index"><span class="nav-number">1.0.4.</span> <span class="nav-text">Using index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ALL"><span class="nav-number">1.0.5.</span> <span class="nav-text">ALL</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
