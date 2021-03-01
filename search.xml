@@ -266,60 +266,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(1)——线程安全性</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
-    <content><![CDATA[<blockquote>
-<p>什么是线程</p>
-</blockquote>
-<ul>
-<li>线程也成为轻量级进程</li>
-<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
-<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
-</ul>
-<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
-<ol>
-<li>不在线程中共享这个状态变量</li>
-<li>把状态变量修改为不可变的变量</li>
-<li>在访问状态时候使用同步</li>
-</ol>
-<a id="more"></a>
-
-<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
-<ul>
-<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
-<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
-</ul>
-<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
-<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
-</blockquote>
-<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
-<p>由于存在多个竞态条件，是结果变得不可靠</p>
-<ul>
-<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
-<blockquote>
-<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
-</blockquote>
-<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
-<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
-</li>
-<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
-</li>
-</ul>
-<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
-<blockquote>
-<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
-</blockquote>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(2)——对象的共享</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-2-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E5%85%B1%E4%BA%AB/</url>
     <content><![CDATA[<h2 id="对象的共享"><a href="#对象的共享" class="headerlink" title="对象的共享"></a>对象的共享</h2><p>同步还有一个重要的方面，内存可见性(Memory Visibility)，简而言之，我们需要对一个对象在进行修改时，其他线程不会对这个对象进行修改，而且在修改完成之后，其他线程也能看到这个对象状态的变化。</p>
@@ -443,6 +389,60 @@
 <p>委托模型</p>
 <p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
 <p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(1)——线程安全性</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
+    <content><![CDATA[<blockquote>
+<p>什么是线程</p>
+</blockquote>
+<ul>
+<li>线程也成为轻量级进程</li>
+<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
+<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
+</ul>
+<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+<ol>
+<li>不在线程中共享这个状态变量</li>
+<li>把状态变量修改为不可变的变量</li>
+<li>在访问状态时候使用同步</li>
+</ol>
+<a id="more"></a>
+
+<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
+<ul>
+<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
+<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
+</ul>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
+<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
+</blockquote>
+<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
+<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<ul>
+<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
+<blockquote>
+<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
+</blockquote>
+<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
+<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
+</li>
+<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
+</li>
+</ul>
+<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
+<blockquote>
+<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
+</blockquote>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -805,28 +805,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Mysql数据字段类型</title>
     <url>/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>MySQL中定义数据字段的类型对你数据库的优化是非常重要的。</p>
@@ -1028,6 +1006,28 @@
       </tags>
   </entry>
   <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>RabbitMQ消息队列</title>
     <url>/2020/12/02/RabbitMQ%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</url>
     <content><![CDATA[<h1 id="RabbitMQ"><a href="#RabbitMQ" class="headerlink" title="RabbitMQ"></a>RabbitMQ</h1><p>消息队列可以发送 字符串、字节数组、序列化对象，需要对象实现序列化接口</p>
@@ -1189,6 +1189,80 @@
       </tags>
   </entry>
   <entry>
+    <title>Java Stream</title>
+    <url>/2020/11/11/Stream/</url>
+    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
+<li>流式API</li>
+</ul>
+<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>java.io</th>
+<th>java.util.steam</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储</td>
+<td>顺序读写的byte或者char</td>
+<td>顺序输出的任意Java对象实例</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>序列化文件或者网络</td>
+<td>内存计算/业务逻辑</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
+<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
+<p>一个流在使用一次之后会销毁掉。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
+<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
+</li>
+<li><p>基于数组或Collection</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
+
+<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
+<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
+</li>
+<li><p>基于Supplier（供货人）</p>
+<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
+</li>
+</ul>
+<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>map对String的操作</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
+<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
+<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
+<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
+</blockquote>
+<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
+]]></content>
+      <tags>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Springboot核心注解详解</title>
     <url>/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<h2 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h2><h3 id="spring相关"><a href="#spring相关" class="headerlink" title="spring相关"></a>spring相关</h3><blockquote>
@@ -1318,113 +1392,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java Stream</title>
-    <url>/2020/11/11/Stream/</url>
-    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
-<li>流式API</li>
-</ul>
-<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>java.io</th>
-<th>java.util.steam</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>存储</td>
-<td>顺序读写的byte或者char</td>
-<td>顺序输出的任意Java对象实例</td>
-</tr>
-<tr>
-<td>用途</td>
-<td>序列化文件或者网络</td>
-<td>内存计算/业务逻辑</td>
-</tr>
-</tbody></table>
-<a id="more"></a>
-
-<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
-<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
-<p>一个流在使用一次之后会销毁掉。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
-<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
-</li>
-<li><p>基于数组或Collection</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
-
-<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
-<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
-</li>
-<li><p>基于Supplier（供货人）</p>
-<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
-</li>
-</ul>
-<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>map对String的操作</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
-<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
-<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
-<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
-</blockquote>
-<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
-]]></content>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>TopK</title>
-    <url>/2020/11/11/TopK/</url>
-    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
-<ul>
-<li>直接排序，取top100</li>
-<li>堆排序，取top100</li>
-<li>快排的思想，使用划分函数取100</li>
-</ul>
-<p>那么他们分别有什么缺陷呢？</p>
-<ul>
-<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
-<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
-<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
-</ul>
-<a id="more"></a>
-
-<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
-<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
-<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
-<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
-<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
-]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Zuul微服务网关</title>
     <url>/2020/11/30/Zuul%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/</url>
     <content><![CDATA[<h1 id="zuul路由网关"><a href="#zuul路由网关" class="headerlink" title="zuul路由网关"></a>zuul路由网关</h1><ul>
@@ -1489,10 +1456,45 @@
       </tags>
   </entry>
   <entry>
+    <title>TopK</title>
+    <url>/2020/11/11/TopK/</url>
+    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
+<ul>
+<li>直接排序，取top100</li>
+<li>堆排序，取top100</li>
+<li>快排的思想，使用划分函数取100</li>
+</ul>
+<p>那么他们分别有什么缺陷呢？</p>
+<ul>
+<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
+<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
+<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
+<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
+<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
+<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
+<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
+]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>mysql_extra浅析</title>
     <url>/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</url>
     <content><![CDATA[<h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
 <a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 表的读取顺序如何</span><br><span class="line">2. 数据读取操作有哪些操作类型</span><br><span class="line">3. 哪些索引可以使用</span><br><span class="line">4. 哪些索引被实际使用</span><br><span class="line">5. 表之间是如何引用</span><br><span class="line">6. 每张表有多少行被优化器查询</span><br></pre></td></tr></table></figure>
 
 <h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
 <p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
@@ -1508,6 +1510,66 @@
       </tags>
   </entry>
   <entry>
+    <title>mysql优化建议</title>
+    <url>/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/</url>
+    <content><![CDATA[<h1 id="SQL性能优化汇总"><a href="#SQL性能优化汇总" class="headerlink" title="SQL性能优化汇总"></a>SQL性能优化汇总</h1><h3 id="库表设计规范"><a href="#库表设计规范" class="headerlink" title="库表设计规范"></a>库表设计规范</h3><h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>云数据库 <code>MySQL</code> 5.6 及以上版本不支持 <code>MyISAM</code> 引擎和 Memory 引擎，若有 Memory 引擎的需求建议使用云数据库 <code>Redis</code> 、<code>Memcached</code>；自建数据库迁移到云数据库 <code>MySQL</code> 时，会自动将 <code>MyISAM</code> 引擎转换成 <code>InnoDB</code> 引擎。<br>存在自增列的表，自增列上必须存在一个单独的索引，若在复合索引中，自增列必须置于第一位。<br>row_format必须保证为非 fixed。<br>每张表必须要有主键，即使选不出合适的列做主键，亦必须添加一个无意义的列做主键，<code>MySQL</code> 第一范式标准 <code>InnoDB</code> 辅助索引叶子节点会保存一份主键值，推荐用自增短列作为主键，降低索引所占磁盘空间提升效率，<code>binlog_format</code>为 row 的场景下，批量删数据没主键会导致严重的主从延迟。<br><strong>字段尽量定义为 NOT NULL 并加上默认值，NULL 会给 SQL 开发带来很多问题导致走不了索引，对 NULL 计算时只能用 IS NULL 和 IS NOT NULL 来判断。</strong></p>
+<a id="more"></a>
+
+<h3 id="索引设计规范"><a href="#索引设计规范" class="headerlink" title="索引设计规范"></a>索引设计规范</h3><h4 id="注意事项-1"><a href="#注意事项-1" class="headerlink" title="注意事项"></a>注意事项</h4><ol>
+<li>禁止在更新十分频繁、区分度不高的列上建立索引，记录更新会变更 B+ 树，更新频繁的字段建立索引会大大降低数据库性能。</li>
+<li>建复合索引时，区分度最高的列放索引的最左边，例如select xxx where a = x and b = x;，a 和 b 一起建组合索引，a 的区分度更高，则建idx_ab(a,b)。存在非等号和等号混合判断条件时，必须把等号条件的列前置，例如，where a xxx and b = xxx那么即使 a 的区分度更高，也必须把 b 放在索引的最前列，因为走不到索引 a。</li>
+</ol>
+<h4 id="建议事项"><a href="#建议事项" class="headerlink" title="建议事项"></a>建议事项</h4><ol>
+<li>单表的索引数建议不超过5个，单个索引中的字段数建议不超过5个，太多起不到过滤作用，索引也占空间，管理起来也耗资源。</li>
+<li>选择业务中 SQL 过滤走的最多的并且 cardinality （基数）值比较高的列建索引，业务 SQL 不走的列建索引是无意义的，字段的唯一性越高即代表 cardinality 值越高，索引过滤效果也越好，一般索引列的 cardinality 记录数小于10%我们可认为这是一个低效索引，例如性别字段。</li>
+<li>varchar 字段上建索引时，建议指定索引长度，不要直接将整个列建索引，一般 varchar 列比较长，指定一定长度作索引已经区分度够高，没必要整列建索引，整列建索引会显得比较重，增大了索引维护的代价，可以用 count(distinct left(列名, 索引长度))/count(*) 来看索引区分度。</li>
+<li>避免冗余索引，两个索引 (a,b) (a) 同时存在，则 (a) 属于冗余索引 redundant index，若查询过滤条件为 a 列，(a,b) 索引就够了，不用单独建 (a) 索引。</li>
+<li>合理利用覆盖索引来降低 IO 开销，在 InnoDB 中二级索引的叶子节点只保存本身的键值和主键值，若一个 SQL 查询的不是索引列或者主键，走这个索引就会先找到对应主键然后根据主键去找需要找的列，这就是回表（Use where），这样会带来额外的 IO 开销，此时我们可以利用覆盖索引来解决这个问题，例如select a,b from xxx where a = xxx，若 a 不是主键，这时候我们可以创建 a,b 两个列的复合索引，这样就不会回表。</li>
+</ol>
+<h3 id="SQL-编写规范"><a href="#SQL-编写规范" class="headerlink" title="SQL 编写规范"></a>SQL 编写规范</h3><h4 id="注意事项-2"><a href="#注意事项-2" class="headerlink" title="注意事项"></a>注意事项</h4><ol>
+<li><p>UPDATE、DELETE 操作不使用 LIMIT，必须走 WHERE 精准匹配，LIMIT 是随机的，此类操作会导致数据出错。</p>
+</li>
+<li><p>禁止使用INSERT INTO t_xxx VALUES(xxx)，必须显式指定插入的列属性，避免表结构变动导致数据出错。</p>
+</li>
+</ol>
+<p>SQL 语句中最常见的导致索引失效的情况需注意：</p>
+<ol>
+<li>隐式类型转换，如索引 a 的类型是 varchar，SQL 语句写成 where a = 1; varchar 变成了int。</li>
+<li>对索引列进行数学计算和函数等操作，例如，使用函数对日期列进行格式化处理。</li>
+<li>join 列字符集不统一。</li>
+<li>多列排序顺序不一致问题，如索引是 (a,b)，SQL 语句是 order by a b desclike。</li>
+<li>模糊查询使用的时候对于字符型xxx%形式可以走到一些索引，其他情况都走不到索引。</li>
+<li>使用了负方向查询（not，!=，not in 等）。</li>
+</ol>
+<h4 id="建议事项-1"><a href="#建议事项-1" class="headerlink" title="建议事项"></a>建议事项</h4><ol>
+<li><p>按需索取，拒绝select *，规避以下问题：</p>
+</li>
+<li><p>无法索引覆盖，回表操作，增加 I/O。</p>
+</li>
+<li><p>额外的内存负担，大量冷数据灌入innodb_buffer_pool_size，降低查询命中率。</p>
+</li>
+<li><p>额外的网络传输开销。</p>
+</li>
+<li><p>尽量避免使用大事务，建议大事务拆小事务，规避主从延迟。</p>
+</li>
+<li><p>业务代码中事务及时提交，避免产生没必要的锁等待。</p>
+</li>
+<li><p>少用多表 join，大表禁止 join，两张表 join 必须让小表做驱动表，join 列必须字符集一致并且都建有索引。</p>
+</li>
+<li><p>LIMIT 分页优化，LIMIT 80000，10这种操作是取出80010条记录，再返回后10条，数据库压力很大，推荐先确认首记录的位置再分页，例如</p>
+<blockquote>
+<p>SELECT * FROM test WHERE id = ( SELECT sql_no_cache id FROM test order by id LIMIT 80000,1 ) LIMIT 10 ;</p>
+</blockquote>
+</li>
+<li><p>避免多层子查询嵌套的 SQL 语句，MySQL 5.5 之前的查询优化器会把 in 改成 exists，会导致索引失效，若外表很大则性能会很差。</p>
+</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>代理模式浅析</title>
     <url>/2021/02/13/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E6%B5%85%E6%9E%90/</url>
     <content><![CDATA[<h1 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h1><h2 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h2><p>因为要搞清楚动态代理必须知道静态代理是什么玩意</p>
@@ -1515,8 +1577,10 @@
 <p>目的是为其他对象提供一个代理以控制对这个对象的访问，或者在不改变原有功能代码的情况下做到添加新的功能</p>
 <p>代理之后要做到：</p>
 <ul>
-<li>使用方式和原先一样</li>
-<li>核心功能和原先一样</li>
+<li><p>使用方式和原先一样</p>
+</li>
+<li><p>核心功能和原先一样</p>
+</li>
 </ul>
 <p>代理模式提供以下三个角色</p>
 <ol>
@@ -1524,6 +1588,8 @@
 <li> 代理主题（Proxy Subject）角色：也叫做委托类、代理类，该角色负责控制对真实主题的引用，负责在需要的时候创建或删除真实主题对象，并且在真实主题角色处理完毕前后做预处理和善后处理工作。</li>
 <li>真实主题（Real Subject）角色：该角色也叫做被委托角色、被代理角色，是业务逻辑的具体执行者。</li>
 </ol>
+<a id="more"></a>
+
 <p>代理模式的优点代理模式的优点有以下几个方面。</p>
 <ol>
 <li> 职责清晰：真实的角色实现实际的业务逻辑，不用关心其他非本职的事务，通过后期的代理完成附加的事务，附带的结果就是编程简洁清晰。2</li>

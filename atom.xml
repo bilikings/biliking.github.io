@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-02-24T07:42:45.993Z</updated>
+  <updated>2021-03-01T07:59:13.867Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -17,11 +17,28 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>mysql优化建议</title>
+    <link href="http://bilikings.top/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/"/>
+    <id>http://bilikings.top/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/</id>
+    <published>2021-03-01T07:55:31.000Z</published>
+    <updated>2021-03-01T07:59:13.867Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;SQL性能优化汇总&quot;&gt;&lt;a href=&quot;#SQL性能优化汇总&quot; class=&quot;headerlink&quot; title=&quot;SQL性能优化汇总&quot;&gt;&lt;/a&gt;SQL性能优化汇总&lt;/h1&gt;&lt;h3 id=&quot;库表设计规范&quot;&gt;&lt;a href=&quot;#库表设计规范&quot; class=&quot;headerlink&quot; title=&quot;库表设计规范&quot;&gt;&lt;/a&gt;库表设计规范&lt;/h3&gt;&lt;h4 id=&quot;注意事项&quot;&gt;&lt;a href=&quot;#注意事项&quot; class=&quot;headerlink&quot; title=&quot;注意事项&quot;&gt;&lt;/a&gt;注意事项&lt;/h4&gt;&lt;p&gt;云数据库 &lt;code&gt;MySQL&lt;/code&gt; 5.6 及以上版本不支持 &lt;code&gt;MyISAM&lt;/code&gt; 引擎和 Memory 引擎，若有 Memory 引擎的需求建议使用云数据库 &lt;code&gt;Redis&lt;/code&gt; 、&lt;code&gt;Memcached&lt;/code&gt;；自建数据库迁移到云数据库 &lt;code&gt;MySQL&lt;/code&gt; 时，会自动将 &lt;code&gt;MyISAM&lt;/code&gt; 引擎转换成 &lt;code&gt;InnoDB&lt;/code&gt; 引擎。&lt;br&gt;存在自增列的表，自增列上必须存在一个单独的索引，若在复合索引中，自增列必须置于第一位。&lt;br&gt;row_format必须保证为非 fixed。&lt;br&gt;每张表必须要有主键，即使选不出合适的列做主键，亦必须添加一个无意义的列做主键，&lt;code&gt;MySQL&lt;/code&gt; 第一范式标准 &lt;code&gt;InnoDB&lt;/code&gt; 辅助索引叶子节点会保存一份主键值，推荐用自增短列作为主键，降低索引所占磁盘空间提升效率，&lt;code&gt;binlog_format&lt;/code&gt;为 row 的场景下，批量删数据没主键会导致严重的主从延迟。&lt;br&gt;&lt;strong&gt;字段尽量定义为 NOT NULL 并加上默认值，NULL 会给 SQL 开发带来很多问题导致走不了索引，对 NULL 计算时只能用 IS NULL 和 IS NOT NULL 来判断。&lt;/strong&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Mysql" scheme="http://bilikings.top/tags/Mysql/"/>
+    
+  </entry>
+  
+  <entry>
     <title>mysql_extra浅析</title>
     <link href="http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/"/>
     <id>http://bilikings.top/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</id>
     <published>2021-02-24T07:42:26.000Z</published>
-    <updated>2021-02-24T07:42:45.993Z</updated>
+    <updated>2021-02-24T07:45:13.719Z</updated>
     
     
     <summary type="html">&lt;h1 id=&quot;Mysql-Explain-Extra的索引优化&quot;&gt;&lt;a href=&quot;#Mysql-Explain-Extra的索引优化&quot; class=&quot;headerlink&quot; title=&quot;Mysql_Explain_Extra的索引优化&quot;&gt;&lt;/a&gt;Mysql_Explain_Extra的索引优化&lt;/h1&gt;&lt;p&gt;在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议&lt;/p&gt;</summary>
@@ -38,16 +55,25 @@
     <link href="http://bilikings.top/2021/02/13/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E6%B5%85%E6%9E%90/"/>
     <id>http://bilikings.top/2021/02/13/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E6%B5%85%E6%9E%90/</id>
     <published>2021-02-13T13:27:59.000Z</published>
-    <updated>2021-02-13T13:28:17.746Z</updated>
+    <updated>2021-02-26T01:07:18.452Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;代理模式&quot;&gt;&lt;a href=&quot;#代理模式&quot; class=&quot;headerlink&quot; title=&quot;代理模式&quot;&gt;&lt;/a&gt;代理模式&lt;/h1&gt;&lt;h2 id=&quot;静态代理&quot;&gt;&lt;a href=&quot;#静态代理&quot; class=&quot;headerlink&quot;</summary>
-        
-      
+    <summary type="html">&lt;h1 id=&quot;代理模式&quot;&gt;&lt;a href=&quot;#代理模式&quot; class=&quot;headerlink&quot; title=&quot;代理模式&quot;&gt;&lt;/a&gt;代理模式&lt;/h1&gt;&lt;h2 id=&quot;静态代理&quot;&gt;&lt;a href=&quot;#静态代理&quot; class=&quot;headerlink&quot; title=&quot;静态代理&quot;&gt;&lt;/a&gt;静态代理&lt;/h2&gt;&lt;p&gt;因为要搞清楚动态代理必须知道静态代理是什么玩意&lt;/p&gt;
+&lt;p&gt;代理模式（Proxy Pattern)也叫委托模式，是一个使用率很高的模式&lt;/p&gt;
+&lt;p&gt;目的是为其他对象提供一个代理以控制对这个对象的访问，或者在不改变原有功能代码的情况下做到添加新的功能&lt;/p&gt;
+&lt;p&gt;代理之后要做到：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;使用方式和原先一样&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;核心功能和原先一样&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;代理模式提供以下三个角色&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;抽象主题（Subject）角色：该角色是真实主题和代理主题的共同接口，以便在任何可以使用真实主题的地方都可以使用代理主题。&lt;/li&gt;
+&lt;li&gt; 代理主题（Proxy Subject）角色：也叫做委托类、代理类，该角色负责控制对真实主题的引用，负责在需要的时候创建或删除真实主题对象，并且在真实主题角色处理完毕前后做预处理和善后处理工作。&lt;/li&gt;
+&lt;li&gt;真实主题（Real Subject）角色：该角色也叫做被委托角色、被代理角色，是业务逻辑的具体执行者。&lt;/li&gt;
+&lt;/ol&gt;</summary>
     
     
     
@@ -449,36 +475,6 @@
     <summary type="html">&lt;h2 id=&quot;对象的共享&quot;&gt;&lt;a href=&quot;#对象的共享&quot; class=&quot;headerlink&quot; title=&quot;对象的共享&quot;&gt;&lt;/a&gt;对象的共享&lt;/h2&gt;&lt;p&gt;同步还有一个重要的方面，内存可见性(Memory Visibility)，简而言之，我们需要对一个对象在进行修改时，其他线程不会对这个对象进行修改，而且在修改完成之后，其他线程也能看到这个对象状态的变化。&lt;/p&gt;
 &lt;h3 id=&quot;可见性&quot;&gt;&lt;a href=&quot;#可见性&quot; class=&quot;headerlink&quot; title=&quot;可见性&quot;&gt;&lt;/a&gt;可见性&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;重排序&lt;/strong&gt;：在编译器和处理时与运行时，可能对操作进行顺序进行进行重排序，所以对内存操作的顺序无法正确判断。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;非原子的64位操作&lt;/strong&gt;：在Java中，long与double类型，JVM允许把其拆分成2个32位的进行计算。如果对这个变量的读操作和写操作在不同的线程中进行，可能就读取到错误的数据。&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java并发编程笔记(1)——线程安全性</title>
-    <link href="http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/"/>
-    <id>http://bilikings.top/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</id>
-    <published>2020-11-17T09:00:25.000Z</published>
-    <updated>2020-11-17T09:01:58.075Z</updated>
-    
-    
-    <summary type="html">&lt;blockquote&gt;
-&lt;p&gt;什么是线程&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;ul&gt;
-&lt;li&gt;线程也成为轻量级进程&lt;/li&gt;
-&lt;li&gt;进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位&lt;/li&gt;
-&lt;li&gt;同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&quot;线程安全性&quot;&gt;&lt;a href=&quot;#线程安全性&quot; class=&quot;headerlink&quot; title=&quot;线程安全性&quot;&gt;&lt;/a&gt;线程安全性&lt;/h2&gt;&lt;p&gt;如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;不在线程中共享这个状态变量&lt;/li&gt;
-&lt;li&gt;把状态变量修改为不可变的变量&lt;/li&gt;
-&lt;li&gt;在访问状态时候使用同步&lt;/li&gt;
-&lt;/ol&gt;</summary>
     
     
     
