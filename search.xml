@@ -257,6 +257,60 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(1)——线程安全性</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
+    <content><![CDATA[<blockquote>
+<p>什么是线程</p>
+</blockquote>
+<ul>
+<li>线程也成为轻量级进程</li>
+<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
+<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
+</ul>
+<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+<ol>
+<li>不在线程中共享这个状态变量</li>
+<li>把状态变量修改为不可变的变量</li>
+<li>在访问状态时候使用同步</li>
+</ol>
+<a id="more"></a>
+
+<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
+<ul>
+<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
+<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
+</ul>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
+<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
+</blockquote>
+<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
+<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<ul>
+<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
+<blockquote>
+<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
+</blockquote>
+<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
+<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
+</li>
+<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
+</li>
+</ul>
+<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
+<blockquote>
+<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JavaJUC(二)——Concurrent包</title>
     <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
     <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
@@ -323,90 +377,6 @@
 
 <h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><h2 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h2><p>在必要的情况下，把一个大任务拆分（fork）成若干个小任务（拆到不可以在拆的时候），再把一个个小任务运算的结果进行join汇总</p>
 <p>在stream处理中，要是开启多线程，内部使用此框架</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(1)——线程安全性</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
-    <content><![CDATA[<blockquote>
-<p>什么是线程</p>
-</blockquote>
-<ul>
-<li>线程也成为轻量级进程</li>
-<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
-<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
-</ul>
-<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
-<ol>
-<li>不在线程中共享这个状态变量</li>
-<li>把状态变量修改为不可变的变量</li>
-<li>在访问状态时候使用同步</li>
-</ol>
-<a id="more"></a>
-
-<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
-<ul>
-<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
-<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
-</ul>
-<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
-<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
-</blockquote>
-<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
-<p>由于存在多个竞态条件，是结果变得不可靠</p>
-<ul>
-<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
-<blockquote>
-<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
-</blockquote>
-<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
-<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
-</li>
-<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
-</li>
-</ul>
-<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
-<blockquote>
-<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
-</blockquote>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(3)——对象的组合</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
-    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
-<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
-<ol>
-<li>找出构成对象的所有变量</li>
-<li>找出约束状态条件的不变性条件</li>
-<li>建立对象状态的并发访问管理策略</li>
-</ol>
-<a id="more"></a>
-
-<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
-<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
-<blockquote>
-<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
-</blockquote>
-<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
-<blockquote>
-<p>通过一个私有锁来保护状态</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>委托模型</p>
-<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
-<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -506,6 +476,36 @@
 <li><p>保护对象。被保护的对象只能通过持有特定锁来进行访问，保护对象包括在封装在其他线程安全对象中的对象，以及已经发布并且由某特定锁保护的对象。</p>
 </li>
 </ul>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(3)——对象的组合</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
+    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
+<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
+<ol>
+<li>找出构成对象的所有变量</li>
+<li>找出约束状态条件的不变性条件</li>
+<li>建立对象状态的并发访问管理策略</li>
+</ol>
+<a id="more"></a>
+
+<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
+<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
+<blockquote>
+<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
+</blockquote>
+<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
+<blockquote>
+<p>通过一个私有锁来保护状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>委托模型</p>
+<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
+<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -1708,68 +1708,6 @@
       </tags>
   </entry>
   <entry>
-    <title>单例模式</title>
-    <url>/2020/12/11/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<h3 id="1-单例模式"><a href="#1-单例模式" class="headerlink" title="1.单例模式"></a>1.单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
-<h4 id="饿汉式（静态常量）"><a href="#饿汉式（静态常量）" class="headerlink" title="饿汉式（静态常量）"></a>饿汉式（静态常量）</h4><ol>
-<li><p>构造器私有化（防止new）</p>
-</li>
-<li><p>类的内部创建对象</p>
-</li>
-<li><p>向外暴露一个静态公共方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Single instance =<span class="keyword">new</span> Single();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<ul>
-<li>优点：写法简单，类装载的时候实例化，避免了线程同步</li>
-<li>缺点：可能造成内存的浪费</li>
-</ul>
-<a id="more"></a>
-
-<h4 id="饿汉式（静态代码块）"><a href="#饿汉式（静态代码块）" class="headerlink" title="饿汉式（静态代码块）"></a>饿汉式（静态代码块）</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance ;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态代码块</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        instance =<span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="懒汉式（线程不安全）"><a href="#懒汉式（线程不安全）" class="headerlink" title="懒汉式（线程不安全）"></a>懒汉式（线程不安全）</h4><p>提供一个静态的公有方法，使用这个方法时候才去创建instance</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：懒加载</li>
-<li>缺点：只能单线程使用</li>
-</ul>
-<h4 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h4><p>加入同步代码</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：可以多线程了</li>
-<li>缺点：同步效率低，每次new都要同步</li>
-</ul>
-<h4 id="懒汉式（无法解决线程安全，同步代码块）"><a href="#懒汉式（无法解决线程安全，同步代码块）" class="headerlink" title="懒汉式（无法解决线程安全，同步代码块）"></a>懒汉式（无法解决线程安全，同步代码块）</h4><p>没有实际意义的代码，所以需要双重检查</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class)&#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="双重检查"><a href="#双重检查" class="headerlink" title="双重检查"></a>双重检查</h4><p><code>volatile</code>是把可以把修改值直接放入储存(实现可见性,实现有序性,不能保证原子性)</p>
-<ul>
-<li>提供一个静态的公有方法，加入双重检查，解决了线程安全问题，同时解决懒加载问题</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instance = <span class="keyword">new</span> Single();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：线程安全，延迟加载，效率高</li>
-</ul>
-<h4 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h4><p>静态内部类的特点：当一个类被装载的时候，里面的static的类不会被装载。当调用到了静态内部类里面的东西的时候，静态内部类才会被装载，而类装载的时候线程的安全的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleGetInstance</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Single INSTANCE = <span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingleGetInstance.INSTANCE;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：避免线程不安全，利用静态内部类的特点实现延迟加载，效率高</li>
-</ul>
-<h4 id="枚举-（enum）"><a href="#枚举-（enum）" class="headerlink" title="枚举 （enum）"></a>枚举 （enum）</h4><p>枚举是一个特殊的类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    INSTANCE;<span class="comment">//属性</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">say</span><span class="params">()</span></span>&#123;<span class="comment">//方法</span></span><br><span class="line">        System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>不仅避免多线程同步问题，还能防止反序列化重新创建新的对象</p>
-]]></content>
-      <tags>
-        <tag>设计模式</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>创建型模式——单例模式</title>
     <url>/2020/11/16/%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
@@ -1830,6 +1768,68 @@
 ]]></content>
       <tags>
         <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>单例模式</title>
+    <url>/2020/12/11/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h3 id="1-单例模式"><a href="#1-单例模式" class="headerlink" title="1.单例模式"></a>1.单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
+<h4 id="饿汉式（静态常量）"><a href="#饿汉式（静态常量）" class="headerlink" title="饿汉式（静态常量）"></a>饿汉式（静态常量）</h4><ol>
+<li><p>构造器私有化（防止new）</p>
+</li>
+<li><p>类的内部创建对象</p>
+</li>
+<li><p>向外暴露一个静态公共方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Single instance =<span class="keyword">new</span> Single();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ul>
+<li>优点：写法简单，类装载的时候实例化，避免了线程同步</li>
+<li>缺点：可能造成内存的浪费</li>
+</ul>
+<a id="more"></a>
+
+<h4 id="饿汉式（静态代码块）"><a href="#饿汉式（静态代码块）" class="headerlink" title="饿汉式（静态代码块）"></a>饿汉式（静态代码块）</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance ;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态代码块</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        instance =<span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="懒汉式（线程不安全）"><a href="#懒汉式（线程不安全）" class="headerlink" title="懒汉式（线程不安全）"></a>懒汉式（线程不安全）</h4><p>提供一个静态的公有方法，使用这个方法时候才去创建instance</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：懒加载</li>
+<li>缺点：只能单线程使用</li>
+</ul>
+<h4 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h4><p>加入同步代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：可以多线程了</li>
+<li>缺点：同步效率低，每次new都要同步</li>
+</ul>
+<h4 id="懒汉式（无法解决线程安全，同步代码块）"><a href="#懒汉式（无法解决线程安全，同步代码块）" class="headerlink" title="懒汉式（无法解决线程安全，同步代码块）"></a>懒汉式（无法解决线程安全，同步代码块）</h4><p>没有实际意义的代码，所以需要双重检查</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class)&#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="双重检查"><a href="#双重检查" class="headerlink" title="双重检查"></a>双重检查</h4><p><code>volatile</code>是把可以把修改值直接放入储存(实现可见性,实现有序性,不能保证原子性)</p>
+<ul>
+<li>提供一个静态的公有方法，加入双重检查，解决了线程安全问题，同时解决懒加载问题</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instance = <span class="keyword">new</span> Single();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：线程安全，延迟加载，效率高</li>
+</ul>
+<h4 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h4><p>静态内部类的特点：当一个类被装载的时候，里面的static的类不会被装载。当调用到了静态内部类里面的东西的时候，静态内部类才会被装载，而类装载的时候线程的安全的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleGetInstance</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Single INSTANCE = <span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingleGetInstance.INSTANCE;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：避免线程不安全，利用静态内部类的特点实现延迟加载，效率高</li>
+</ul>
+<h4 id="枚举-（enum）"><a href="#枚举-（enum）" class="headerlink" title="枚举 （enum）"></a>枚举 （enum）</h4><p>枚举是一个特殊的类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    INSTANCE;<span class="comment">//属性</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">say</span><span class="params">()</span></span>&#123;<span class="comment">//方法</span></span><br><span class="line">        System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不仅避免多线程同步问题，还能防止反序列化重新创建新的对象</p>
+]]></content>
+      <tags>
+        <tag>设计模式</tag>
       </tags>
   </entry>
   <entry>
@@ -2041,6 +2041,30 @@
       </tags>
   </entry>
   <entry>
+    <title>泛型的具体含义与区别</title>
+    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
+<p>主要是从为了把运行时异常提前到编译时抛出</p>
+<p><strong>通配符的几种形式：</strong></p>
+<ol>
+<li><p>无限定通配符，&lt;?&gt;</p>
+</li>
+<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
+</li>
+<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
+</li>
+</ol>
+<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
+<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
+<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -2116,30 +2140,6 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>泛型的具体含义与区别</title>
-    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
-<p>主要是从为了把运行时异常提前到编译时抛出</p>
-<p><strong>通配符的几种形式：</strong></p>
-<ol>
-<li><p>无限定通配符，&lt;?&gt;</p>
-</li>
-<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
-</li>
-<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
-</li>
-</ol>
-<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
-<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
-<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2230,58 +2230,6 @@
       </tags>
   </entry>
   <entry>
-    <title>通过反射定义注解</title>
-    <url>/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</url>
-    <content><![CDATA[<p>本文则以输入校验的 <code>@Length</code>注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。</p>
-<h2 id="第一步：首先定义注解：-Length"><a href="#第一步：首先定义注解：-Length" class="headerlink" title="第一步：首先定义注解：@Length"></a>第一步：首先定义注解：@Length</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.FIELD&#125;)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Length&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">min</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最小值</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最大值</span></span><br><span class="line">    <span class="function">String <span class="title">errorMsg</span><span class="params">()</span></span>; <span class="comment">// 自定义的错误提示信息</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<ul>
-<li><p>说明：</p>
-<ol>
-<li><p>注解的定义有点像定义接口 <code>interface</code>，但唯一不同的是前面需要加一个 <code>@</code>符号。</p>
-</li>
-<li><p>注解的成员变量只能使用基本类型、 <code>String</code>或者 <code>enum</code>枚举，比如 <code>int</code>可以，但 <code>Integer</code>这种包装类型就不行，需注意。</p>
-</li>
-<li><p>像上面 <code>@Target</code>、 <code>@Retention</code>这种加在注解定义上面的注解，我们称为 <strong>“元注解”</strong>，元注解就是专门用于给注解添加注解的注解，哈哈，很拗口，简单理解，元注解就是天生就有的注解，可直接用于注解的定义上。</p>
-</li>
-<li><p><code>@Target(xxx)</code> 用来说明该自定义注解可以用在什么位置，比如：</p>
-<ul>
-<li><code>ElementType.FIELD</code>：说明自定义的注解可以用于类的变量</li>
-<li><code>ElementType.METHOD</code>：说明自定义的注解可以用于类的方法</li>
-<li><code>ElementType.TYPE</code>：说明自定义的注解可以用于类本身、接口或 <code>enum</code>类型</li>
-<li>等等… 还有很多，如果记不住，建议现用现查</li>
-</ul>
-</li>
-<li><p><code>@Retention(xxx)</code> 用来说明你自定义注解的生命周期，比如：</p>
-<ul>
-<li><code>@Retention(RetentionPolicy.RUNTIME)</code>：表示注解可以一直保留到运行时，因此可以通过反射获取注解信息</li>
-<li><code>@Retention(RetentionPolicy.CLASS)</code>：表示注解被编译器编译进 <code>class</code>文件，但运行时会忽略</li>
-<li><code>@Retention(RetentionPolicy.SOURCE)</code>：表示注解仅在源文件中有效，编译时就会被忽略</li>
-</ul>
-<p>所以声明周期从长到短分别为：<strong>RUNTIME</strong> &gt; <strong>CLASS</strong> &gt; <strong>SOURCE</strong> ，一般来说，如果需要在运行时去动态获取注解的信息，还是得用RUNTIME，就像本文所用。</p>
-</li>
-</ol>
-</li>
-</ul>
-<h2 id="获取注解并对其认证"><a href="#获取注解并对其认证" class="headerlink" title="获取注解并对其认证"></a>获取注解并对其认证</h2><p>在运行时候获取注解包含的信息，得用<strong>java反射机制</strong></p>
-<p>下面写了一个验证函数 <code>validate()</code>，代码中会<strong>逐行用注释去解释</strong>想要达到的目的，认真看一下每一行的注释：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">validate</span><span class="params">(Object object)</span> <span class="keyword">throws</span> IllagelAccessException</span>&#123;</span><br><span class="line">    <span class="comment">//先通过反射获取object对象的类有哪些字段</span></span><br><span class="line">    <span class="comment">//本文就是获取到Student的id、name、mobile的三个字段</span></span><br><span class="line">    <span class="comment">//getClass()获得获得一个实例的类型类；getDeclaredFields()获得某个类的所有声明的字段，即包括public、private和proteced，但是不包括父类的申明字段。</span></span><br><span class="line">    Field[] fields = object.getClass().getDeclaredFields();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//for循环逐个检测校验，看看哪个字段标了注解</span></span><br><span class="line">    <span class="keyword">for</span>(Field field : fields)&#123;</span><br><span class="line">        <span class="comment">//if判断：检测字段是有没有@Length注解</span></span><br><span class="line">        <span class="keyword">if</span>(field.isAnnotationPresent(Length.class))&#123; <span class="comment">//Length类型的注解是否在反射获得的那个类上</span></span><br><span class="line">            <span class="comment">//通过反射获取到字段上面标注的@Length的详细信息</span></span><br><span class="line">            Length length = field.getAnnotation(Length.class);</span><br><span class="line">            field.setAccessable(<span class="keyword">true</span>);<span class="comment">//允许反射时候可以获得私有变量</span></span><br><span class="line">            <span class="comment">//用反射获取字段的实际值</span></span><br><span class="line">            <span class="keyword">int</span> value = ((String)field.get(objedt)).length;</span><br><span class="line">            <span class="comment">//将字段的实际值和注解上做标志的值进行比对</span></span><br><span class="line">            <span class="keyword">if</span>(value&lt;length.min() || value&gt;length.max)&#123;</span><br><span class="line">                <span class="keyword">return</span> lenth.errorMsh();</span><br><span class="line">            &#125;   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="使用注解"><a href="#使用注解" class="headerlink" title="使用注解"></a>使用注解</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Length(min = 11,max = 11, erroeMsg = &quot;error phone number&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mobile;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>感谢CodeSheep的<a href="https://mp.weixin.qq.com/s/gdYysBB3aD_HmPyvEThFXw">原文</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>转发与重定向</title>
     <url>/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</url>
     <content><![CDATA[<h1 id="转发与重定向"><a href="#转发与重定向" class="headerlink" title="转发与重定向"></a>转发与重定向</h1><p> 转发和重定向都是作为实现页面跳转的方法，他们的区别</p>
@@ -2333,6 +2281,58 @@
 ]]></content>
       <tags>
         <tag>web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>通过反射定义注解</title>
+    <url>/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</url>
+    <content><![CDATA[<p>本文则以输入校验的 <code>@Length</code>注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。</p>
+<h2 id="第一步：首先定义注解：-Length"><a href="#第一步：首先定义注解：-Length" class="headerlink" title="第一步：首先定义注解：@Length"></a>第一步：首先定义注解：@Length</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.FIELD&#125;)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Length&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">min</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最小值</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最大值</span></span><br><span class="line">    <span class="function">String <span class="title">errorMsg</span><span class="params">()</span></span>; <span class="comment">// 自定义的错误提示信息</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<ul>
+<li><p>说明：</p>
+<ol>
+<li><p>注解的定义有点像定义接口 <code>interface</code>，但唯一不同的是前面需要加一个 <code>@</code>符号。</p>
+</li>
+<li><p>注解的成员变量只能使用基本类型、 <code>String</code>或者 <code>enum</code>枚举，比如 <code>int</code>可以，但 <code>Integer</code>这种包装类型就不行，需注意。</p>
+</li>
+<li><p>像上面 <code>@Target</code>、 <code>@Retention</code>这种加在注解定义上面的注解，我们称为 <strong>“元注解”</strong>，元注解就是专门用于给注解添加注解的注解，哈哈，很拗口，简单理解，元注解就是天生就有的注解，可直接用于注解的定义上。</p>
+</li>
+<li><p><code>@Target(xxx)</code> 用来说明该自定义注解可以用在什么位置，比如：</p>
+<ul>
+<li><code>ElementType.FIELD</code>：说明自定义的注解可以用于类的变量</li>
+<li><code>ElementType.METHOD</code>：说明自定义的注解可以用于类的方法</li>
+<li><code>ElementType.TYPE</code>：说明自定义的注解可以用于类本身、接口或 <code>enum</code>类型</li>
+<li>等等… 还有很多，如果记不住，建议现用现查</li>
+</ul>
+</li>
+<li><p><code>@Retention(xxx)</code> 用来说明你自定义注解的生命周期，比如：</p>
+<ul>
+<li><code>@Retention(RetentionPolicy.RUNTIME)</code>：表示注解可以一直保留到运行时，因此可以通过反射获取注解信息</li>
+<li><code>@Retention(RetentionPolicy.CLASS)</code>：表示注解被编译器编译进 <code>class</code>文件，但运行时会忽略</li>
+<li><code>@Retention(RetentionPolicy.SOURCE)</code>：表示注解仅在源文件中有效，编译时就会被忽略</li>
+</ul>
+<p>所以声明周期从长到短分别为：<strong>RUNTIME</strong> &gt; <strong>CLASS</strong> &gt; <strong>SOURCE</strong> ，一般来说，如果需要在运行时去动态获取注解的信息，还是得用RUNTIME，就像本文所用。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="获取注解并对其认证"><a href="#获取注解并对其认证" class="headerlink" title="获取注解并对其认证"></a>获取注解并对其认证</h2><p>在运行时候获取注解包含的信息，得用<strong>java反射机制</strong></p>
+<p>下面写了一个验证函数 <code>validate()</code>，代码中会<strong>逐行用注释去解释</strong>想要达到的目的，认真看一下每一行的注释：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">validate</span><span class="params">(Object object)</span> <span class="keyword">throws</span> IllagelAccessException</span>&#123;</span><br><span class="line">    <span class="comment">//先通过反射获取object对象的类有哪些字段</span></span><br><span class="line">    <span class="comment">//本文就是获取到Student的id、name、mobile的三个字段</span></span><br><span class="line">    <span class="comment">//getClass()获得获得一个实例的类型类；getDeclaredFields()获得某个类的所有声明的字段，即包括public、private和proteced，但是不包括父类的申明字段。</span></span><br><span class="line">    Field[] fields = object.getClass().getDeclaredFields();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//for循环逐个检测校验，看看哪个字段标了注解</span></span><br><span class="line">    <span class="keyword">for</span>(Field field : fields)&#123;</span><br><span class="line">        <span class="comment">//if判断：检测字段是有没有@Length注解</span></span><br><span class="line">        <span class="keyword">if</span>(field.isAnnotationPresent(Length.class))&#123; <span class="comment">//Length类型的注解是否在反射获得的那个类上</span></span><br><span class="line">            <span class="comment">//通过反射获取到字段上面标注的@Length的详细信息</span></span><br><span class="line">            Length length = field.getAnnotation(Length.class);</span><br><span class="line">            field.setAccessable(<span class="keyword">true</span>);<span class="comment">//允许反射时候可以获得私有变量</span></span><br><span class="line">            <span class="comment">//用反射获取字段的实际值</span></span><br><span class="line">            <span class="keyword">int</span> value = ((String)field.get(objedt)).length;</span><br><span class="line">            <span class="comment">//将字段的实际值和注解上做标志的值进行比对</span></span><br><span class="line">            <span class="keyword">if</span>(value&lt;length.min() || value&gt;length.max)&#123;</span><br><span class="line">                <span class="keyword">return</span> lenth.errorMsh();</span><br><span class="line">            &#125;   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="使用注解"><a href="#使用注解" class="headerlink" title="使用注解"></a>使用注解</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Length(min = 11,max = 11, erroeMsg = &quot;error phone number&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mobile;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>感谢CodeSheep的<a href="https://mp.weixin.qq.com/s/gdYysBB3aD_HmPyvEThFXw">原文</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
