@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-03-14T10:48:22.945Z</updated>
+  <updated>2021-03-14T10:49:25.997Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -21,16 +21,11 @@
     <link href="http://bilikings.top/2021/03/14/JAV%E4%B8%ADSTW%E5%92%8CCMS/"/>
     <id>http://bilikings.top/2021/03/14/JAV%E4%B8%ADSTW%E5%92%8CCMS/</id>
     <published>2021-03-14T10:48:11.000Z</published>
-    <updated>2021-03-14T10:48:22.945Z</updated>
+    <updated>2021-03-14T10:49:25.997Z</updated>
     
     
-      
-      
-        
-        
-    <summary type="html">&lt;h1 id=&quot;JVM中的STW和CMS&quot;&gt;&lt;a href=&quot;#JVM中的STW和CMS&quot; class=&quot;headerlink&quot;</summary>
-        
-      
+    <summary type="html">&lt;h1 id=&quot;JVM中的STW和CMS&quot;&gt;&lt;a href=&quot;#JVM中的STW和CMS&quot; class=&quot;headerlink&quot; title=&quot;JVM中的STW和CMS&quot;&gt;&lt;/a&gt;JVM中的STW和CMS&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;Java中Stop-The-World机制简称STW&lt;/strong&gt;，是在执行垃圾收集算法时，Java应用程序的其他所有线程都被挂起（除了垃圾收集帮助器之外）。Java中一种全局暂停现象，全局停顿，所有Java代码停止，native代码可以执行，但不能与JVM交互；这些现象多半是由于gc引起。&lt;/p&gt;
+&lt;p&gt;GC时的Stop the World(STW)是大家最大的敌人。但可能很多人还不清楚，除了GC，JVM下还会发生停顿现象。&lt;/p&gt;</summary>
     
     
     
