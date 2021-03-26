@@ -566,6 +566,76 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(5)——同步的基础构建模块</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
+    <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
+<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器。</p>
+<a id="more"></a>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用迭代器来遍历list</span></span><br><span class="line">List&lt;String&gt; s = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">...<span class="comment">//add操作</span></span><br><span class="line">  </span><br><span class="line">      Iterator&lt;String&gt; iterator = s.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">          String next = iterator.next();</span><br><span class="line">          System.out.println(next);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p><code>ConcurrentHashMap</code>（使用分段锁），<code>CopyOnWriteArrayList</code>（写入时复制，一般在读操作远多于写操作时使用），</p>
+<ul>
+<li>使用并发容器来代替同步容器，可以极大的提高伸缩性和降低风险</li>
+</ul>
+<h3 id="BlockingQueue和生产者与消费者模式"><a href="#BlockingQueue和生产者与消费者模式" class="headerlink" title="BlockingQueue和生产者与消费者模式"></a>BlockingQueue和生产者与消费者模式</h3><p>生产者不需要知道消费者的数量和状态，只需要把东西生产了交付个阻塞队列，同理，消费者也自己从阻塞队列中取值简化了生产者和消费者模式，例为单消费者，单生产者的例子</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> bq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ArrayBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlockingQ</span> </span>&#123;</span><br><span class="line">    BlockingQueue&lt;apple&gt; bq = <span class="keyword">new</span> ArrayBlockingQueue&lt;apple&gt;(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        BlockingQ blockingQ = <span class="keyword">new</span> BlockingQ();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::product).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::customer).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">product</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.put(<span class="keyword">new</span> apple(<span class="string">&quot;red&quot;</span>, i));</span><br><span class="line">                <span class="comment">// TimeUnit.SECONDS.sleep(1);</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;放置了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.take();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;拿走了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">apple</span> </span>&#123;</span><br><span class="line">    String color;</span><br><span class="line">    <span class="keyword">int</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">apple</span><span class="params">(String color, <span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.color = color;</span><br><span class="line">        <span class="keyword">this</span>.size = size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="BlockingQueue的四组API"><a href="#BlockingQueue的四组API" class="headerlink" title="BlockingQueue的四组API"></a>BlockingQueue的四组API</h4><ol>
+<li>抛出异常</li>
+<li>不抛出异常</li>
+<li>阻塞等待</li>
+<li>超时等待</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>抛出异常</th>
+<th>不抛出异常</th>
+<th>阻塞等待</th>
+<th>超时等待</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>添加操作</td>
+<td>add</td>
+<td>offer</td>
+<td>put</td>
+<td>offer(obj,timeOut,TimeUnit)</td>
+</tr>
+<tr>
+<td>移除操作</td>
+<td>remove</td>
+<td>poll（返回null）</td>
+<td>take</td>
+<td>poll(timeOut,TimeUnit)</td>
+</tr>
+<tr>
+<td>查看队首</td>
+<td>element</td>
+<td>peek</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="阻塞方法和中断方法"><a href="#阻塞方法和中断方法" class="headerlink" title="阻塞方法和中断方法"></a>阻塞方法和中断方法</h3><p>Thread提供了interrupt()中断方法，用于查询线程已经被中断或者中断线程，返回一个boolean属性。</p>
+<blockquote>
+<p>解决<code>InterruptedException</code>的方案</p>
+<ul>
+<li><p>传递<code>InterruptionException</code>，可以把这异常传递给这个方案的调用者</p>
+</li>
+<li><p>恢复中断</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">runables</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    BlockingQueue&lt;String&gt; blockingQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String take = blockingQueue.take();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="comment">//恢复被中断的状态</span></span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+<h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java并发编程笔记(6)——任务</title>
     <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/</url>
     <content><![CDATA[<h2 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h2><p><strong>任务</strong>通常是一项抽象并且离散的一些单元。</p>
@@ -647,76 +717,6 @@
 <p>对于持有线程的服务，只要服务的时间大于创建线程的方法存在的时间，那么就应该提供生命周期方法</p>
 </blockquote>
 ]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(5)——同步的基础构建模块</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
-    <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
-<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器。</p>
-<a id="more"></a>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用迭代器来遍历list</span></span><br><span class="line">List&lt;String&gt; s = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">...<span class="comment">//add操作</span></span><br><span class="line">  </span><br><span class="line">      Iterator&lt;String&gt; iterator = s.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">          String next = iterator.next();</span><br><span class="line">          System.out.println(next);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p><code>ConcurrentHashMap</code>（使用分段锁），<code>CopyOnWriteArrayList</code>（写入时复制，一般在读操作远多于写操作时使用），</p>
-<ul>
-<li>使用并发容器来代替同步容器，可以极大的提高伸缩性和降低风险</li>
-</ul>
-<h3 id="BlockingQueue和生产者与消费者模式"><a href="#BlockingQueue和生产者与消费者模式" class="headerlink" title="BlockingQueue和生产者与消费者模式"></a>BlockingQueue和生产者与消费者模式</h3><p>生产者不需要知道消费者的数量和状态，只需要把东西生产了交付个阻塞队列，同理，消费者也自己从阻塞队列中取值简化了生产者和消费者模式，例为单消费者，单生产者的例子</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> bq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ArrayBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlockingQ</span> </span>&#123;</span><br><span class="line">    BlockingQueue&lt;apple&gt; bq = <span class="keyword">new</span> ArrayBlockingQueue&lt;apple&gt;(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        BlockingQ blockingQ = <span class="keyword">new</span> BlockingQ();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::product).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::customer).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">product</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.put(<span class="keyword">new</span> apple(<span class="string">&quot;red&quot;</span>, i));</span><br><span class="line">                <span class="comment">// TimeUnit.SECONDS.sleep(1);</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;放置了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.take();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;拿走了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">apple</span> </span>&#123;</span><br><span class="line">    String color;</span><br><span class="line">    <span class="keyword">int</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">apple</span><span class="params">(String color, <span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.color = color;</span><br><span class="line">        <span class="keyword">this</span>.size = size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="BlockingQueue的四组API"><a href="#BlockingQueue的四组API" class="headerlink" title="BlockingQueue的四组API"></a>BlockingQueue的四组API</h4><ol>
-<li>抛出异常</li>
-<li>不抛出异常</li>
-<li>阻塞等待</li>
-<li>超时等待</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th>方式</th>
-<th>抛出异常</th>
-<th>不抛出异常</th>
-<th>阻塞等待</th>
-<th>超时等待</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>添加操作</td>
-<td>add</td>
-<td>offer</td>
-<td>put</td>
-<td>offer(obj,timeOut,TimeUnit)</td>
-</tr>
-<tr>
-<td>移除操作</td>
-<td>remove</td>
-<td>poll（返回null）</td>
-<td>take</td>
-<td>poll(timeOut,TimeUnit)</td>
-</tr>
-<tr>
-<td>查看队首</td>
-<td>element</td>
-<td>peek</td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<h3 id="阻塞方法和中断方法"><a href="#阻塞方法和中断方法" class="headerlink" title="阻塞方法和中断方法"></a>阻塞方法和中断方法</h3><p>Thread提供了interrupt()中断方法，用于查询线程已经被中断或者中断线程，返回一个boolean属性。</p>
-<blockquote>
-<p>解决<code>InterruptedException</code>的方案</p>
-<ul>
-<li><p>传递<code>InterruptionException</code>，可以把这异常传递给这个方案的调用者</p>
-</li>
-<li><p>恢复中断</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">runables</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    BlockingQueue&lt;String&gt; blockingQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String take = blockingQueue.take();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="comment">//恢复被中断的状态</span></span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</blockquote>
-<h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
       <tags>
         <tag>Java</tag>
       </tags>
@@ -1252,80 +1252,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java Stream</title>
-    <url>/2020/11/11/Stream/</url>
-    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
-<li>流式API</li>
-</ul>
-<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>java.io</th>
-<th>java.util.steam</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>存储</td>
-<td>顺序读写的byte或者char</td>
-<td>顺序输出的任意Java对象实例</td>
-</tr>
-<tr>
-<td>用途</td>
-<td>序列化文件或者网络</td>
-<td>内存计算/业务逻辑</td>
-</tr>
-</tbody></table>
-<a id="more"></a>
-
-<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
-<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
-<p>一个流在使用一次之后会销毁掉。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
-<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
-</li>
-<li><p>基于数组或Collection</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
-
-<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
-<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
-</li>
-<li><p>基于Supplier（供货人）</p>
-<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-</li>
-<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
-</li>
-</ul>
-<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>map对String的操作</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
-<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
-<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
-<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
-</blockquote>
-<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
-]]></content>
-      <tags>
-        <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Springboot核心注解详解</title>
     <url>/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<h2 id="核心注解"><a href="#核心注解" class="headerlink" title="核心注解"></a>核心注解</h2><h3 id="spring相关"><a href="#spring相关" class="headerlink" title="spring相关"></a>spring相关</h3><blockquote>
@@ -1452,6 +1378,80 @@
 ]]></content>
       <tags>
         <tag>Spring</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java Stream</title>
+    <url>/2020/11/11/Stream/</url>
+    <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
+<li>流式API</li>
+</ul>
+<p>这个<code>Stream</code>不同于<code>java.io</code>的<code>InputStream</code>和<code>OutputStream</code>，它代表的是任意Java对象的序列。两者对比如下</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>java.io</th>
+<th>java.util.steam</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>存储</td>
+<td>顺序读写的byte或者char</td>
+<td>顺序输出的任意Java对象实例</td>
+</tr>
+<tr>
+<td>用途</td>
+<td>序列化文件或者网络</td>
+<td>内存计算/业务逻辑</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<p>这个<code>Stream</code>和<code>List</code>也不一样，<code>List</code>存储的每个元素都是已经存储在内存中的某个Java对象，而<code>Stream</code>输出的元素可能并没有预先存储在内存中，而是实时计算出来的。</p>
+<p>如果我们要表示一个全体自然数的集合，显然，用<code>List</code>是不可能写出来的，因为自然数是无限的，内存再大也没法放到<code>List</code>中：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">    Stream&lt;Integer&gt; streamNum = createStream();<span class="comment">//不计算</span></span><br><span class="line">    Stream&lt;Integer&gt; SNxN =streamNum.map(Queues::multiply).limit(<span class="number">3</span>);<span class="comment">//不计算</span></span><br><span class="line">    SNxN.forEach(System.out::println);<span class="comment">//计算</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Stream&lt;Integer&gt; <span class="title">createStream</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> n)</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> n*n;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>惰性计算的特点是：一个<code>Stream</code>转换为另一个<code>Stream</code>时，实际上只存储了转换规则，并没有任何计算发生。</p>
+<p>一个流在使用一次之后会销毁掉。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Use2</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        List&lt;Integer&gt; list = Arrays.asList(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">5</span>,<span class="number">6</span>);</span><br><span class="line">        Stream&lt;Integer&gt; s = list.stream();</span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        <span class="comment">//下面这句会抛出异常，流已经被使用过了 java.lang.IllegalStateException: stream has already been operated upon or closed</span></span><br><span class="line">        s.map((x)-&gt;x*<span class="number">2</span>).forEach(System.out::print);</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="创建Stream"><a href="#创建Stream" class="headerlink" title="创建Stream"></a>创建Stream</h3><ul>
+<li><p>创建<code>Stream</code>最简单的方式是直接用<code>Stream.of()</code>静态方法，传入可变参数即创建了一个能输出确定元素的<code>Stream</code>。<strong>虽然这种方式基本上没啥实质性用途，但测试的时候很方便。</strong></p>
+</li>
+<li><p>基于数组或Collection</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; stream1 = Arrays.stream(<span class="keyword">new</span> String[] &#123; <span class="string">&quot;A&quot;</span>, <span class="string">&quot;B&quot;</span>, <span class="string">&quot;C&quot;</span> &#125;);</span><br><span class="line">Stream&lt;String&gt; stream2 = List.of(<span class="string">&quot;a&quot;</span>,<span class="string">&quot;b&quot;</span>,<span class="string">&quot;c&quot;</span>).stream();</span><br></pre></td></tr></table></figure>
+
+<p>把数组变成<code>Stream</code>使用<code>Arrays.stream()</code>方法。对于<code>Collection</code>（<code>List</code>、<code>Set</code>、<code>Queue</code>等），直接调用<code>stream()</code>方法就可以获得<code>Stream</code>。</p>
+<p>上述创建<code>Stream</code>的方法都是把一个现有的序列变为<code>Stream</code>，它的元素是固定的。</p>
+</li>
+<li><p>基于Supplier（供货人）</p>
+<p>基于Supplier创建的Stream回不断调用<code>Supplier.get()</code>来不断产生下一个元素，这个<code>Stream</code>保存的不是元素而是算法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Stream&lt;Integer&gt;  stream =Stream.generate(<span class="keyword">new</span> NumSupplier());</span><br><span class="line">        stream.limit(<span class="number">30</span>).forEach(System.out::println);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">NumSupplier</span> <span class="keyword">implements</span> <span class="title">Supplier</span>&lt;<span class="title">Integer</span>&gt;</span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n=<span class="number">0</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Integer <span class="title">get</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> n++;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Files</code>类的<code>lines()</code>方法可以把一个文件变成一个<code>Stream</code>，每个元素代表文件的一行内容：</p>
+</li>
+</ul>
+<h3 id="使用map"><a href="#使用map" class="headerlink" title="使用map"></a>使用map</h3><p>所谓map操作就是把一个操作运算映射到一个Stream序列的每一个元素上</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;Integer&gt; s1=Stream.of(<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>);</span><br><span class="line">Stream&lt;Integer&gt; s2 =s1.map(e -&gt; e * e);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>map对String的操作</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Stream&lt;String&gt; s = Arrays.stream(<span class="keyword">new</span> String[]&#123; <span class="string">&quot; pear &quot;</span>, <span class="string">&quot; ORANGE&quot;</span>, <span class="string">&quot; BaNaNa &quot;</span>&#125;);</span><br><span class="line">s.map(String::trim) <span class="comment">// 去空格</span></span><br><span class="line">        .map(String::toLowerCase) <span class="comment">// 变小写</span></span><br><span class="line">        .forEach(System.out::print); <span class="comment">// 打印</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="使用filter（过滤器）"><a href="#使用filter（过滤器）" class="headerlink" title="使用filter（过滤器）"></a>使用filter（过滤器）</h3><p>  就是对一个<code>Stream</code>的所有元素一一进行测试，不满足条件的就被“滤掉”了，剩下的满足条件的元素就构成了一个新的<code>Stream</code>。</p>
+<h3 id="使用reduce"><a href="#使用reduce" class="headerlink" title="使用reduce"></a>使用reduce</h3><p><code>map()</code>和<code>filter()</code>都是<code>Stream</code>的转换方法，而<code>Stream.reduce()</code>则是<code>Stream</code>的一个聚合方法，他可以把一个Stream所有的元素按照聚合函数聚合成为一个结果。</p>
+<h3 id="使用并行流-parallelStream"><a href="#使用并行流-parallelStream" class="headerlink" title="使用并行流 parallelStream"></a>使用并行流 parallelStream</h3><blockquote>
+<p>使用并行流可以充分利用多核cpu的资源，通过<strong>工作窃取</strong>实现的多任务在多个cpu核中执行，把一个内容分成多个数据块，并用不同的线程分成多个数据块，并用不同的线程分别处理每个数据块的流。</p>
+</blockquote>
+<h5 id="Fork-Join框架"><a href="#Fork-Join框架" class="headerlink" title="Fork/Join框架"></a>Fork/Join框架</h5><p>采用工作窃取模式：当执行新的任务时，可以把他拆分 成更小的任务来进行执行，并把小任务添加到进程队列中，当一个队列执行完毕自己的队列任务之后，然后再从一个随机的线程队列中still一个并把它放入自己的任务队列中，比一般的线程池的实现，fork/Join优势体现在对于包含任务的处理里。一个线程池中，如果一个任务因为某些原因无法继续指向，那线程就会处于等在状态，在fork/join中，因为这个线程等待某个线程的而处于等待时，就会主动寻找其他尚未完成的子线程来执行，减少了进程等待的时间。</p>
+]]></content>
+      <tags>
+        <tag>java</tag>
       </tags>
   </entry>
   <entry>
@@ -1630,6 +1630,86 @@
 ]]></content>
       <tags>
         <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一道题搞懂JVM类加载</title>
+    <url>/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/</url>
+    <content><![CDATA[<h1 id="一道题搞懂JVM类加载机制"><a href="#一道题搞懂JVM类加载机制" class="headerlink" title="一道题搞懂JVM类加载机制"></a>一道题搞懂JVM类加载机制</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton2 singleton2 = <span class="keyword">new</span> Singleton2();</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton2 <span class="title">getInstance2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton2;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton singleton = Singleton.getInstance();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value1:&quot;</span> + singleton.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value2:&quot;</span> + singleton.value2);</span><br><span class="line">		</span><br><span class="line">		Singleton2 singleton2 = Singleton2.getInstance2();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value1:&quot;</span> + singleton2.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value2:&quot;</span> + singleton2.value2);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<blockquote>
+<p>说出运行的结果：<br>Singleton1 value1 : 1<br>Singleton1 value2 : 0<br>Singleton2 value1 : 1<br>Singleton2 value2 : 1</p>
+</blockquote>
+<p>Singleton1的原因：</p>
+<ol>
+<li><p>先执行main中的Singleton singleton = Singleton.getInstance();</p>
+</li>
+<li><p>类的加载：加载类Singleton</p>
+</li>
+<li><p>类的验证</p>
+</li>
+<li><p>类的准备：为静态变量分配内存，设置默认值。这里为singleton(引用类型)设置为null,value1,value2（基本数据类型）设置默认值0</p>
+</li>
+<li><p>类的初始化（按照赋值语句进行修改）：</p>
+<ul>
+<li><p>执行private static Singleton singleton = new Singleton();</p>
+</li>
+<li><p>执行Singleton的构造器：value1++;value2++; 此时value1，value2均等于1</p>
+</li>
+<li><p>执行public static int value1;</p>
+<p>public static int value2 = 0;</p>
+<p>此时value1=1，value2=0</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Singleton1的原因：</p>
+<ol>
+<li>首先执行main中的Singleton2 singleton2 = Singleton2.getInstance2();</li>
+<li>类的加载：加载类Singleton2</li>
+<li>类的验证</li>
+<li>类的准备：为静态变量分配内存，设置默认值。这里为value1,value2（基本数据类型）设置默认值0,singleton2(引用类型)设置为null,</li>
+<li>类的初始化（按照赋值语句进行修改）：<ul>
+<li>执行public static int value2 = 0;</li>
+<li>此时value2=0(value1不变，依然是0);</li>
+<li>执行private static Singleton singleton = new Singleton();</li>
+<li>执行Singleton2的构造器：value1++;value2++;<br>此时value1，value2均等于1,即为最后结果</li>
+</ul>
+</li>
+</ol>
+<h3 id="JVM类加载"><a href="#JVM类加载" class="headerlink" title="JVM类加载"></a>JVM类加载</h3><p><strong>JVM类加载分为5个过程：加载，验证，准备，解析，初始化，使用，卸载，如下图所示</strong></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png"></p>
+<p>下面来看看加载，验证，准备，解析，初始化这5个过程的具体动作。</p>
+<h4 id="1-1-加载"><a href="#1-1-加载" class="headerlink" title="1.1 加载"></a>1.1 加载</h4><p>加载主要是将.class文件（并不一定是.class。可以是ZIP包，网络中获取）中的二进制字节流读入到JVM中。<br>在加载阶段，JVM需要完成3件事：<br>1）通过类的全限定名获取该类的二进制字节流；<br>2）将字节流所代表的静态存储结构转化为方法区的运行时数据结构；<br>3）在内存中生成一个该类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
+<h4 id="1-2-连接"><a href="#1-2-连接" class="headerlink" title="1.2 连接"></a>1.2 连接</h4><h5 id="1-2-1-验证"><a href="#1-2-1-验证" class="headerlink" title="1.2.1 验证"></a>1.2.1 验证</h5><p>验证是连接阶段的第一步，主要确保加载进来的字节流符合JVM规范。<br>验证阶段会完成以下4个阶段的检验动作：<br>1）文件格式验证<br>2）元数据验证(是否符合Java语言规范)<br>3）字节码验证（确定程序语义合法，符合逻辑）<br>4）符号引用验证（确保下一步的解析能正常执行）</p>
+<h5 id="1-2-2-准备"><a href="#1-2-2-准备" class="headerlink" title="1.2.2 准备"></a>1.2.2 准备</h5><p>准备是连接阶段的第二步，主要为静态变量在方法区分配内存，并设置默认初始值。</p>
+<h5 id="1-2-3-解析"><a href="#1-2-3-解析" class="headerlink" title="1.2.3 解析"></a>1.2.3 解析</h5><p>解析是连接阶段的第三步，是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<h5 id="1-3-初始化"><a href="#1-3-初始化" class="headerlink" title="1.3 初始化"></a>1.3 初始化</h5><p>初始化阶段是类加载过程的最后一步，主要是根据程序中的赋值语句主动为类变量赋值。<br>注：</p>
+<ol>
+<li>当有父类且父类为初始化的时候，先去初始化父类；</li>
+<li>再进行子类初始化语句。</li>
+</ol>
+<p><strong>什么时候需要对类进行初始化？</strong></p>
+<ol>
+<li>使用new该类实例化对象的时候；</li>
+<li>读取或设置类静态字段的时候（但被final修饰的字段，在编译器时就被放入常量池的静态字段除外static final）；</li>
+<li>调用类静态方法的时候；</li>
+<li>使用反射Class.forName(“xxxx”)对类进行反射调用的时候，该类需要初始化；</li>
+<li> 初始化一个类的时候，有父类，先初始化父类（注：1. 接口除外，父接口在调用的时候才会被初始化；2.子类引用父类静态字段，只会引发父类初始化）；</li>
+<li> 被标明为启动类的类（即包含main()方法的类）要初始化；</li>
+<li>当使用JDK1.7的动态语言支持时，如果一个java.invoke.MethodHandle实例最后的解析结果REF_getStatic、REF_putStatic、REF_invokeStatic的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需要先触发其初始化。</li>
+</ol>
+<p>以上情况称为对一个类进行主动引用，且有且只要以上几种情况需要对类进行初始化。</p>
+<h4 id="双亲委派模型的工作过程"><a href="#双亲委派模型的工作过程" class="headerlink" title="双亲委派模型的工作过程"></a>双亲委派模型的工作过程</h4><p>如果一个类接受到类加载请求，他自己不会去加载这个请求，而是将这个类加载请求委派给父类加载器，这样一层一层传送，直到到达启动类加载器（Bootstrap ClassLoader）。<br>只有当父类加载器无法加载这个请求时，子加载器才会尝试自己去加载。</p>
+<h4 id="双亲委派模型的代码实现"><a href="#双亲委派模型的代码实现" class="headerlink" title="双亲委派模型的代码实现"></a>双亲委派模型的代码实现</h4><p>双亲委派模型的代码实现集中在java.lang.ClassLoader的loadClass()方法当中。<br>1）首先检查类是否被加载，没有则调用父类加载器的loadClass()方法；<br>2）若父类加载器为空，则默认使用启动类加载器作为父加载器；<br>3）若父类加载失败，抛出ClassNotFoundException 异常后，再调用自己的findClass() 方法。</p>
+<h3 id="链接加上一个面试题，巩固下类的加载过程。"><a href="#链接加上一个面试题，巩固下类的加载过程。" class="headerlink" title="链接加上一个面试题，巩固下类的加载过程。"></a>链接加上一个面试题，巩固下类的加载过程。</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t1 = <span class="keyword">new</span> B();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t2 = <span class="keyword">new</span> B();</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;构造块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span></span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;静态块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        B t = <span class="keyword">new</span> B();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>以上代码输出结果是？</strong><br>根据上文分析，类的加载过程是：<br>（1）加载B类；<br>（2）验证、准备（给静态属性t1、t2赋默认值null）、解析；<br>（3）初始化：执行public static B t1 = new B(); 和 public static B t2 = new B();、static {}；<br>注意，我们之前说的类的加载顺序是 有父类先加载父类静态域，这里的静态域不仅包括static{} 代码块，还有 静态属性；<br>然后再执行构造块{}和构造方法；<br>所以在执行public static B t1 = new B();时，不会加载static{}代码块，否则就会重复执行，只会执行B的构造块和构造方法(默认的无参构造器)，输出”构造块”；<br>执行public static B t2 = new B();时，也同样执行构造块和构造方法，输出”构造块”；<br>第三步再执行static{} 代码块，输出”静态快“；<br>最后执行main方法中的B t = new B();，输出”构造块”；</p>
+]]></content>
+      <tags>
+        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>

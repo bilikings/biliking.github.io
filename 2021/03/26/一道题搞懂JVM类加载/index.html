@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bilikings.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一道题搞懂JVM类加载机制1234567891011121314151617181920212223242526272829303132333435363738394041424344class Singleton&amp;#123;	private static Singleton singleton &#x3D; new Singleton();	public static int value1;	public">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一道题搞懂JVM类加载">
+<meta property="og:url" content="http://bilikings.top/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/index.html">
+<meta property="og:site_name" content="Groza&#39;s">
+<meta property="og:description" content="一道题搞懂JVM类加载机制1234567891011121314151617181920212223242526272829303132333435363738394041424344class Singleton&amp;#123;	private static Singleton singleton &#x3D; new Singleton();	public static int value1;	public">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png">
+<meta property="article:published_time" content="2021-03-26T07:13:46.000Z">
+<meta property="article:modified_time" content="2021-03-26T07:16:45.727Z">
+<meta property="article:author" content="Biliking">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png">
+
+<link rel="canonical" href="http://bilikings.top/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一道题搞懂JVM类加载 | Groza's</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Groza's" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Groza's</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">噫|呜|呜|噫</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/bilikings" class="github-corner" title="I on GitHub" aria-label="I on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一道题搞懂JVM类加载
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-26 15:13:46 / 修改时间：15:16:45" itemprop="dateCreated datePublished" datetime="2021-03-26T15:13:46+08:00">2021-03-26</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="一道题搞懂JVM类加载机制"><a href="#一道题搞懂JVM类加载机制" class="headerlink" title="一道题搞懂JVM类加载机制"></a>一道题搞懂JVM类加载机制</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton2 singleton2 = <span class="keyword">new</span> Singleton2();</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton2 <span class="title">getInstance2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton2;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton singleton = Singleton.getInstance();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value1:&quot;</span> + singleton.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value2:&quot;</span> + singleton.value2);</span><br><span class="line">		</span><br><span class="line">		Singleton2 singleton2 = Singleton2.getInstance2();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value1:&quot;</span> + singleton2.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value2:&quot;</span> + singleton2.value2);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<blockquote>
+<p>说出运行的结果：<br>Singleton1 value1 : 1<br>Singleton1 value2 : 0<br>Singleton2 value1 : 1<br>Singleton2 value2 : 1</p>
+</blockquote>
+<p>Singleton1的原因：</p>
+<ol>
+<li><p>先执行main中的Singleton singleton = Singleton.getInstance();</p>
+</li>
+<li><p>类的加载：加载类Singleton</p>
+</li>
+<li><p>类的验证</p>
+</li>
+<li><p>类的准备：为静态变量分配内存，设置默认值。这里为singleton(引用类型)设置为null,value1,value2（基本数据类型）设置默认值0</p>
+</li>
+<li><p>类的初始化（按照赋值语句进行修改）：</p>
+<ul>
+<li><p>执行private static Singleton singleton = new Singleton();</p>
+</li>
+<li><p>执行Singleton的构造器：value1++;value2++; 此时value1，value2均等于1</p>
+</li>
+<li><p>执行public static int value1;</p>
+<p>public static int value2 = 0;</p>
+<p>此时value1=1，value2=0</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Singleton1的原因：</p>
+<ol>
+<li>首先执行main中的Singleton2 singleton2 = Singleton2.getInstance2();</li>
+<li>类的加载：加载类Singleton2</li>
+<li>类的验证</li>
+<li>类的准备：为静态变量分配内存，设置默认值。这里为value1,value2（基本数据类型）设置默认值0,singleton2(引用类型)设置为null,</li>
+<li>类的初始化（按照赋值语句进行修改）：<ul>
+<li>执行public static int value2 = 0;</li>
+<li>此时value2=0(value1不变，依然是0);</li>
+<li>执行private static Singleton singleton = new Singleton();</li>
+<li>执行Singleton2的构造器：value1++;value2++;<br>此时value1，value2均等于1,即为最后结果</li>
+</ul>
+</li>
+</ol>
+<h3 id="JVM类加载"><a href="#JVM类加载" class="headerlink" title="JVM类加载"></a>JVM类加载</h3><p><strong>JVM类加载分为5个过程：加载，验证，准备，解析，初始化，使用，卸载，如下图所示</strong></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png"></p>
+<p>下面来看看加载，验证，准备，解析，初始化这5个过程的具体动作。</p>
+<h4 id="1-1-加载"><a href="#1-1-加载" class="headerlink" title="1.1 加载"></a>1.1 加载</h4><p>加载主要是将.class文件（并不一定是.class。可以是ZIP包，网络中获取）中的二进制字节流读入到JVM中。<br>在加载阶段，JVM需要完成3件事：<br>1）通过类的全限定名获取该类的二进制字节流；<br>2）将字节流所代表的静态存储结构转化为方法区的运行时数据结构；<br>3）在内存中生成一个该类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
+<h4 id="1-2-连接"><a href="#1-2-连接" class="headerlink" title="1.2 连接"></a>1.2 连接</h4><h5 id="1-2-1-验证"><a href="#1-2-1-验证" class="headerlink" title="1.2.1 验证"></a>1.2.1 验证</h5><p>验证是连接阶段的第一步，主要确保加载进来的字节流符合JVM规范。<br>验证阶段会完成以下4个阶段的检验动作：<br>1）文件格式验证<br>2）元数据验证(是否符合Java语言规范)<br>3）字节码验证（确定程序语义合法，符合逻辑）<br>4）符号引用验证（确保下一步的解析能正常执行）</p>
+<h5 id="1-2-2-准备"><a href="#1-2-2-准备" class="headerlink" title="1.2.2 准备"></a>1.2.2 准备</h5><p>准备是连接阶段的第二步，主要为静态变量在方法区分配内存，并设置默认初始值。</p>
+<h5 id="1-2-3-解析"><a href="#1-2-3-解析" class="headerlink" title="1.2.3 解析"></a>1.2.3 解析</h5><p>解析是连接阶段的第三步，是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<h5 id="1-3-初始化"><a href="#1-3-初始化" class="headerlink" title="1.3 初始化"></a>1.3 初始化</h5><p>初始化阶段是类加载过程的最后一步，主要是根据程序中的赋值语句主动为类变量赋值。<br>注：</p>
+<ol>
+<li>当有父类且父类为初始化的时候，先去初始化父类；</li>
+<li>再进行子类初始化语句。</li>
+</ol>
+<p><strong>什么时候需要对类进行初始化？</strong></p>
+<ol>
+<li>使用new该类实例化对象的时候；</li>
+<li>读取或设置类静态字段的时候（但被final修饰的字段，在编译器时就被放入常量池的静态字段除外static final）；</li>
+<li>调用类静态方法的时候；</li>
+<li>使用反射Class.forName(“xxxx”)对类进行反射调用的时候，该类需要初始化；</li>
+<li> 初始化一个类的时候，有父类，先初始化父类（注：1. 接口除外，父接口在调用的时候才会被初始化；2.子类引用父类静态字段，只会引发父类初始化）；</li>
+<li> 被标明为启动类的类（即包含main()方法的类）要初始化；</li>
+<li>当使用JDK1.7的动态语言支持时，如果一个java.invoke.MethodHandle实例最后的解析结果REF_getStatic、REF_putStatic、REF_invokeStatic的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需要先触发其初始化。</li>
+</ol>
+<p>以上情况称为对一个类进行主动引用，且有且只要以上几种情况需要对类进行初始化。</p>
+<h4 id="双亲委派模型的工作过程"><a href="#双亲委派模型的工作过程" class="headerlink" title="双亲委派模型的工作过程"></a>双亲委派模型的工作过程</h4><p>如果一个类接受到类加载请求，他自己不会去加载这个请求，而是将这个类加载请求委派给父类加载器，这样一层一层传送，直到到达启动类加载器（Bootstrap ClassLoader）。<br>只有当父类加载器无法加载这个请求时，子加载器才会尝试自己去加载。</p>
+<h4 id="双亲委派模型的代码实现"><a href="#双亲委派模型的代码实现" class="headerlink" title="双亲委派模型的代码实现"></a>双亲委派模型的代码实现</h4><p>双亲委派模型的代码实现集中在java.lang.ClassLoader的loadClass()方法当中。<br>1）首先检查类是否被加载，没有则调用父类加载器的loadClass()方法；<br>2）若父类加载器为空，则默认使用启动类加载器作为父加载器；<br>3）若父类加载失败，抛出ClassNotFoundException 异常后，再调用自己的findClass() 方法。</p>
+<h3 id="链接加上一个面试题，巩固下类的加载过程。"><a href="#链接加上一个面试题，巩固下类的加载过程。" class="headerlink" title="链接加上一个面试题，巩固下类的加载过程。"></a>链接加上一个面试题，巩固下类的加载过程。</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t1 = <span class="keyword">new</span> B();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t2 = <span class="keyword">new</span> B();</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;构造块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span></span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;静态块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        B t = <span class="keyword">new</span> B();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>以上代码输出结果是？</strong><br>根据上文分析，类的加载过程是：<br>（1）加载B类；<br>（2）验证、准备（给静态属性t1、t2赋默认值null）、解析；<br>（3）初始化：执行public static B t1 = new B(); 和 public static B t2 = new B();、static {}；<br>注意，我们之前说的类的加载顺序是 有父类先加载父类静态域，这里的静态域不仅包括static{} 代码块，还有 静态属性；<br>然后再执行构造块{}和构造方法；<br>所以在执行public static B t1 = new B();时，不会加载static{}代码块，否则就会重复执行，只会执行B的构造块和构造方法(默认的无参构造器)，输出”构造块”；<br>执行public static B t2 = new B();时，也同样执行构造块和构造方法，输出”构造块”；<br>第三步再执行static{} 代码块，输出”静态快“；<br>最后执行main方法中的B t = new B();，输出”构造块”；</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Biliking
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://bilikings.top/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/" title="一道题搞懂JVM类加载">http://bilikings.top/2021/03/26/一道题搞懂JVM类加载/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/20/%E4%B8%AD%E7%BC%80%E8%BD%AC%E5%90%8E%E7%BC%80%EF%BC%8C%E9%80%86%E6%B3%A2%E5%85%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F/" rel="prev" title="中缀转后缀，逆波兰表达式">
+      <i class="fa fa-chevron-left"></i> 中缀转后缀，逆波兰表达式
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6"><span class="nav-number">1.</span> <span class="nav-text">一道题搞懂JVM类加载机制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD"><span class="nav-number">1.0.1.</span> <span class="nav-text">JVM类加载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-%E5%8A%A0%E8%BD%BD"><span class="nav-number">1.0.1.1.</span> <span class="nav-text">1.1 加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-%E8%BF%9E%E6%8E%A5"><span class="nav-number">1.0.1.2.</span> <span class="nav-text">1.2 连接</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-1-%E9%AA%8C%E8%AF%81"><span class="nav-number">1.0.1.2.1.</span> <span class="nav-text">1.2.1 验证</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-2-%E5%87%86%E5%A4%87"><span class="nav-number">1.0.1.2.2.</span> <span class="nav-text">1.2.2 准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-2-3-%E8%A7%A3%E6%9E%90"><span class="nav-number">1.0.1.2.3.</span> <span class="nav-text">1.2.3 解析</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#1-3-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">1.0.1.2.4.</span> <span class="nav-text">1.3 初始化</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%B7%A5%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="nav-number">1.0.1.3.</span> <span class="nav-text">双亲委派模型的工作过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8F%8C%E4%BA%B2%E5%A7%94%E6%B4%BE%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.0.1.4.</span> <span class="nav-text">双亲委派模型的代码实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E5%8A%A0%E4%B8%8A%E4%B8%80%E4%B8%AA%E9%9D%A2%E8%AF%95%E9%A2%98%EF%BC%8C%E5%B7%A9%E5%9B%BA%E4%B8%8B%E7%B1%BB%E7%9A%84%E5%8A%A0%E8%BD%BD%E8%BF%87%E7%A8%8B%E3%80%82"><span class="nav-number">1.0.2.</span> <span class="nav-text">链接加上一个面试题，巩固下类的加载过程。</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Biliking"
+      src="/images/peiky.png">
+  <p class="site-author-name" itemprop="name">Biliking</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bilikings" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bilikings" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="rss fa-fw"></i>RSS</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://kiritostna.github.io/Rice/" title="https:&#x2F;&#x2F;kiritostna.github.io&#x2F;Rice&#x2F;" rel="noopener" target="_blank">MuMing</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bilikings</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
