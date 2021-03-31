@@ -482,76 +482,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(5)——同步的基础构建模块</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
-    <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
-<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器。</p>
-<a id="more"></a>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用迭代器来遍历list</span></span><br><span class="line">List&lt;String&gt; s = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">...<span class="comment">//add操作</span></span><br><span class="line">  </span><br><span class="line">      Iterator&lt;String&gt; iterator = s.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">          String next = iterator.next();</span><br><span class="line">          System.out.println(next);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p><code>ConcurrentHashMap</code>（使用分段锁），<code>CopyOnWriteArrayList</code>（写入时复制，一般在读操作远多于写操作时使用），</p>
-<ul>
-<li>使用并发容器来代替同步容器，可以极大的提高伸缩性和降低风险</li>
-</ul>
-<h3 id="BlockingQueue和生产者与消费者模式"><a href="#BlockingQueue和生产者与消费者模式" class="headerlink" title="BlockingQueue和生产者与消费者模式"></a>BlockingQueue和生产者与消费者模式</h3><p>生产者不需要知道消费者的数量和状态，只需要把东西生产了交付个阻塞队列，同理，消费者也自己从阻塞队列中取值简化了生产者和消费者模式，例为单消费者，单生产者的例子</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> bq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ArrayBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlockingQ</span> </span>&#123;</span><br><span class="line">    BlockingQueue&lt;apple&gt; bq = <span class="keyword">new</span> ArrayBlockingQueue&lt;apple&gt;(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        BlockingQ blockingQ = <span class="keyword">new</span> BlockingQ();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::product).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::customer).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">product</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.put(<span class="keyword">new</span> apple(<span class="string">&quot;red&quot;</span>, i));</span><br><span class="line">                <span class="comment">// TimeUnit.SECONDS.sleep(1);</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;放置了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.take();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;拿走了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">apple</span> </span>&#123;</span><br><span class="line">    String color;</span><br><span class="line">    <span class="keyword">int</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">apple</span><span class="params">(String color, <span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.color = color;</span><br><span class="line">        <span class="keyword">this</span>.size = size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<h4 id="BlockingQueue的四组API"><a href="#BlockingQueue的四组API" class="headerlink" title="BlockingQueue的四组API"></a>BlockingQueue的四组API</h4><ol>
-<li>抛出异常</li>
-<li>不抛出异常</li>
-<li>阻塞等待</li>
-<li>超时等待</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th>方式</th>
-<th>抛出异常</th>
-<th>不抛出异常</th>
-<th>阻塞等待</th>
-<th>超时等待</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>添加操作</td>
-<td>add</td>
-<td>offer</td>
-<td>put</td>
-<td>offer(obj,timeOut,TimeUnit)</td>
-</tr>
-<tr>
-<td>移除操作</td>
-<td>remove</td>
-<td>poll（返回null）</td>
-<td>take</td>
-<td>poll(timeOut,TimeUnit)</td>
-</tr>
-<tr>
-<td>查看队首</td>
-<td>element</td>
-<td>peek</td>
-<td></td>
-<td></td>
-</tr>
-</tbody></table>
-<h3 id="阻塞方法和中断方法"><a href="#阻塞方法和中断方法" class="headerlink" title="阻塞方法和中断方法"></a>阻塞方法和中断方法</h3><p>Thread提供了interrupt()中断方法，用于查询线程已经被中断或者中断线程，返回一个boolean属性。</p>
-<blockquote>
-<p>解决<code>InterruptedException</code>的方案</p>
-<ul>
-<li><p>传递<code>InterruptionException</code>，可以把这异常传递给这个方案的调用者</p>
-</li>
-<li><p>恢复中断</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">runables</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    BlockingQueue&lt;String&gt; blockingQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String take = blockingQueue.take();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="comment">//恢复被中断的状态</span></span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-</blockquote>
-<h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(3)——对象的组合</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
     <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
@@ -631,6 +561,76 @@
 
 <p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
 ]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(5)——同步的基础构建模块</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
+    <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
+<h3 id="迭代容器"><a href="#迭代容器" class="headerlink" title="迭代容器"></a>迭代容器</h3><p>现在的许多容器也没有消除<strong>复合操作</strong>的问题，对容器进行直接迭代的标准方式都是使用Iterator。但是这不能避免在迭代的过程中，其他线程也会并发的修改容器，所以很多容器的解决方案就是发现迭代时被修改了就马上抛出<code>concurrentModificationException</code>，但只能当做并发问题的预警警示器。</p>
+<a id="more"></a>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//使用迭代器来遍历list</span></span><br><span class="line">List&lt;String&gt; s = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line"></span><br><span class="line">...<span class="comment">//add操作</span></span><br><span class="line">  </span><br><span class="line">      Iterator&lt;String&gt; iterator = s.iterator();</span><br><span class="line">      <span class="keyword">while</span> (iterator.hasNext())&#123;</span><br><span class="line">          String next = iterator.next();</span><br><span class="line">          System.out.println(next);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="并发容器"><a href="#并发容器" class="headerlink" title="并发容器"></a>并发容器</h3><p><code>ConcurrentHashMap</code>（使用分段锁），<code>CopyOnWriteArrayList</code>（写入时复制，一般在读操作远多于写操作时使用），</p>
+<ul>
+<li>使用并发容器来代替同步容器，可以极大的提高伸缩性和降低风险</li>
+</ul>
+<h3 id="BlockingQueue和生产者与消费者模式"><a href="#BlockingQueue和生产者与消费者模式" class="headerlink" title="BlockingQueue和生产者与消费者模式"></a>BlockingQueue和生产者与消费者模式</h3><p>生产者不需要知道消费者的数量和状态，只需要把东西生产了交付个阻塞队列，同理，消费者也自己从阻塞队列中取值简化了生产者和消费者模式，例为单消费者，单生产者的例子</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> bq;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ArrayBlockingQueue;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.BlockingQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BlockingQ</span> </span>&#123;</span><br><span class="line">    BlockingQueue&lt;apple&gt; bq = <span class="keyword">new</span> ArrayBlockingQueue&lt;apple&gt;(<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        BlockingQ blockingQ = <span class="keyword">new</span> BlockingQ();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::product).start();</span><br><span class="line">        <span class="keyword">new</span> Thread(blockingQ::customer).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">product</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.put(<span class="keyword">new</span> apple(<span class="string">&quot;red&quot;</span>, i));</span><br><span class="line">                <span class="comment">// TimeUnit.SECONDS.sleep(1);</span></span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;放置了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">customer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">                bq.take();</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;拿走了apple&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">apple</span> </span>&#123;</span><br><span class="line">    String color;</span><br><span class="line">    <span class="keyword">int</span> size;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">apple</span><span class="params">(String color, <span class="keyword">int</span> size)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.color = color;</span><br><span class="line">        <span class="keyword">this</span>.size = size;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="BlockingQueue的四组API"><a href="#BlockingQueue的四组API" class="headerlink" title="BlockingQueue的四组API"></a>BlockingQueue的四组API</h4><ol>
+<li>抛出异常</li>
+<li>不抛出异常</li>
+<li>阻塞等待</li>
+<li>超时等待</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>抛出异常</th>
+<th>不抛出异常</th>
+<th>阻塞等待</th>
+<th>超时等待</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>添加操作</td>
+<td>add</td>
+<td>offer</td>
+<td>put</td>
+<td>offer(obj,timeOut,TimeUnit)</td>
+</tr>
+<tr>
+<td>移除操作</td>
+<td>remove</td>
+<td>poll（返回null）</td>
+<td>take</td>
+<td>poll(timeOut,TimeUnit)</td>
+</tr>
+<tr>
+<td>查看队首</td>
+<td>element</td>
+<td>peek</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="阻塞方法和中断方法"><a href="#阻塞方法和中断方法" class="headerlink" title="阻塞方法和中断方法"></a>阻塞方法和中断方法</h3><p>Thread提供了interrupt()中断方法，用于查询线程已经被中断或者中断线程，返回一个boolean属性。</p>
+<blockquote>
+<p>解决<code>InterruptedException</code>的方案</p>
+<ul>
+<li><p>传递<code>InterruptionException</code>，可以把这异常传递给这个方案的调用者</p>
+</li>
+<li><p>恢复中断</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">runables</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">    BlockingQueue&lt;String&gt; blockingQueue;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            String take = blockingQueue.take();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            <span class="comment">//恢复被中断的状态</span></span><br><span class="line">            Thread.currentThread().interrupt();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+<h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
       <tags>
         <tag>Java</tag>
       </tags>
@@ -1426,6 +1426,39 @@
       </tags>
   </entry>
   <entry>
+    <title>TopK</title>
+    <url>/2020/11/11/TopK/</url>
+    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
+<ul>
+<li>直接排序，取top100</li>
+<li>堆排序，取top100</li>
+<li>快排的思想，使用划分函数取100</li>
+</ul>
+<p>那么他们分别有什么缺陷呢？</p>
+<ul>
+<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
+<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
+<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
+<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
+<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
+<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
+<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
+]]></content>
+      <tags>
+        <tag>数据结构与算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java Stream</title>
     <url>/2020/11/11/Stream/</url>
     <content><![CDATA[<h2 id="Stream"><a href="#Stream" class="headerlink" title="Stream"></a>Stream</h2><ul>
@@ -1497,39 +1530,6 @@
 ]]></content>
       <tags>
         <tag>java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>TopK</title>
-    <url>/2020/11/11/TopK/</url>
-    <content><![CDATA[<h1 id="TopK问题"><a href="#TopK问题" class="headerlink" title="TopK问题"></a>TopK问题</h1><p>你有一个数据榜单，你需要给用户显示rank排名前100的玩家。可以怎么样操作呢？</p>
-<ul>
-<li>直接排序，取top100</li>
-<li>堆排序，取top100</li>
-<li>快排的思想，使用划分函数取100</li>
-</ul>
-<p>那么他们分别有什么缺陷呢？</p>
-<ul>
-<li>直接排序，时间复杂度O（nlogn），空间复杂度O（n），所以当用户过多的时候，一块内存空间读不进，直接OOM异常</li>
-<li>堆排序，构建小根堆，维护一个大小为K的堆，此时堆顶元素是这k个元素中最小值。所以新加入的值要是比堆顶大，就把这个堆顶pop出来，把这个新的值加入。由于维护一个堆的操作时间是O（logn）的，所以总空间复杂度是O（nlogn），空间复杂度是O（k），Java可以通过优先队列来实现，不需要自己写一个堆。</li>
-<li>使用划分函数进行快排，由于快排的特性，总能让flag左边的值大于于flag，flag右边的值小于flag（递减序列）。所以只需要判断flag的index在k的那一边就OK，index&gt;k，就只需要排序[start，index-1]左半部分，反之排序[index+1,end]的部分，就很容易写出递归方案了，最好时间复杂度O（n），要是需要top1，那就是完全的进行一次快排时间复杂度：O（nlogn），由于需要修改数组，那自然空间复杂度为O（n）</li>
-</ul>
-<a id="more"></a>
-
-<h2 id="堆排序topK代码-使用优先队列PriorityQueue"><a href="#堆排序topK代码-使用优先队列PriorityQueue" class="headerlink" title="堆排序topK代码(使用优先队列PriorityQueue)"></a>堆排序topK代码(使用优先队列PriorityQueue)</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PQTopK</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopK(<span class="keyword">int</span>[] arr,<span class="keyword">int</span> k)&#123;</span><br><span class="line">        <span class="comment">//（不指定Comparator时默认为最小堆），通过传入自定义的Comparator函数可以实现大顶堆。</span></span><br><span class="line">        PriorityQueue&lt;Integer&gt; pq= <span class="keyword">new</span> PriorityQueue&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; k; i++) &#123;</span><br><span class="line">            pq.add(arr[i]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = k; i &lt;arr.length ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(!pq.isEmpty() &amp;&amp; arr[i]&gt;pq.peek())&#123;</span><br><span class="line">                pq.poll();</span><br><span class="line">                pq.add(arr[i]);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//现在堆中的数据就是前k个元素</span></span><br><span class="line">        <span class="keyword">int</span>[] ans = <span class="keyword">new</span> <span class="keyword">int</span>[pq.size()];</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;!pq.isEmpty()&amp;&amp;i&lt;ans.length;i++)&#123;</span><br><span class="line">            ans[i] = pq.poll();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//此时ans是正序的，第K大的是arr[0]</span></span><br><span class="line">        <span class="keyword">return</span> ans;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">2</span>,<span class="number">1</span>,<span class="number">7</span>,<span class="number">3</span>,<span class="number">4</span>,<span class="number">9</span>,<span class="number">8</span>,<span class="number">5</span>,<span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">5</span>;</span><br><span class="line">        <span class="keyword">final</span> <span class="keyword">int</span>[] topK = getTopK(arr, k );</span><br><span class="line">        System.out.println(Arrays.toString(topK));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="快排思想实现topK"><a href="#快排思想实现topK" class="headerlink" title="快排思想实现topK"></a>快排思想实现topK</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">QsortTopK</span> </span>&#123;</span><br><span class="line"> <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 取最小的k个数 </span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] getTopKByPartition(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> k) &#123;</span><br><span class="line">        <span class="keyword">if</span> (arr == <span class="keyword">null</span> || arr.length &lt;= <span class="number">0</span> || k &lt;= <span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> size = arr.length;</span><br><span class="line">        <span class="keyword">int</span> target = k;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> low = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">int</span> high = size - <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">int</span> mid = getMid(arr, low, high);</span><br><span class="line">        <span class="keyword">while</span> (mid != target) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mid &lt; target) &#123;</span><br><span class="line">                mid = getMid(arr, mid + <span class="number">1</span>, high);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                mid = getMid(arr, low, mid - <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span>[] ret = <span class="keyword">new</span> <span class="keyword">int</span>[target];</span><br><span class="line">        System.arraycopy(arr, <span class="number">0</span>, ret, <span class="number">0</span>, target);</span><br><span class="line">        <span class="keyword">return</span> ret;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 快排思想-一趟排序（划分函数）</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMid</span><span class="params">(<span class="keyword">int</span>[] arr, <span class="keyword">int</span> low, <span class="keyword">int</span> high)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> base = arr[low];</span><br><span class="line">        <span class="keyword">while</span> (low &lt; high) &#123;</span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&lt;= 不能为&lt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &gt;= arr[high]) &#123;</span><br><span class="line">                high--;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[low] = arr[high];</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 判断条件必须加=场景，为&gt;= 不能为&gt;，否则数组中有相同数据时，会一直循环</span></span><br><span class="line">            <span class="keyword">while</span> (low &lt; high &amp;&amp; base &lt;= arr[low]) &#123;</span><br><span class="line">                low++;</span><br><span class="line">            &#125;</span><br><span class="line">            arr[high] = arr[low];</span><br><span class="line">        &#125;</span><br><span class="line">        arr[low] = base;</span><br><span class="line">        <span class="keyword">return</span> low;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span>[] arr = &#123;<span class="number">3</span>, <span class="number">9</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">6</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span> k =<span class="number">3</span>;</span><br><span class="line">        System.out.println(Arrays.toString(getTopKByPartition(arr, k)));</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p> <strong>用堆来实现TopK 和 用快排来实现TopK 的效率对比：</strong></p>
-<p>　　　　　　　　　　　　　　　　　　“小顶堆”　　　　|　　　　“快排”</p>
-<p>　　　　数据量为100万+10时：　　　　11毫秒　　　　|　　　　124毫秒</p>
-<p>　　　　数据量为1000万+10时：　　　　28毫秒　　　  |　　　　1438毫秒</p>
-<h2 id="写在后面"><a href="#写在后面" class="headerlink" title="写在后面"></a>写在后面</h2><p>要是是做游戏排行榜，大家的战力分布其实是符合正态分布的，所以找TopK时，可以根据数据分布，选择合适的西格玛值，就能大致的估计出第K个值，来优化base的取值，让其时间尽量靠近最佳时间。</p>
-]]></content>
-      <tags>
-        <tag>数据结构与算法</tag>
       </tags>
   </entry>
   <entry>
@@ -2120,29 +2120,6 @@
       </tags>
   </entry>
   <entry>
-    <title>拓扑排序检验图中成环</title>
-    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
-    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
-<ol>
-<li>计算每一个节点的入度</li>
-<li>把入度为0的点加入队列</li>
-<li>把队列中的点从图中删除<ul>
-<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
-<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
-</ul>
-</li>
-<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
-</ol>
-<a id="more"></a>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>排序与查找</title>
     <url>/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/</url>
     <content><![CDATA[<h3 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h3><ul>
@@ -2208,67 +2185,26 @@
       </tags>
   </entry>
   <entry>
-    <title>数据库事务与隔离级别</title>
-    <url>/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</url>
-    <content><![CDATA[<h1 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h1><p>因为MyIsAM是没有事务的，所以说数据库事务只存在于InnoDB中</p>
-<h3 id="数据库要是能支持事务必须要满足ACID"><a href="#数据库要是能支持事务必须要满足ACID" class="headerlink" title="数据库要是能支持事务必须要满足ACID"></a>数据库要是能支持事务必须要满足ACID</h3><ol>
-<li>原子性（Atomicity）<ul>
-<li>一个事务中的所有执行语句要么全部成功，要么全部失败回滚</li>
+    <title>拓扑排序检验图中成环</title>
+    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
+    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
+<ol>
+<li>计算每一个节点的入度</li>
+<li>把入度为0的点加入队列</li>
+<li>把队列中的点从图中删除<ul>
+<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
+<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
 </ul>
 </li>
-<li>一致性（Consistency）<ul>
-<li><strong>一致读</strong> 事务读取数据只能从一个状态中读取，不能从2个或者2个以上状态读取。</li>
-<li><strong>一致写</strong> 事务执行的数据变更只能基于上一个一致的状态，且只能体现在一个状态中。</li>
-</ul>
-</li>
-<li>隔离性（Isolation）<ul>
-<li>每个事务都不能访问到其他事务操作过程中的状态。他们等于互相不可见。</li>
-</ul>
-</li>
-<li>持久性（Durability）<ul>
-<li>一旦提交，对于数据库中数据的改变是永久性的，即使数据库发生故障也不能丢失已提交事务所完成的改变。</li>
-</ul>
-</li>
+<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
 </ol>
 <a id="more"></a>
 
-<h3 id="数据库有四种隔离级别"><a href="#数据库有四种隔离级别" class="headerlink" title="数据库有四种隔离级别"></a>数据库有四种隔离级别</h3><h4 id="Repeatable-Read-可重复读"><a href="#Repeatable-Read-可重复读" class="headerlink" title="Repeatable Read 可重复读"></a><code>Repeatable Read</code> 可重复读</h4><p><strong>MySQL数据库默认的隔离级别。</strong>保证一个事务在运行时，是此时查询的结果是唯一性的，通过给整个事务一个快照的方式实现（正常的每一个select语句是获得一个快照），InnoDB和Falcon存储引擎通过多版本并发控制机制解决了幻读问题。</p>
-<h4 id="Read-Committed-读取提交内容"><a href="#Read-Committed-读取提交内容" class="headerlink" title="Read Committed 读取提交内容"></a><code>Read Committed</code> 读取提交内容</h4><p>一个事务在运行时，要是在这个中间段时间，有其他修改数据库的操作提交。本事务查询，会出现和事务相关的</p>
-<h4 id="Read-UnCommitted-读取未提交内容"><a href="#Read-UnCommitted-读取未提交内容" class="headerlink" title="Read UnCommitted 读取未提交内容"></a><code>Read UnCommitted</code> 读取未提交内容</h4><p>等于裸奔，没有事务，会出现脏读，</p>
-<h4 id="Serializable-可串行化"><a href="#Serializable-可串行化" class="headerlink" title="Serializable 可串行化"></a><code>Serializable</code> 可串行化</h4><p>等于加了读写锁，它通过强制事务排序，使之不可能相互冲突，从而解决幻读问题。</p>
-<h3 id="不同隔离级别下会出现什么问题"><a href="#不同隔离级别下会出现什么问题" class="headerlink" title="不同隔离级别下会出现什么问题"></a>不同隔离级别下会出现什么问题</h3><h4 id="1-脏读"><a href="#1-脏读" class="headerlink" title="1. 脏读"></a>1. 脏读</h4><p><strong>脏读是指一个事务读取了未提交事务执行过程中的数据。</strong><br>当一个事务的操作正在多次修改数据，而在事务还未提交的时候，另外一个并发事务来读取了数据，就会导致读取到的数据并非是最终持久化之后的数据，这个数据就是脏读的数据。<br>最典型的例子就是银行转账，从A账户转账100到B账户，脚本命令为</p>
-<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">update</span> <span class="keyword">account</span> <span class="keyword">set</span> money = money + <span class="number">100</span> <span class="keyword">where</span> username = <span class="string">&#x27;B&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">update</span> <span class="keyword">account</span> <span class="keyword">set</span> money = money - <span class="number">100</span> <span class="keyword">where</span> username = <span class="string">&#x27;A&#x27;</span>;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
-<p>在这个事务执行过程中，另外一个事务读取结果发现B账户中的钱已经到账，提示B钱已到账，B就进行了下一步的操作。但是最终转账事务失败，导致操作回滚。实际上B并未收到钱，但是进行了下一步的操作，造成了损失，这就是脏读。</p>
-<h4 id="2-不可重复读"><a href="#2-不可重复读" class="headerlink" title="2. 不可重复读"></a>2. 不可重复读</h4><p>不可重复读是指对于数据库中的某个数据，一个事务执行过程中多次查询返回不同查询结果，这就是在事务执行过程中，数据被其他事务提交修改了。<br>不可重复读同脏读的区别在于，脏读是一个事务读取了另一未完成的事务执行过程中的数据，而不可重复读是一个事务执行过程中，另一事务提交并修改了当前事务正在读取的数据。</p>
-<h4 id="3-虚读-幻读"><a href="#3-虚读-幻读" class="headerlink" title="3. 虚读(幻读)"></a>3. 虚读(幻读)</h4><p>幻读是事务非独立执行时发生的一种现象，例如事务T1批量对一个表中某一列列值为1的数据修改为2的变更，但是在这时，事务T2对这张表插入了一条列值为1的数据，并完成提交。此时，如果事务T1查看刚刚完成操作的数据，发现还有一条列值为1的数据没有进行修改，而这条数据其实是T2刚刚提交插入的，这就是幻读。<br>幻读和不可重复读都是读取了另一条已经提交的事务（这点同脏读不同），所不同的是不可重复读查询的都是同一个数据项，而幻读针对的是一批数据整体（比如数据的个数）。</p>
 ]]></content>
       <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>泛型的具体含义与区别</title>
-    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
-<p>主要是从为了把运行时异常提前到编译时抛出</p>
-<p><strong>通配符的几种形式：</strong></p>
-<ol>
-<li><p>无限定通配符，&lt;?&gt;</p>
-</li>
-<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
-</li>
-<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
-</li>
-</ol>
-<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
-<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
-<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -2347,6 +2283,70 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>数据库事务与隔离级别</title>
+    <url>/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</url>
+    <content><![CDATA[<h1 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h1><p>因为MyIsAM是没有事务的，所以说数据库事务只存在于InnoDB中</p>
+<h3 id="数据库要是能支持事务必须要满足ACID"><a href="#数据库要是能支持事务必须要满足ACID" class="headerlink" title="数据库要是能支持事务必须要满足ACID"></a>数据库要是能支持事务必须要满足ACID</h3><ol>
+<li>原子性（Atomicity）<ul>
+<li>一个事务中的所有执行语句要么全部成功，要么全部失败回滚</li>
+</ul>
+</li>
+<li>一致性（Consistency）<ul>
+<li><strong>一致读</strong> 事务读取数据只能从一个状态中读取，不能从2个或者2个以上状态读取。</li>
+<li><strong>一致写</strong> 事务执行的数据变更只能基于上一个一致的状态，且只能体现在一个状态中。</li>
+</ul>
+</li>
+<li>隔离性（Isolation）<ul>
+<li>每个事务都不能访问到其他事务操作过程中的状态。他们等于互相不可见。</li>
+</ul>
+</li>
+<li>持久性（Durability）<ul>
+<li>一旦提交，对于数据库中数据的改变是永久性的，即使数据库发生故障也不能丢失已提交事务所完成的改变。</li>
+</ul>
+</li>
+</ol>
+<a id="more"></a>
+
+<h3 id="数据库有四种隔离级别"><a href="#数据库有四种隔离级别" class="headerlink" title="数据库有四种隔离级别"></a>数据库有四种隔离级别</h3><h4 id="Repeatable-Read-可重复读"><a href="#Repeatable-Read-可重复读" class="headerlink" title="Repeatable Read 可重复读"></a><code>Repeatable Read</code> 可重复读</h4><p><strong>MySQL数据库默认的隔离级别。</strong>保证一个事务在运行时，是此时查询的结果是唯一性的，通过给整个事务一个快照的方式实现（正常的每一个select语句是获得一个快照），InnoDB和Falcon存储引擎通过多版本并发控制机制解决了幻读问题。</p>
+<h4 id="Read-Committed-读取提交内容"><a href="#Read-Committed-读取提交内容" class="headerlink" title="Read Committed 读取提交内容"></a><code>Read Committed</code> 读取提交内容</h4><p>一个事务在运行时，要是在这个中间段时间，有其他修改数据库的操作提交。本事务查询，会出现和事务相关的</p>
+<h4 id="Read-UnCommitted-读取未提交内容"><a href="#Read-UnCommitted-读取未提交内容" class="headerlink" title="Read UnCommitted 读取未提交内容"></a><code>Read UnCommitted</code> 读取未提交内容</h4><p>等于裸奔，没有事务，会出现脏读，</p>
+<h4 id="Serializable-可串行化"><a href="#Serializable-可串行化" class="headerlink" title="Serializable 可串行化"></a><code>Serializable</code> 可串行化</h4><p>等于加了读写锁，它通过强制事务排序，使之不可能相互冲突，从而解决幻读问题。</p>
+<h3 id="不同隔离级别下会出现什么问题"><a href="#不同隔离级别下会出现什么问题" class="headerlink" title="不同隔离级别下会出现什么问题"></a>不同隔离级别下会出现什么问题</h3><h4 id="1-脏读"><a href="#1-脏读" class="headerlink" title="1. 脏读"></a>1. 脏读</h4><p><strong>脏读是指一个事务读取了未提交事务执行过程中的数据。</strong><br>当一个事务的操作正在多次修改数据，而在事务还未提交的时候，另外一个并发事务来读取了数据，就会导致读取到的数据并非是最终持久化之后的数据，这个数据就是脏读的数据。<br>最典型的例子就是银行转账，从A账户转账100到B账户，脚本命令为</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">update</span> <span class="keyword">account</span> <span class="keyword">set</span> money = money + <span class="number">100</span> <span class="keyword">where</span> username = <span class="string">&#x27;B&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">update</span> <span class="keyword">account</span> <span class="keyword">set</span> money = money - <span class="number">100</span> <span class="keyword">where</span> username = <span class="string">&#x27;A&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在这个事务执行过程中，另外一个事务读取结果发现B账户中的钱已经到账，提示B钱已到账，B就进行了下一步的操作。但是最终转账事务失败，导致操作回滚。实际上B并未收到钱，但是进行了下一步的操作，造成了损失，这就是脏读。</p>
+<h4 id="2-不可重复读"><a href="#2-不可重复读" class="headerlink" title="2. 不可重复读"></a>2. 不可重复读</h4><p>不可重复读是指对于数据库中的某个数据，一个事务执行过程中多次查询返回不同查询结果，这就是在事务执行过程中，数据被其他事务提交修改了。<br>不可重复读同脏读的区别在于，脏读是一个事务读取了另一未完成的事务执行过程中的数据，而不可重复读是一个事务执行过程中，另一事务提交并修改了当前事务正在读取的数据。</p>
+<h4 id="3-虚读-幻读"><a href="#3-虚读-幻读" class="headerlink" title="3. 虚读(幻读)"></a>3. 虚读(幻读)</h4><p>幻读是事务非独立执行时发生的一种现象，例如事务T1批量对一个表中某一列列值为1的数据修改为2的变更，但是在这时，事务T2对这张表插入了一条列值为1的数据，并完成提交。此时，如果事务T1查看刚刚完成操作的数据，发现还有一条列值为1的数据没有进行修改，而这条数据其实是T2刚刚提交插入的，这就是幻读。<br>幻读和不可重复读都是读取了另一条已经提交的事务（这点同脏读不同），所不同的是不可重复读查询的都是同一个数据项，而幻读针对的是一批数据整体（比如数据的个数）。</p>
+]]></content>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>泛型的具体含义与区别</title>
+    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
+<p>主要是从为了把运行时异常提前到编译时抛出</p>
+<p><strong>通配符的几种形式：</strong></p>
+<ol>
+<li><p>无限定通配符，&lt;?&gt;</p>
+</li>
+<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
+</li>
+<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
+</li>
+</ol>
+<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
+<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
+<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
