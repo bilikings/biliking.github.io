@@ -177,6 +177,91 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="post-title-link" itemprop="url">数据库事务与隔离级别</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-31 10:36:26 / 修改时间：10:36:35" itemprop="dateCreated datePublished" datetime="2021-03-31T10:36:26+08:00">2021-03-31</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h1><p>因为MyIsAM是没有事务的，所以说数据库事务只存在于InnoDB中</p>
+<h3 id="数据库要是能支持事务必须要满足ACID"><a href="#数据库要是能支持事务必须要满足ACID" class="headerlink" title="数据库要是能支持事务必须要满足ACID"></a>数据库要是能支持事务必须要满足ACID</h3><ol>
+<li>原子性（Atomicity）<ul>
+<li>一个事务中的所有执行语句要么全部成功，要么全部失败回滚</li>
+</ul>
+</li>
+<li>一致性（Consistency）<ul>
+<li><strong>一致读</strong> 事务读取数据只能从一个状态中读取，不能从2个或者2个以上状态读取。</li>
+<li><strong>一致写</strong> 事务执行的数据变更只能基于上一个一致的状态，且只能体现在一个状态中。</li>
+</ul>
+</li>
+<li>隔离性（Isolation）<ul>
+<li>每个事务都不能访问到其他事务操作过程中的状态。他们等于互相不可见。</li>
+</ul>
+</li>
+<li>持久性（Durability）<ul>
+<li>一旦提交，对于数据库中数据的改变是永久性的，即使数据库发生故障也不能丢失已提交事务所完成的改变。</li>
+</ul>
+</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -828,75 +913,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/" class="post-title-link" itemprop="url">排序与查找</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-12-17 08:46:18 / 修改时间：08:48:04" itemprop="dateCreated datePublished" datetime="2020-12-17T08:46:18+08:00">2020-12-17</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h3><ul>
-<li><p>最没用的算法</p>
-</li>
-<li><p>一遍又一遍过滤这个数组，找到最小的放到前面来</p></li></ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -968,7 +984,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">41</span>
+          <span class="site-state-item-count">42</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
