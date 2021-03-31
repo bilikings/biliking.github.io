@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-03-31T02:36:35.945Z</updated>
+  <updated>2021-03-31T09:56:36.052Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,39 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Spring事务</title>
+    <link href="http://bilikings.top/2021/03/31/Spring%E4%BA%8B%E5%8A%A1/"/>
+    <id>http://bilikings.top/2021/03/31/Spring%E4%BA%8B%E5%8A%A1/</id>
+    <published>2021-03-31T09:56:09.000Z</published>
+    <updated>2021-03-31T09:56:36.052Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Spring事务&quot;&gt;&lt;a href=&quot;#Spring事务&quot; class=&quot;headerlink&quot; title=&quot;Spring事务&quot;&gt;&lt;/a&gt;Spring事务&lt;/h1&gt;&lt;p&gt;spring事务是在方法上添加@Transactional注解，这个注解能有7个参数，表示了不同事务的传播级别&lt;/p&gt;
+&lt;h3 id=&quot;七种事务传播行为&quot;&gt;&lt;a href=&quot;#七种事务传播行为&quot; class=&quot;headerlink&quot; title=&quot;七种事务传播行为&quot;&gt;&lt;/a&gt;七种事务传播行为&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_REQUIRED&lt;/strong&gt; – 支持当前事务，如果当前没有事务，就新建一个事务。这是最常见的选择。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_SUPPORTS&lt;/strong&gt; – 支持当前事务，如果当前没有事务，就以非事务方式执行。&lt;ul&gt;
+&lt;li&gt;PROPAGATION_SUPPORTS如果无事务则以非事务运行,如果有事务则加入当前事务,这样和不使用注解有什么区别呢? &lt;ul&gt;
+&lt;li&gt;这样他抛异常,可以回滚.两种调用方法,一个是控制层调用,一个是另一个事务调用.如果控制层调用,他是和没有事务注解一样的,如果是另一个事务调用(其他service),那么他抛异常的时候,会出现回滚.区别了使用场景&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_MANDATORY&lt;/strong&gt; – 支持当前事务，如果当前没有事务，就抛出异常。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_REQUIRES_NEW&lt;/strong&gt; – 新建事务，如果当前存在事务，把当前事务挂起。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_NOT_SUPPORTED&lt;/strong&gt; – 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_NEVER&lt;/strong&gt; – 以非事务方式执行，如果当前存在事务，则抛出异常。&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;PROPAGATION_NESTED&lt;/strong&gt; – 如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则进行与PROPAGATION_REQUIRED类似的操作。&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;常用的两个事务传播属性是1和4，即PROPAGATION_REQUIRED，PROPAGATION_REQUIRES_NEW&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
+    
+  </entry>
   
   <entry>
     <title>数据库事务与隔离级别</title>
@@ -468,29 +501,6 @@
 &lt;li&gt;对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性&lt;/li&gt;
 &lt;li&gt;使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值&lt;/li&gt;
 &lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java并发编程笔记(6)——任务</title>
-    <link href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/"/>
-    <id>http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/</id>
-    <published>2020-11-22T12:18:58.000Z</published>
-    <updated>2020-11-22T12:20:58.831Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;任务执行&quot;&gt;&lt;a href=&quot;#任务执行&quot; class=&quot;headerlink&quot; title=&quot;任务执行&quot;&gt;&lt;/a&gt;任务执行&lt;/h2&gt;&lt;p&gt;&lt;strong&gt;任务&lt;/strong&gt;通常是一项抽象并且离散的一些单元。&lt;/p&gt;
-&lt;p&gt;可以把应用程序分解到多个任务中，可以简化程序的组织结构，提供一种自然的事务边界来优化错误的恢复过程&lt;/p&gt;
-&lt;h3 id=&quot;在线程中执行任务&quot;&gt;&lt;a href=&quot;#在线程中执行任务&quot; class=&quot;headerlink&quot; title=&quot;在线程中执行任务&quot;&gt;&lt;/a&gt;在线程中执行任务&lt;/h3&gt;&lt;ol&gt;
-&lt;li&gt;找出任务边界&lt;/li&gt;
-&lt;li&gt;任务并不依赖其他的任务的状态、结果、边界效应。&lt;/li&gt;
-&lt;li&gt;多数web服务器的任务边界是一独立的客户请求为边界&lt;/li&gt;
-&lt;/ol&gt;</summary>
     
     
     
