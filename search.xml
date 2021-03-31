@@ -64,100 +64,6 @@
       </tags>
   </entry>
   <entry>
-    <title>JVM内存回收概述</title>
-    <url>/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/</url>
-    <content><![CDATA[<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
-<li>Java引用的功能和意义</li>
-<li>Java引用与内存回收之间的关系</li>
-<li>Java对象在内存中的不同状态</li>
-<li>软引用的作用和使用软引用的注意点</li>
-<li>弱引用的作用和使用弱引用的注意点</li>
-<li>虚引用的作用和使用虚引用的注意点</li>
-<li>Java内存泄漏的原因</li>
-<li>Java内存泄漏和C++内存泄漏的差别</li>
-<li>Java垃圾回收机制的基本算法</li>
-<li>堆内存的分代回收</li>
-<li>Young代、Old代和Permanent代的各自存储的对象</li>
-<li>Young代、Old代和Permanent代的特定及适用的回收算法</li>
-<li>常见垃圾回收机制对堆内存的回收细节</li>
-</ol>
-<a id="more"></a>
-
-<h2 id="对象在内存中的状态"><a href="#对象在内存中的状态" class="headerlink" title="对象在内存中的状态"></a>对象在内存中的状态</h2><p>对于GC来说，是否回收一个对象的标准在于，是否几率引用变量在引用这个对象。</p>
-<p>基本上，可以把JVM内存中的对象引用理解成一种<strong>有向图</strong>，引用变量、对象都当成为有向图的顶点，将引用关系当成图的有向边，有向边总是从引用端指向被引用的Java对象，图的起始顶点是<strong>线程对象</strong>。</p>
-<p>一个对象在堆内存中运行时，根据图中状态，可以有下面三种状态：</p>
-<ol>
-<li><p>可达状态：一个状态在被创建之后，有一个以上的变量引用他，在有向图的起始顶点可以导航到这个对象，那么他就处于可达状态</p>
-</li>
-<li><p>可恢复状态：如果成行中不在有任何的引用变量引用他，那么就先进入可恢复状态，有向图顶点不可达。</p>
-</li>
-<li><p>不可达状态：当系统调用finalize方法仍然不能让可恢复状态称为可达状态，那么这个对象就永久的失去引用，成为不可达状态，这时才会真正的垃圾回收。</p>
-<h2 id="对象的引用类型"><a href="#对象的引用类型" class="headerlink" title="对象的引用类型"></a>对象的引用类型</h2><p>​        对于垃圾回收机制来说，判断一个对象是否可以进行回收的标准就在于这个对象是不是被引用，所以引用是JVM进行内存管理的一个重要工具，</p>
-<p>Java的4个引用类型如下</p>
-<ol>
-<li>强引用</li>
-<li>软引用</li>
-<li>弱引用</li>
-<li>虚引用</li>
-</ol>
-</li>
-</ol>
-<h3 id="强引用"><a href="#强引用" class="headerlink" title="强引用"></a>强引用</h3><p>这是Java程序中最常见的引用方式，程序创建一个对象，并把这个对象赋给一个引用变量，这个引用变量就是强引用。</p>
-<p>由于JVM肯定不会回收强引用所引用的Java对象，因此强引用是造成Java内存泄漏的主要原因之一。</p>
-<h3 id="软引用"><a href="#软引用" class="headerlink" title="软引用"></a>软引用</h3><p>软引用需要通过<code>SoftReference</code>类来实现，当一个对象只具有软引用时，它有可能被垃圾回收机制回收。对于只有软引用的对象而言，当系统内存空间足够时，它不会被系统回收，程序也可使用该对象；当系统内存空间不足时，系统将会回收它。</p>
-<p>当系统内存充足时，<code>SoftReference</code>引用和强引用并没有太大的区别。当程序使用强引用时，无论系统堆内存如何紧张，JVM垃圾回收机制都不会回收被强引用所引用的Java对象，因此最后导致程序因内存不足而中止。但如果程序把强引用改为使用软引用，就可完全避免这种情况，这就是软引用的优势所在。</p>
-<h3 id="弱引用"><a href="#弱引用" class="headerlink" title="弱引用"></a>弱引用</h3><p>弱引用和软引用很像，但弱引用的引用级别更低。对于只有弱引用的对象而言，当系统垃圾回收机制运行时，不管系统内存是否足够，总会回收该对象所占用的内存。</p>
-<h3 id="虚引用"><a href="#虚引用" class="headerlink" title="虚引用"></a>虚引用</h3><p>软引用和弱引用可以单独使用，但虚引用不能单独使用，单独使用虚引用没有太大的意义。虚引用的主要作用就是跟踪对象被垃圾回收的状态，程序可以通过检查与虚引用关联的引用队列中是否已经包含指定的虚引用，从而了解虚引用所引用对象是否即将被回收。</p>
-<p>与软引用和弱引用不同的是，虚引用在对象被释放之前，将把它对应的虚引用添加到它的关联的引用队列中，这使得可以在对象被回收之前采取行动。</p>
-<p>虚引用通过<code>PhantomReference</code>类实现，它完全类似于<strong>没有引用</strong>。虚引用对对象本身没有太大影响，对象甚至感觉不到虚引用的存在。</p>
-<p>虚引用主要用于<strong>跟踪对象被垃圾回收的状态</strong>，虚引用不能单独使用，虚引用必须和引用队列（<code>ReferenceQueue</code>）联合使用。</p>
-<h2 id="Java内存泄漏"><a href="#Java内存泄漏" class="headerlink" title="Java内存泄漏"></a>Java内存泄漏</h2><p>程序运行过程中会不断地分配内存空间，那些不再使用的内存空间应该即时回收它们，从而保证系统可以再次使用这些内存，如果存在无用的内存没有被回收回来，那就是<strong>内存泄漏</strong>。</p>
-<p>java中的内存泄漏主要针对那些<strong>无用却可达</strong>的对象，而c++中针对的是<strong>无用</strong>的对象，需要程序员手动释放。</p>
-<p>对于Java程序而言，只要它们一直处于可达状态，垃圾回收机制就不会回收它们—即使它们对于程序来说已经变成了垃圾（程序再也不需要它们了），而对于垃圾回收机制来说，它们还不是垃圾（还处于可达状态），因此不能回收。</p>
-<h2 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h2><p>主要完成两件事情</p>
-<ul>
-<li>跟踪并监控每个Java对象，当一个对象处于不可达状态是，回收对象分配的内存</li>
-<li>清理内存分配、回收是产生的内存碎片</li>
-</ul>
-<h3 id="基本算法"><a href="#基本算法" class="headerlink" title="基本算法"></a>基本算法</h3><p>实际上，垃圾回收机制不可能实时检测到每个Java对象的状态，因此当一个对象失去引用后，它也不会被立即回收，只有等垃圾回收运行时才会被回收。</p>
-<p>设计思路：</p>
-<ul>
-<li>串行回收与并行回收</li>
-<li>并发执行和引用程序停止</li>
-<li>压缩，不压缩，复制<ul>
-<li>复制：将堆内分成两个相同空间，从根（类似于前面介绍的有向图的起始顶点）开始访问每一个关联的可达对象，将空间A的可达对象全部复制到空间B，然后一次性回收整个空间A。</li>
-<li>标记清除：经典的不压缩算法，垃圾回收器先从根开始访问所有可达对象，将它们标记为可达状态，然后再遍历一次整个内存区域，把所有没有标记为可达的对象进行回收处理。</li>
-<li>标记压缩：垃圾回收器先从根开始访问所有可达对象，将它们标记为可达状态。接下来垃圾回收器会将这些活动对象搬迁在一起，这个过程也被称为内存压缩，然后垃圾回收机制再次回收那些不可达对象所占用的内存空间，这样就避免了回收产生的内存碎片。有3个阶段：mark（标识可达对象）、sweep（清除）、compact（压缩）。<ul>
-<li>在 mark阶段，回收器会识别出哪些对象仍然是可达的</li>
-<li>在 sweep阶段将会回收不可达对象所占用的内存</li>
-<li>在compact阶段回收器执行<code>slidingcompaction</code>，把活动对象往Old代的前端启动，而在尾部保留一块连续的空间，以便下次为新对象分配内存空间。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="内存分代回收"><a href="#内存分代回收" class="headerlink" title="内存分代回收"></a>内存分代回收</h3><ul>
-<li> Young（年轻代）：采用复制算法</li>
-<li> Old（老年代）：采用标记压缩算法</li>
-<li> Permanent（永久代）</li>
-</ul>
-<p>在不同的代中，采用不同的回收算法</p>
-<ul>
-<li>绝大对数的对象不会被长时间引用，这些对象在其Young期间就会被回收</li>
-<li>很老的对象（生存时间很长）和很新的对象（生存时间很短）之间很少存在相互引用的情况。</li>
-</ul>
-<h4 id="young代"><a href="#young代" class="headerlink" title="young代"></a>young代</h4><p>Young代由1个Eden区和2个Survivor区构成。绝大多数对象先分配到Eden区。同一时间2个Survivor空间中有一个用来保存对象，而另一个是空的，用来在下次垃圾回收时保存Young代中的对象。</p>
-<p>Eden和Survivor的比例通过<code>-XX:SurvivorRatio</code>附加选项来设定，默认为32。</p>
-<h4 id="old代"><a href="#old代" class="headerlink" title="old代"></a>old代</h4><p>执行垃圾回收的频率无需太高，久经考验的对象很少会死掉</p>
-<p>每次 Old的垃圾回收需要更长的时间</p>
-<h4 id="permanent代"><a href="#permanent代" class="headerlink" title="permanent代"></a>permanent代</h4><p>主要用于转载Class，方法等信息，默认为64M</p>
-<p>通常不会对这里面的对象执行垃圾回收</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JavaJUC(一)——线程</title>
     <url>/2020/11/15/JavaJUC-%E4%B8%80-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B/</url>
     <content><![CDATA[<h1 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h1><p>进程是系统资源分配的基本单位</p>
@@ -257,6 +163,60 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(1)——线程安全性</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
+    <content><![CDATA[<blockquote>
+<p>什么是线程</p>
+</blockquote>
+<ul>
+<li>线程也成为轻量级进程</li>
+<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
+<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
+</ul>
+<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
+<ol>
+<li>不在线程中共享这个状态变量</li>
+<li>把状态变量修改为不可变的变量</li>
+<li>在访问状态时候使用同步</li>
+</ol>
+<a id="more"></a>
+
+<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
+<ul>
+<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
+<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
+</ul>
+<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
+<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
+</blockquote>
+<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
+<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<ul>
+<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
+<blockquote>
+<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
+</blockquote>
+<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
+<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
+</li>
+<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
+</li>
+</ul>
+<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
+<blockquote>
+<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
+</blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>JavaJUC(二)——Concurrent包</title>
     <url>/2020/11/15/JavaJUC-%E4%BA%8C-%E2%80%94%E2%80%94Concurrent%E5%8C%85/</url>
     <content><![CDATA[<h1 id="java-util-concurrent"><a href="#java-util-concurrent" class="headerlink" title="java.util.concurrent"></a>java.util.concurrent</h1><p>这是一个jdk1.5之后的一个有关多线程的包</p>
@@ -329,54 +289,94 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(1)——线程安全性</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-1-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E6%80%A7/</url>
-    <content><![CDATA[<blockquote>
-<p>什么是线程</p>
-</blockquote>
-<ul>
-<li>线程也成为轻量级进程</li>
-<li>进程是操作系统资源分配的最小单位，线程是cpu调度的最小单位</li>
-<li>同一个进程中的线程是都将共享进程的内存地址空间，因此这些形成都可以访问相同的变量并在一个堆上分配对象</li>
-</ul>
-<h2 id="线程安全性"><a href="#线程安全性" class="headerlink" title="线程安全性"></a>线程安全性</h2><p>如果多个线程访问同一个可变的状态变量时，没有使用合适的同步，程序就出现错误，解决方案：</p>
-<ol>
-<li>不在线程中共享这个状态变量</li>
-<li>把状态变量修改为不可变的变量</li>
-<li>在访问状态时候使用同步</li>
+    <title>JVM内存回收概述</title>
+    <url>/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/</url>
+    <content><![CDATA[<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
+<li>Java引用的功能和意义</li>
+<li>Java引用与内存回收之间的关系</li>
+<li>Java对象在内存中的不同状态</li>
+<li>软引用的作用和使用软引用的注意点</li>
+<li>弱引用的作用和使用弱引用的注意点</li>
+<li>虚引用的作用和使用虚引用的注意点</li>
+<li>Java内存泄漏的原因</li>
+<li>Java内存泄漏和C++内存泄漏的差别</li>
+<li>Java垃圾回收机制的基本算法</li>
+<li>堆内存的分代回收</li>
+<li>Young代、Old代和Permanent代的各自存储的对象</li>
+<li>Young代、Old代和Permanent代的特定及适用的回收算法</li>
+<li>常见垃圾回收机制对堆内存的回收细节</li>
 </ol>
 <a id="more"></a>
 
-<p><strong>安全性</strong>是由<strong>正确性</strong>决定的，正确性的定义是某个类和其行为完全一致，在良好的规范中，通常会定义各种不变的条件来约束对象的状态，以及描述对象操作的结果的后验状态</p>
+<h2 id="对象在内存中的状态"><a href="#对象在内存中的状态" class="headerlink" title="对象在内存中的状态"></a>对象在内存中的状态</h2><p>对于GC来说，是否回收一个对象的标准在于，是否几率引用变量在引用这个对象。</p>
+<p>基本上，可以把JVM内存中的对象引用理解成一种<strong>有向图</strong>，引用变量、对象都当成为有向图的顶点，将引用关系当成图的有向边，有向边总是从引用端指向被引用的Java对象，图的起始顶点是<strong>线程对象</strong>。</p>
+<p>一个对象在堆内存中运行时，根据图中状态，可以有下面三种状态：</p>
+<ol>
+<li><p>可达状态：一个状态在被创建之后，有一个以上的变量引用他，在有向图的起始顶点可以导航到这个对象，那么他就处于可达状态</p>
+</li>
+<li><p>可恢复状态：如果成行中不在有任何的引用变量引用他，那么就先进入可恢复状态，有向图顶点不可达。</p>
+</li>
+<li><p>不可达状态：当系统调用finalize方法仍然不能让可恢复状态称为可达状态，那么这个对象就永久的失去引用，成为不可达状态，这时才会真正的垃圾回收。</p>
+<h2 id="对象的引用类型"><a href="#对象的引用类型" class="headerlink" title="对象的引用类型"></a>对象的引用类型</h2><p>​        对于垃圾回收机制来说，判断一个对象是否可以进行回收的标准就在于这个对象是不是被引用，所以引用是JVM进行内存管理的一个重要工具，</p>
+<p>Java的4个引用类型如下</p>
+<ol>
+<li>强引用</li>
+<li>软引用</li>
+<li>弱引用</li>
+<li>虚引用</li>
+</ol>
+</li>
+</ol>
+<h3 id="强引用"><a href="#强引用" class="headerlink" title="强引用"></a>强引用</h3><p>这是Java程序中最常见的引用方式，程序创建一个对象，并把这个对象赋给一个引用变量，这个引用变量就是强引用。</p>
+<p>由于JVM肯定不会回收强引用所引用的Java对象，因此强引用是造成Java内存泄漏的主要原因之一。</p>
+<h3 id="软引用"><a href="#软引用" class="headerlink" title="软引用"></a>软引用</h3><p>软引用需要通过<code>SoftReference</code>类来实现，当一个对象只具有软引用时，它有可能被垃圾回收机制回收。对于只有软引用的对象而言，当系统内存空间足够时，它不会被系统回收，程序也可使用该对象；当系统内存空间不足时，系统将会回收它。</p>
+<p>当系统内存充足时，<code>SoftReference</code>引用和强引用并没有太大的区别。当程序使用强引用时，无论系统堆内存如何紧张，JVM垃圾回收机制都不会回收被强引用所引用的Java对象，因此最后导致程序因内存不足而中止。但如果程序把强引用改为使用软引用，就可完全避免这种情况，这就是软引用的优势所在。</p>
+<h3 id="弱引用"><a href="#弱引用" class="headerlink" title="弱引用"></a>弱引用</h3><p>弱引用和软引用很像，但弱引用的引用级别更低。对于只有弱引用的对象而言，当系统垃圾回收机制运行时，不管系统内存是否足够，总会回收该对象所占用的内存。</p>
+<h3 id="虚引用"><a href="#虚引用" class="headerlink" title="虚引用"></a>虚引用</h3><p>软引用和弱引用可以单独使用，但虚引用不能单独使用，单独使用虚引用没有太大的意义。虚引用的主要作用就是跟踪对象被垃圾回收的状态，程序可以通过检查与虚引用关联的引用队列中是否已经包含指定的虚引用，从而了解虚引用所引用对象是否即将被回收。</p>
+<p>与软引用和弱引用不同的是，虚引用在对象被释放之前，将把它对应的虚引用添加到它的关联的引用队列中，这使得可以在对象被回收之前采取行动。</p>
+<p>虚引用通过<code>PhantomReference</code>类实现，它完全类似于<strong>没有引用</strong>。虚引用对对象本身没有太大影响，对象甚至感觉不到虚引用的存在。</p>
+<p>虚引用主要用于<strong>跟踪对象被垃圾回收的状态</strong>，虚引用不能单独使用，虚引用必须和引用队列（<code>ReferenceQueue</code>）联合使用。</p>
+<h2 id="Java内存泄漏"><a href="#Java内存泄漏" class="headerlink" title="Java内存泄漏"></a>Java内存泄漏</h2><p>程序运行过程中会不断地分配内存空间，那些不再使用的内存空间应该即时回收它们，从而保证系统可以再次使用这些内存，如果存在无用的内存没有被回收回来，那就是<strong>内存泄漏</strong>。</p>
+<p>java中的内存泄漏主要针对那些<strong>无用却可达</strong>的对象，而c++中针对的是<strong>无用</strong>的对象，需要程序员手动释放。</p>
+<p>对于Java程序而言，只要它们一直处于可达状态，垃圾回收机制就不会回收它们—即使它们对于程序来说已经变成了垃圾（程序再也不需要它们了），而对于垃圾回收机制来说，它们还不是垃圾（还处于可达状态），因此不能回收。</p>
+<h2 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h2><p>主要完成两件事情</p>
 <ul>
-<li>当多个线程访问一个类时，不管运行时采用何种调度方法或者这些线程如何交替进行，并且在主代码中不用任何额外的同步或者协同，这个类都会表现出正确的行为，这个类就是线程安全的（线程安全类就是在并发环境下和单线程环境中都不会被破坏的类）</li>
-<li><strong>一个无状态的对象一定是线程安全的</strong>：他既不包含任何域，也没有对其他类中域的引用。他的操作仅仅操作他的线程栈上的局部变量</li>
+<li>跟踪并监控每个Java对象，当一个对象处于不可达状态是，回收对象分配的内存</li>
+<li>清理内存分配、回收是产生的内存碎片</li>
 </ul>
-<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
-<p>count++并不是一个操作，而是包含了“读取——修改——写入”的操作序列，他的结果依赖于之前的状态。</p>
-</blockquote>
-<h4 id="竞态条件"><a href="#竞态条件" class="headerlink" title="竞态条件"></a>竞态条件</h4><p>在并发编程中，这种由于不恰当的执行时序而出现不同结果是一种非常重要的情况。</p>
-<p>由于存在多个竞态条件，是结果变得不可靠</p>
+<h3 id="基本算法"><a href="#基本算法" class="headerlink" title="基本算法"></a>基本算法</h3><p>实际上，垃圾回收机制不可能实时检测到每个Java对象的状态，因此当一个对象失去引用后，它也不会被立即回收，只有等垃圾回收运行时才会被回收。</p>
+<p>设计思路：</p>
 <ul>
-<li><p>在单例中，有可能线程在A创建对象时候，线程B也开始调用这个方法创建对象，按理来说应该返回同一个对象。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LasyInit</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> LasyInit instance;</span><br><span class="line">    <span class="function">priveate <span class="title">LasyInit</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">    <span class="keyword">public</span> LasyInit getInstance&#123;</span><br><span class="line">        <span class="keyword">if</span>(instance==<span class="keyword">null</span>)&#123;<span class="comment">//A执行到这时候开始创建，B还没开始</span></span><br><span class="line">            instance = <span class="keyword">new</span> LasyInit();<span class="comment">//A开始创建了，B这时候进入了if(instance==null)，发现为false，也开始创建新对象。</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<li>串行回收与并行回收</li>
+<li>并发执行和引用程序停止</li>
+<li>压缩，不压缩，复制<ul>
+<li>复制：将堆内分成两个相同空间，从根（类似于前面介绍的有向图的起始顶点）开始访问每一个关联的可达对象，将空间A的可达对象全部复制到空间B，然后一次性回收整个空间A。</li>
+<li>标记清除：经典的不压缩算法，垃圾回收器先从根开始访问所有可达对象，将它们标记为可达状态，然后再遍历一次整个内存区域，把所有没有标记为可达的对象进行回收处理。</li>
+<li>标记压缩：垃圾回收器先从根开始访问所有可达对象，将它们标记为可达状态。接下来垃圾回收器会将这些活动对象搬迁在一起，这个过程也被称为内存压缩，然后垃圾回收机制再次回收那些不可达对象所占用的内存空间，这样就避免了回收产生的内存碎片。有3个阶段：mark（标识可达对象）、sweep（清除）、compact（压缩）。<ul>
+<li>在 mark阶段，回收器会识别出哪些对象仍然是可达的</li>
+<li>在 sweep阶段将会回收不可达对象所占用的内存</li>
+<li>在compact阶段回收器执行<code>slidingcompaction</code>，把活动对象往Old代的前端启动，而在尾部保留一块连续的空间，以便下次为新对象分配内存空间。</li>
+</ul>
 </li>
 </ul>
-<h4 id="复合操作"><a href="#复合操作" class="headerlink" title="复合操作"></a>复合操作</h4><p>要避免静态条件，必须确保其他线程只能在修改操作之前或者之后读取或者修改，而而不是在修改状态的过程中。</p>
-<blockquote>
-<p>可以使用原子类型<code>AtomicXXX</code>类的<code>incrementAndGet()</code>方法代替count++</p>
-</blockquote>
-<h4 id="内置锁"><a href="#内置锁" class="headerlink" title="内置锁"></a>内置锁</h4><ul>
-<li><p>每个java对象都有一个实现同步的锁，这些锁称为内置锁（或监视器）。</p>
-</li>
-<li><p>JAVA的内置锁相当于一个互斥锁，就是一个线程只能持有这个锁。</p>
 </li>
 </ul>
-<h4 id="重入锁"><a href="#重入锁" class="headerlink" title="重入锁"></a>重入锁</h4><p>每一个线程请求一个其他线程所持有的锁的是时候，发出请求的线程就会block，而内置锁是可重入的，意思是这线程再次请求一个由他自己所已经持有的锁的时候，这个请求就会成功。</p>
-<blockquote>
-<p>获取锁的操作粒度是“线程”，而不是”调用“，</p>
-</blockquote>
+<h3 id="内存分代回收"><a href="#内存分代回收" class="headerlink" title="内存分代回收"></a>内存分代回收</h3><ul>
+<li> Young（年轻代）：采用复制算法</li>
+<li> Old（老年代）：采用标记压缩算法</li>
+<li> Permanent（永久代）</li>
+</ul>
+<p>在不同的代中，采用不同的回收算法</p>
+<ul>
+<li>绝大对数的对象不会被长时间引用，这些对象在其Young期间就会被回收</li>
+<li>很老的对象（生存时间很长）和很新的对象（生存时间很短）之间很少存在相互引用的情况。</li>
+</ul>
+<h4 id="young代"><a href="#young代" class="headerlink" title="young代"></a>young代</h4><p>Young代由1个Eden区和2个Survivor区构成。绝大多数对象先分配到Eden区。同一时间2个Survivor空间中有一个用来保存对象，而另一个是空的，用来在下次垃圾回收时保存Young代中的对象。</p>
+<p>Eden和Survivor的比例通过<code>-XX:SurvivorRatio</code>附加选项来设定，默认为32。</p>
+<h4 id="old代"><a href="#old代" class="headerlink" title="old代"></a>old代</h4><p>执行垃圾回收的频率无需太高，久经考验的对象很少会死掉</p>
+<p>每次 Old的垃圾回收需要更长的时间</p>
+<h4 id="permanent代"><a href="#permanent代" class="headerlink" title="permanent代"></a>permanent代</h4><p>主要用于转载Class，方法等信息，默认为64M</p>
+<p>通常不会对这里面的对象执行垃圾回收</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -868,28 +868,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Mysql数据字段类型</title>
     <url>/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>MySQL中定义数据字段的类型对你数据库的优化是非常重要的。</p>
@@ -1088,6 +1066,28 @@
 ]]></content>
       <tags>
         <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
       </tags>
   </entry>
   <entry>
@@ -1552,6 +1552,27 @@
       </tags>
   </entry>
   <entry>
+    <title>mysql_extra浅析</title>
+    <url>/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
+<a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 表的读取顺序如何</span><br><span class="line">2. 数据读取操作有哪些操作类型</span><br><span class="line">3. 哪些索引可以使用</span><br><span class="line">4. 哪些索引被实际使用</span><br><span class="line">5. 表之间是如何引用</span><br><span class="line">6. 每张表有多少行被优化器查询</span><br></pre></td></tr></table></figure>
+
+<h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
+<p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
+<p>解决方案：如果放在数据库这边实现，查询次数又非常大的话，尽量考虑把字段直接冗余到索引中去，避免Mysql自身的排序机制可能会引起的性能下降。就是说让排序走索引</p>
+<h3 id="Using-temporary"><a href="#Using-temporary" class="headerlink" title="Using temporary"></a>Using temporary</h3><p><code>Using temporary</code>表示由于排序没有走索引、使用<code>union</code>、子查询连接查询、使用某些视图等原因，因此创建了一个内部临时表。注意这里的临时表可能是内存上的临时表，也有可能是硬盘上的临时表，理所当然基于内存的临时表的时间消耗肯定要比基于硬盘的临时表的实际消耗小。</p>
+<p>常见于排序和分组查询，常见 group by ; order by</p>
+<h3 id="Using-where"><a href="#Using-where" class="headerlink" title="Using where"></a>Using where</h3><p>在查找使用索引的情况下，需要回表去查询所需的数据</p>
+<h3 id="Using-index"><a href="#Using-index" class="headerlink" title="Using index"></a>Using index</h3><p>直接使用索引可获取数据</p>
+<h3 id="ALL"><a href="#ALL" class="headerlink" title="ALL"></a>ALL</h3><p>对于每个来自于先前的表的行组合，进行完整的表扫描。如果表是第一个没标记const的表，这通常不好，并且通常在它情况下很差。通常可以增加更多的索引而不要使用ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
+]]></content>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>mysql优化建议</title>
     <url>/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/</url>
     <content><![CDATA[<h1 id="SQL性能优化汇总"><a href="#SQL性能优化汇总" class="headerlink" title="SQL性能优化汇总"></a>SQL性能优化汇总</h1><h3 id="库表设计规范"><a href="#库表设计规范" class="headerlink" title="库表设计规范"></a>库表设计规范</h3><h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>云数据库 <code>MySQL</code> 5.6 及以上版本不支持 <code>MyISAM</code> 引擎和 Memory 引擎，若有 Memory 引擎的需求建议使用云数据库 <code>Redis</code> 、<code>Memcached</code>；自建数据库迁移到云数据库 <code>MySQL</code> 时，会自动将 <code>MyISAM</code> 引擎转换成 <code>InnoDB</code> 引擎。<br>存在自增列的表，自增列上必须存在一个单独的索引，若在复合索引中，自增列必须置于第一位。<br>row_format必须保证为非 fixed。<br>每张表必须要有主键，即使选不出合适的列做主键，亦必须添加一个无意义的列做主键，<code>MySQL</code> 第一范式标准 <code>InnoDB</code> 辅助索引叶子节点会保存一份主键值，推荐用自增短列作为主键，降低索引所占磁盘空间提升效率，<code>binlog_format</code>为 row 的场景下，批量删数据没主键会导致严重的主从延迟。<br><strong>字段尽量定义为 NOT NULL 并加上默认值，NULL 会给 SQL 开发带来很多问题导致走不了索引，对 NULL 计算时只能用 IS NULL 和 IS NOT NULL 来判断。</strong></p>
@@ -1606,27 +1627,6 @@
 <li><p>避免多层子查询嵌套的 SQL 语句，MySQL 5.5 之前的查询优化器会把 in 改成 exists，会导致索引失效，若外表很大则性能会很差。</p>
 </li>
 </ol>
-]]></content>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>mysql_extra浅析</title>
-    <url>/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
-<a id="more"></a>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 表的读取顺序如何</span><br><span class="line">2. 数据读取操作有哪些操作类型</span><br><span class="line">3. 哪些索引可以使用</span><br><span class="line">4. 哪些索引被实际使用</span><br><span class="line">5. 表之间是如何引用</span><br><span class="line">6. 每张表有多少行被优化器查询</span><br></pre></td></tr></table></figure>
-
-<h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
-<p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
-<p>解决方案：如果放在数据库这边实现，查询次数又非常大的话，尽量考虑把字段直接冗余到索引中去，避免Mysql自身的排序机制可能会引起的性能下降。就是说让排序走索引</p>
-<h3 id="Using-temporary"><a href="#Using-temporary" class="headerlink" title="Using temporary"></a>Using temporary</h3><p><code>Using temporary</code>表示由于排序没有走索引、使用<code>union</code>、子查询连接查询、使用某些视图等原因，因此创建了一个内部临时表。注意这里的临时表可能是内存上的临时表，也有可能是硬盘上的临时表，理所当然基于内存的临时表的时间消耗肯定要比基于硬盘的临时表的实际消耗小。</p>
-<p>常见于排序和分组查询，常见 group by ; order by</p>
-<h3 id="Using-where"><a href="#Using-where" class="headerlink" title="Using where"></a>Using where</h3><p>在查找使用索引的情况下，需要回表去查询所需的数据</p>
-<h3 id="Using-index"><a href="#Using-index" class="headerlink" title="Using index"></a>Using index</h3><p>直接使用索引可获取数据</p>
-<h3 id="ALL"><a href="#ALL" class="headerlink" title="ALL"></a>ALL</h3><p>对于每个来自于先前的表的行组合，进行完整的表扫描。如果表是第一个没标记const的表，这通常不好，并且通常在它情况下很差。通常可以增加更多的索引而不要使用ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
 ]]></content>
       <tags>
         <tag>Mysql</tag>
@@ -2203,30 +2203,6 @@
       </tags>
   </entry>
   <entry>
-    <title>泛型的具体含义与区别</title>
-    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
-<p>主要是从为了把运行时异常提前到编译时抛出</p>
-<p><strong>通配符的几种形式：</strong></p>
-<ol>
-<li><p>无限定通配符，&lt;?&gt;</p>
-</li>
-<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
-</li>
-<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
-</li>
-</ol>
-<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
-<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
-<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>正则表达式&#39;</title>
     <url>/2020/11/13/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
     <content><![CDATA[<h1 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a>正则表达式</h1><p>实例：</p>
@@ -2302,6 +2278,30 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>泛型的具体含义与区别</title>
+    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
+<p>主要是从为了把运行时异常提前到编译时抛出</p>
+<p><strong>通配符的几种形式：</strong></p>
+<ol>
+<li><p>无限定通配符，&lt;?&gt;</p>
+</li>
+<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
+</li>
+<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
+</li>
+</ol>
+<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
+<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
+<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
