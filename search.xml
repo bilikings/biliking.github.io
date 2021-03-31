@@ -482,6 +482,36 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发编程笔记(3)——对象的组合</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
+    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
+<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
+<ol>
+<li>找出构成对象的所有变量</li>
+<li>找出约束状态条件的不变性条件</li>
+<li>建立对象状态的并发访问管理策略</li>
+</ol>
+<a id="more"></a>
+
+<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
+<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
+<blockquote>
+<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
+</blockquote>
+<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
+<blockquote>
+<p>通过一个私有锁来保护状态</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>委托模型</p>
+<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
+<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java并发编程笔记(4)——同步工具类</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
     <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
@@ -530,36 +560,6 @@
 <h4 id="基于FutureTask"><a href="#基于FutureTask" class="headerlink" title="基于FutureTask"></a>基于FutureTask</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> cache</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/27 20:10</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;A, Future&lt;V&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;A, V&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(Computable&lt;A, V&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Future&lt;V&gt; f = cache.get(arg);</span><br><span class="line">            <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Callable&lt;V&gt; eval = () -&gt; c.computer(arg);</span><br><span class="line">                FutureTask&lt;V&gt; ft = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                f = cache.putIfAbsent(arg, ft);<span class="comment">//没有则添加</span></span><br><span class="line">                <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    ft.run();</span><br><span class="line">                    f = ft;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> f.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CancellationException e)&#123;</span><br><span class="line">                cache.remove(arg,f);<span class="comment">//执行错误时清除缓存，保证计算正确</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java并发编程笔记(3)——对象的组合</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-3-%E2%80%94%E2%80%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E7%BB%84%E5%90%88/</url>
-    <content><![CDATA[<h2 id="对象的组合"><a href="#对象的组合" class="headerlink" title="对象的组合"></a>对象的组合</h2><p>实际生产环境，我们不希望对每次内存的访问进行分析以实现线程安全，鹅绒希望吧线程安全组件进行组合以成为更大规模的组件。</p>
-<h3 id="设计线程安全的类"><a href="#设计线程安全的类" class="headerlink" title="设计线程安全的类"></a>设计线程安全的类</h3><p>基本要素：</p>
-<ol>
-<li>找出构成对象的所有变量</li>
-<li>找出约束状态条件的不变性条件</li>
-<li>建立对象状态的并发访问管理策略</li>
-</ol>
-<a id="more"></a>
-
-<h3 id="实例封闭"><a href="#实例封闭" class="headerlink" title="实例封闭"></a>实例封闭</h3><p>封装简化线程安全累的实现过程，提供了一种<strong>实例封闭机制</strong></p>
-<p>实例封闭是构建线程安全类的一个最简单的方式，使得在锁的选择上面有更多灵活性</p>
-<blockquote>
-<p>把数据封闭在对象内部可以把数据的访问限制在对象的方法上，从而更容易保证线程在访问数据是总可以持有正确位置的锁</p>
-</blockquote>
-<h3 id="Java的监视器模式"><a href="#Java的监视器模式" class="headerlink" title="Java的监视器模式"></a>Java的监视器模式</h3><p>synchronize在字节码中会编译成<strong>monitorenter</strong>和<strong>monitorexit</strong>，用于进入和退出同步代码块。</p>
-<blockquote>
-<p>通过一个私有锁来保护状态</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">priLock</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Object myLock = <span class="keyword">new</span> Object;</span><br><span class="line"> <span class="keyword">private</span> Wight wight;</span><br><span class="line"> <span class="function"><span class="keyword">void</span> <span class="title">doSomethings</span><span class="params">()</span></span>&#123;</span><br><span class="line">     <span class="keyword">synchronized</span>(myLock)&#123;</span><br><span class="line">         <span class="comment">//修改wight的状态</span></span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<p>委托模型</p>
-<p>如果一个类是由多个独立且线程安全的状态变量组成，并且在所有的操作中都不包括无效的状态转换那么可以把线程安全性委托给底层的状态变量。</p>
-<p>比如把线程安全性委托给底层的<code>ConcurrentHashMap</code>，这个Map中的元素是线程安全的且可变的。</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -868,6 +868,28 @@
       </tags>
   </entry>
   <entry>
+    <title>Netty</title>
+    <url>/2020/11/11/Netty/</url>
+    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
+<ol>
+<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
+<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
+<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
+</ol>
+<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
+<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
+<li>是一个异步的、基于事件驱动的网络应用框架</li>
+<li>目的是开发高性能，高可靠的网络IO程序</li>
+<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
+<li>是对NIO框架的封装实现</li>
+<li>是长连接的，保持大量数据传输的应用</li>
+</ol>
+]]></content>
+      <tags>
+        <tag>NIO</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql数据字段类型</title>
     <url>/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</url>
     <content><![CDATA[<h2 id="基本数据类型"><a href="#基本数据类型" class="headerlink" title="基本数据类型"></a>基本数据类型</h2><p>MySQL中定义数据字段的类型对你数据库的优化是非常重要的。</p>
@@ -1066,28 +1088,6 @@
 ]]></content>
       <tags>
         <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Netty</title>
-    <url>/2020/11/11/Netty/</url>
-    <content><![CDATA[<h1 id="Netty"><a href="#Netty" class="headerlink" title="Netty"></a>Netty</h1><p>可以做的事情：</p>
-<ol>
-<li>所谓rpc通讯的框架、协议、库，实现远程过程调用，基于socket的方式</li>
-<li>可以作为长连接实现客户端与服务器的通讯，基于websocket</li>
-<li>作为http服务器，类似于jetty，tomcat等等，此时说采取的编程模型不遵循servlet的规范，而是自实现</li>
-</ol>
-<p>tcp/ip—&gt;jdk原生io—&gt;NIO—&gt;netty</p>
-<h3 id="Netty是什么"><a href="#Netty是什么" class="headerlink" title="Netty是什么"></a>Netty是什么</h3><ol>
-<li>是一个异步的、基于事件驱动的网络应用框架</li>
-<li>目的是开发高性能，高可靠的网络IO程序</li>
-<li>主要针对在TCP协议下，面向Clients端的高并发应用</li>
-<li>是对NIO框架的封装实现</li>
-<li>是长连接的，保持大量数据传输的应用</li>
-</ol>
-]]></content>
-      <tags>
-        <tag>NIO</tag>
       </tags>
   </entry>
   <entry>
@@ -1552,27 +1552,6 @@
       </tags>
   </entry>
   <entry>
-    <title>mysql_extra浅析</title>
-    <url>/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
-<a id="more"></a>
-
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 表的读取顺序如何</span><br><span class="line">2. 数据读取操作有哪些操作类型</span><br><span class="line">3. 哪些索引可以使用</span><br><span class="line">4. 哪些索引被实际使用</span><br><span class="line">5. 表之间是如何引用</span><br><span class="line">6. 每张表有多少行被优化器查询</span><br></pre></td></tr></table></figure>
-
-<h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
-<p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
-<p>解决方案：如果放在数据库这边实现，查询次数又非常大的话，尽量考虑把字段直接冗余到索引中去，避免Mysql自身的排序机制可能会引起的性能下降。就是说让排序走索引</p>
-<h3 id="Using-temporary"><a href="#Using-temporary" class="headerlink" title="Using temporary"></a>Using temporary</h3><p><code>Using temporary</code>表示由于排序没有走索引、使用<code>union</code>、子查询连接查询、使用某些视图等原因，因此创建了一个内部临时表。注意这里的临时表可能是内存上的临时表，也有可能是硬盘上的临时表，理所当然基于内存的临时表的时间消耗肯定要比基于硬盘的临时表的实际消耗小。</p>
-<p>常见于排序和分组查询，常见 group by ; order by</p>
-<h3 id="Using-where"><a href="#Using-where" class="headerlink" title="Using where"></a>Using where</h3><p>在查找使用索引的情况下，需要回表去查询所需的数据</p>
-<h3 id="Using-index"><a href="#Using-index" class="headerlink" title="Using index"></a>Using index</h3><p>直接使用索引可获取数据</p>
-<h3 id="ALL"><a href="#ALL" class="headerlink" title="ALL"></a>ALL</h3><p>对于每个来自于先前的表的行组合，进行完整的表扫描。如果表是第一个没标记const的表，这通常不好，并且通常在它情况下很差。通常可以增加更多的索引而不要使用ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
-]]></content>
-      <tags>
-        <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>mysql优化建议</title>
     <url>/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/</url>
     <content><![CDATA[<h1 id="SQL性能优化汇总"><a href="#SQL性能优化汇总" class="headerlink" title="SQL性能优化汇总"></a>SQL性能优化汇总</h1><h3 id="库表设计规范"><a href="#库表设计规范" class="headerlink" title="库表设计规范"></a>库表设计规范</h3><h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>云数据库 <code>MySQL</code> 5.6 及以上版本不支持 <code>MyISAM</code> 引擎和 Memory 引擎，若有 Memory 引擎的需求建议使用云数据库 <code>Redis</code> 、<code>Memcached</code>；自建数据库迁移到云数据库 <code>MySQL</code> 时，会自动将 <code>MyISAM</code> 引擎转换成 <code>InnoDB</code> 引擎。<br>存在自增列的表，自增列上必须存在一个单独的索引，若在复合索引中，自增列必须置于第一位。<br>row_format必须保证为非 fixed。<br>每张表必须要有主键，即使选不出合适的列做主键，亦必须添加一个无意义的列做主键，<code>MySQL</code> 第一范式标准 <code>InnoDB</code> 辅助索引叶子节点会保存一份主键值，推荐用自增短列作为主键，降低索引所占磁盘空间提升效率，<code>binlog_format</code>为 row 的场景下，批量删数据没主键会导致严重的主从延迟。<br><strong>字段尽量定义为 NOT NULL 并加上默认值，NULL 会给 SQL 开发带来很多问题导致走不了索引，对 NULL 计算时只能用 IS NULL 和 IS NOT NULL 来判断。</strong></p>
@@ -1627,6 +1606,27 @@
 <li><p>避免多层子查询嵌套的 SQL 语句，MySQL 5.5 之前的查询优化器会把 in 改成 exists，会导致索引失效，若外表很大则性能会很差。</p>
 </li>
 </ol>
+]]></content>
+      <tags>
+        <tag>Mysql</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>mysql_extra浅析</title>
+    <url>/2021/02/24/mysql-extra%E6%B5%85%E6%9E%90/</url>
+    <content><![CDATA[<h1 id="Mysql-Explain-Extra的索引优化"><a href="#Mysql-Explain-Extra的索引优化" class="headerlink" title="Mysql_Explain_Extra的索引优化"></a>Mysql_Explain_Extra的索引优化</h1><p>在日常工作中，我们会有时会开慢查询去记录一些执行时间比较久的SQL语句，找出这些SQL语句并不意味着完事了，些时我们常常用到explain这个命令来查看一个这些SQL语句的执行计划，查看该SQL语句有没有使用上了索引，有没有做全表扫描，这都可以通过explain命令来查看。所以我们深入了解MySQL的基于开销的优化器，还可以获得很多可能被优化器考虑到的访问策略的细节，以及当运行SQL语句时哪种策略预计会被优化器采用。可以通过Extra的信息获取可以优化的建议</p>
+<a id="more"></a>
+
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">1. 表的读取顺序如何</span><br><span class="line">2. 数据读取操作有哪些操作类型</span><br><span class="line">3. 哪些索引可以使用</span><br><span class="line">4. 哪些索引被实际使用</span><br><span class="line">5. 表之间是如何引用</span><br><span class="line">6. 每张表有多少行被优化器查询</span><br></pre></td></tr></table></figure>
+
+<h3 id="Using-filsort"><a href="#Using-filsort" class="headerlink" title="Using filsort"></a>Using filsort</h3><p>文件内排序，这会让表使用外部排序，进行了额外的排序，一般在where和order by排序中，排序项目没有用到索引的地方出现这个问题</p>
+<p>额外传递指的是多做了一次排序，很少人会把所有需要排序的字段都放到索引中，出现Using filesort不一定就会有什么性能问题。当然，我是希望尽量在应用中实现order by排序。</p>
+<p>解决方案：如果放在数据库这边实现，查询次数又非常大的话，尽量考虑把字段直接冗余到索引中去，避免Mysql自身的排序机制可能会引起的性能下降。就是说让排序走索引</p>
+<h3 id="Using-temporary"><a href="#Using-temporary" class="headerlink" title="Using temporary"></a>Using temporary</h3><p><code>Using temporary</code>表示由于排序没有走索引、使用<code>union</code>、子查询连接查询、使用某些视图等原因，因此创建了一个内部临时表。注意这里的临时表可能是内存上的临时表，也有可能是硬盘上的临时表，理所当然基于内存的临时表的时间消耗肯定要比基于硬盘的临时表的实际消耗小。</p>
+<p>常见于排序和分组查询，常见 group by ; order by</p>
+<h3 id="Using-where"><a href="#Using-where" class="headerlink" title="Using where"></a>Using where</h3><p>在查找使用索引的情况下，需要回表去查询所需的数据</p>
+<h3 id="Using-index"><a href="#Using-index" class="headerlink" title="Using index"></a>Using index</h3><p>直接使用索引可获取数据</p>
+<h3 id="ALL"><a href="#ALL" class="headerlink" title="ALL"></a>ALL</h3><p>对于每个来自于先前的表的行组合，进行完整的表扫描。如果表是第一个没标记const的表，这通常不好，并且通常在它情况下很差。通常可以增加更多的索引而不要使用ALL，使得行能基于前面的表中的常数值或列值被检索出。</p>
 ]]></content>
       <tags>
         <tag>Mysql</tag>
@@ -1870,70 +1870,6 @@
       </tags>
   </entry>
   <entry>
-    <title>常用数据库引擎对比</title>
-    <url>/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/</url>
-    <content><![CDATA[<h1 id="InnoDB和MyIsAM的区别"><a href="#InnoDB和MyIsAM的区别" class="headerlink" title="InnoDB和MyIsAM的区别"></a>InnoDB和MyIsAM的区别</h1><p><strong>InnoDB</strong></p>
-<p>InnoDB是MySQL默认的事务型引擎，也是最重要、最广泛的存储引擎。它的设计是用来处理大量短期事务，短期事务大部分是正常提交的，很少回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中，也很流行。除了非常特别的原因需要使用其他引擎，InnoDB也是非常好值得花时间研究的对象。</p>
-<p>InnoDB的数据存储在表空间中，表空间是由InnoDB管理的黑盒文件系统，由一系列系统文件组成。InnoDB可以将每个表的数据和索引存放在单独的文件中。InnoDB也可以使用裸设备作为表空间存储介质。</p>
-<p>InnoDB通过间隙锁（next-key locking）防止幻读的出现。InnoDB是基于聚簇索引建立，与其他存储引擎有很大的区别，聚簇索引对主键查询有很高的性能，不过它的二级索引（secondary ind ex，非主键索引）必须包含主键列。所以如果主键列很大的话，索引会很大。</p>
-<p><strong>MyISAM</strong></p>
-<p>在5.1之前，MyISAM是默认的引擎，MyISAM有大量的特心态，包括全文索引、压缩、空间函数。但是MyISAM不支持事务和行级锁，而且在崩溃后无法安全恢复。即使后续版本中MyISAM支持了事务，但是很多人的概念中依然是不支持事务的引擎。</p>
-<a id="more"></a>
-
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Innodb</th>
-<th>MyIsAM</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>事务支持</td>
-<td>是</td>
-<td>否</td>
-</tr>
-<tr>
-<td>数据行锁定（行锁）</td>
-<td>是</td>
-<td>否（表锁）</td>
-</tr>
-<tr>
-<td>外键</td>
-<td>是</td>
-<td>否</td>
-</tr>
-<tr>
-<td>全文索引</td>
-<td>否</td>
-<td>是</td>
-</tr>
-<tr>
-<td>表空间大小</td>
-<td>大</td>
-<td>小</td>
-</tr>
-</tbody></table>
-<h4 id="常规使用操作"><a href="#常规使用操作" class="headerlink" title="常规使用操作"></a>常规使用操作</h4><ul>
-<li>Innodb  安全，事务的处理</li>
-<li>MyIsAM 速度快</li>
-</ul>
-<h4 id="在物理空间中的存储"><a href="#在物理空间中的存储" class="headerlink" title="在物理空间中的存储"></a>在物理空间中的存储</h4><p>都在data目录下</p>
-<ul>
-<li>Innodb  *.frm文件，以及上级目录下的ibdata1文件</li>
-<li>MyIsAM <ul>
-<li>*.frm 表结构定义文件</li>
-<li>*.MYD 数据文件（Data）</li>
-<li>*.MYI 索引文件</li>
-</ul>
-</li>
-</ul>
-]]></content>
-      <tags>
-        <tag>SQL</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>单例模式</title>
     <url>/2020/12/11/%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
     <content><![CDATA[<h3 id="1-单例模式"><a href="#1-单例模式" class="headerlink" title="1.单例模式"></a>1.单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
@@ -1996,26 +1932,67 @@
       </tags>
   </entry>
   <entry>
-    <title>拓扑排序检验图中成环</title>
-    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
-    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
-<ol>
-<li>计算每一个节点的入度</li>
-<li>把入度为0的点加入队列</li>
-<li>把队列中的点从图中删除<ul>
-<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
-<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
-</ul>
-</li>
-<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
-</ol>
+    <title>常用数据库引擎对比</title>
+    <url>/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/</url>
+    <content><![CDATA[<h1 id="InnoDB和MyIsAM的区别"><a href="#InnoDB和MyIsAM的区别" class="headerlink" title="InnoDB和MyIsAM的区别"></a>InnoDB和MyIsAM的区别</h1><p><strong>InnoDB</strong></p>
+<p>InnoDB是MySQL默认的事务型引擎，也是最重要、最广泛的存储引擎。它的设计是用来处理大量短期事务，短期事务大部分是正常提交的，很少回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中，也很流行。除了非常特别的原因需要使用其他引擎，InnoDB也是非常好值得花时间研究的对象。</p>
+<p>InnoDB的数据存储在表空间中，表空间是由InnoDB管理的黑盒文件系统，由一系列系统文件组成。InnoDB可以将每个表的数据和索引存放在单独的文件中。InnoDB也可以使用裸设备作为表空间存储介质。</p>
+<p>InnoDB通过间隙锁（next-key locking）防止幻读的出现。InnoDB是基于聚簇索引建立，与其他存储引擎有很大的区别，聚簇索引对主键查询有很高的性能，不过它的二级索引（secondary ind ex，非主键索引）必须包含主键列。所以如果主键列很大的话，索引会很大。</p>
+<p><strong>MyISAM</strong></p>
+<p>在5.1之前，MyISAM是默认的引擎，MyISAM有大量的特心态，包括全文索引、压缩、空间函数。但是MyISAM不支持事务和行级锁，而且在崩溃后无法安全恢复。即使后续版本中MyISAM支持了事务，但是很多人的概念中依然是不支持事务的引擎。</p>
 <a id="more"></a>
 
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Innodb</th>
+<th>MyIsAM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>事务支持</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>数据行锁定（行锁）</td>
+<td>是</td>
+<td>否（表锁）</td>
+</tr>
+<tr>
+<td>外键</td>
+<td>是</td>
+<td>否</td>
+</tr>
+<tr>
+<td>全文索引</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>表空间大小</td>
+<td>大</td>
+<td>小</td>
+</tr>
+</tbody></table>
+<h4 id="常规使用操作"><a href="#常规使用操作" class="headerlink" title="常规使用操作"></a>常规使用操作</h4><ul>
+<li>Innodb  安全，事务的处理</li>
+<li>MyIsAM 速度快</li>
+</ul>
+<h4 id="在物理空间中的存储"><a href="#在物理空间中的存储" class="headerlink" title="在物理空间中的存储"></a>在物理空间中的存储</h4><p>都在data目录下</p>
+<ul>
+<li>Innodb  *.frm文件，以及上级目录下的ibdata1文件</li>
+<li>MyIsAM <ul>
+<li>*.frm 表结构定义文件</li>
+<li>*.MYD 数据文件（Data）</li>
+<li>*.MYI 索引文件</li>
+</ul>
+</li>
+</ul>
 ]]></content>
       <tags>
-        <tag>算法</tag>
+        <tag>SQL</tag>
       </tags>
   </entry>
   <entry>
@@ -2095,6 +2072,29 @@
 ]]></content>
       <tags>
         <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>拓扑排序检验图中成环</title>
+    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
+    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
+<ol>
+<li>计算每一个节点的入度</li>
+<li>把入度为0的点加入队列</li>
+<li>把队列中的点从图中删除<ul>
+<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
+<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
+</ul>
+</li>
+<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
+</ol>
+<a id="more"></a>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
