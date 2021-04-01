@@ -636,65 +636,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(7)——线程池</title>
-    <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
-    <content><![CDATA[<h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
-<ul>
-<li>依赖性任务：如果线程池中的任务需要依赖其他任务的活动，那么就隐含的给执行策略带来了约束</li>
-<li>使用线程封闭机制的任务：单线程的Executor可以对并发性做出更强的承诺，对象封闭在任务线程中，使得线程中的任务访问这个对象时不会同步，</li>
-<li>对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性</li>
-<li>使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值</li>
-</ul>
-<a id="more"></a>
-
-<h3 id="线程饥饿死锁"><a href="#线程饥饿死锁" class="headerlink" title="线程饥饿死锁"></a>线程饥饿死锁</h3><p>一个任务依赖于其他任务，那么可能产生死锁。</p>
-<p>若所有正在执行任务的线程因为等待其他仍在工作队列中的任务而发生阻塞，那么就会发生<strong>线程饥饿死锁</strong>。</p>
-<h3 id="设置线程池的大小"><a href="#设置线程池的大小" class="headerlink" title="设置线程池的大小"></a>设置线程池的大小</h3><p>对于计算密集型任务而言，在有N个CPU的环境中，一般设在N+1个线程为最优。</p>
-<p>对于使用I/O操作或是其他阻塞操作的任务时，线程池应该更大</p>
-<h3 id="配置ThreadPoolExecutor"><a href="#配置ThreadPoolExecutor" class="headerlink" title="配置ThreadPoolExecutor"></a>配置ThreadPoolExecutor</h3><p>通过Executors中的工厂方法，基于<code>ThreadPoolExecutor</code>实现了一个稳定灵活的线程池</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,//线程池的大小</span></span></span><br><span class="line"><span class="function"><span class="params">                          <span class="keyword">int</span> maximumPoolSize,//线程池中允许的最大线程数，线程池中的当前线程数目不会超过该值</span></span></span><br><span class="line"><span class="function"><span class="params">                          <span class="keyword">long</span> keepAliveTime,//没有线程任务执行时最多保持多久时间才会停止</span></span></span><br><span class="line"><span class="function"><span class="params">                          TimeUnit unit,//参数keepAliveTime的时间单位，有<span class="number">7</span>种取值</span></span></span><br><span class="line"><span class="function"><span class="params">                          BlockingQueue workQueue,//一个阻塞队列，用于存储等待执行的任务，影响线程池的排队策略</span></span></span><br><span class="line"><span class="function"><span class="params">                          ThreadFactory threadFactory,//用于设置线程的工厂，</span></span></span><br><span class="line"><span class="function"><span class="params">                          RejectedExecutionHandler handler)</span></span>;<span class="comment">//当拒绝处理任务时的策略（饱和策略），有以下四种策略</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">1、AbortPolicy：直接抛出异常。</span><br><span class="line">2、CallerRunsPolicy：只用调用者所在线程来运行任务。</span><br><span class="line">3、DiscardOldestPolicy：丢弃队列里最近的一个任务，并执行当前任务。</span><br><span class="line">4、DiscardPolicy：不处理，丢弃掉。</span><br><span class="line">5、也可以根据应用场景需要来实现RejectedExecutionHandler接口自定义策略。如记录日志或持久化不能处理的任务。</span><br></pre></td></tr></table></figure>
-
-<p><strong>新提交一个任务时的处理流程很明显：</strong></p>
-<ol>
-<li><p>如果当前线程池的线程数还没有达到基本大小(poolSize &lt; corePoolSize)，<strong>无论是否有空闲的线程新增一个线程处理新提交的任务；</strong></p>
-</li>
-<li><p>如果当前线程池的线程数大于或等于基本大小(poolSize &gt;= corePoolSize) <strong>且任务队列未满时</strong>，就将新提交的任务提交到阻塞队列排队，等候处理workQueue.offer(command)；</p>
-</li>
-<li><p>如果当前线程池的线程数大于或等于基本大小(poolSize &gt;= corePoolSize) <strong>且任务队列满时</strong>；</p>
-<ul>
-<li>当前poolSize&lt;maximumPoolSize，那么就<strong>新增线程</strong>来处理任务；</li>
-<li>当前poolSize=maximumPoolSize，那么意味着线程池的处理能力已经达到了极限，此时需要拒绝新增加的任务。至于如何拒绝处理新增的任务，取决于线程池的饱和策略<code>RejectedExecutionHandler</code></li>
-</ul>
-</li>
-</ol>
-<h4 id="线程的创建与消耗"><a href="#线程的创建与消耗" class="headerlink" title="线程的创建与消耗"></a>线程的创建与消耗</h4><p>线程池的基本大小，最大大小，以及存活时间等硬说共同负责线程的创建于销毁</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建使用单个线程的线程池</span></span><br><span class="line">    ExecutorService es1 = Executors.newSingleThreadExecutor();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        es1.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建使用固定线程数的线程池</span></span><br><span class="line">    ExecutorService es2 = Executors.newFixedThreadPool(<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        es2.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建一个会根据需要创建新线程的线程池</span></span><br><span class="line">    ExecutorService es3 = Executors.newCachedThreadPool();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">        es3.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建拥有固定线程数量的定时线程任务的线程池</span></span><br><span class="line">    ScheduledExecutorService es4 = Executors.newScheduledThreadPool(<span class="number">2</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;时间：&quot;</span> + System.currentTimeMillis());</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        es4.schedule(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;时间：&quot;</span>+System.currentTimeMillis()+<span class="string">&quot;--&quot;</span>+Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建只有一个线程的定时线程任务的线程池</span></span><br><span class="line">    ScheduledExecutorService es5 = Executors.newSingleThreadScheduledExecutor();</span><br><span class="line">    System.out.println(<span class="string">&quot;时间：&quot;</span> + System.currentTimeMillis());</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        es5.schedule(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;时间：&quot;</span>+System.currentTimeMillis()+<span class="string">&quot;--&quot;</span>+Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p><code>newFixedThreadPool</code>和<code>newSingleThreadPool</code>默认使用一个无界的<code>LinkedBlockingQueue</code>。当所有线程都处于忙碌状态是，任务将在队列中等候。</p>
-</li>
-<li><p>使用有界队列来存放时，队列的大小与线程池的大小需要同步调节。</p>
-</li>
-<li><p><code>SynchronousQueue</code>用于非常大或是无界的线程池，让任务避免排队，但这不是一个真正的队列，而是一种在线程中进行移交的机制，<code>newCachedThreadPool</code>就使用中这个机制</p>
-</li>
-</ul>
-<blockquote>
-<p>当线程中存在依赖时，这时就应该选用无界的线程池，已避免导致线程饥饿死锁的问题</p>
-</blockquote>
-<h4 id="线程工厂"><a href="#线程工厂" class="headerlink" title="线程工厂"></a>线程工厂</h4><p>当线程需要创建线程时的，都是通过线程工厂方法。</p>
-<p>默认的线程工厂方法将创建一个新的、非守护的线程，创建一个线程调用<code>newThread</code></p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ThreadFactory</span></span>&#123;</span><br><span class="line">    <span class="function">Thread <span class="title">newThead</span><span class="params">(Runnable r)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>可以通过自定义的线程工厂，创建了新的myThread。</p>
-<h4 id="定制ThreadPoolExecutor"><a href="#定制ThreadPoolExecutor" class="headerlink" title="定制ThreadPoolExecutor"></a>定制ThreadPoolExecutor</h4><p>调用完构造函数之后，仍然可以通过set来修改大多数传递给它的构造参数。 </p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(6)——任务</title>
     <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-6-%E2%80%94%E2%80%94%E4%BB%BB%E5%8A%A1/</url>
     <content><![CDATA[<h2 id="任务执行"><a href="#任务执行" class="headerlink" title="任务执行"></a>任务执行</h2><p><strong>任务</strong>通常是一项抽象并且离散的一些单元。</p>
@@ -775,6 +716,65 @@
 <h4 id="响应中断"><a href="#响应中断" class="headerlink" title="响应中断"></a>响应中断</h4><h4 id="对阻塞的事件处理中断"><a href="#对阻塞的事件处理中断" class="headerlink" title="对阻塞的事件处理中断"></a>对阻塞的事件处理中断</h4><h5 id="改写interrupt"><a href="#改写interrupt" class="headerlink" title="改写interrupt"></a>改写interrupt</h5><h5 id="使用newTaskForm来封装取消操作"><a href="#使用newTaskForm来封装取消操作" class="headerlink" title="使用newTaskForm来封装取消操作"></a>使用newTaskForm来封装取消操作</h5><h3 id="停止基于线程的服务"><a href="#停止基于线程的服务" class="headerlink" title="停止基于线程的服务"></a>停止基于线程的服务</h3><blockquote>
 <p>对于持有线程的服务，只要服务的时间大于创建线程的方法存在的时间，那么就应该提供生命周期方法</p>
 </blockquote>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(7)——线程池</title>
+    <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
+    <content><![CDATA[<h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
+<ul>
+<li>依赖性任务：如果线程池中的任务需要依赖其他任务的活动，那么就隐含的给执行策略带来了约束</li>
+<li>使用线程封闭机制的任务：单线程的Executor可以对并发性做出更强的承诺，对象封闭在任务线程中，使得线程中的任务访问这个对象时不会同步，</li>
+<li>对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性</li>
+<li>使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="线程饥饿死锁"><a href="#线程饥饿死锁" class="headerlink" title="线程饥饿死锁"></a>线程饥饿死锁</h3><p>一个任务依赖于其他任务，那么可能产生死锁。</p>
+<p>若所有正在执行任务的线程因为等待其他仍在工作队列中的任务而发生阻塞，那么就会发生<strong>线程饥饿死锁</strong>。</p>
+<h3 id="设置线程池的大小"><a href="#设置线程池的大小" class="headerlink" title="设置线程池的大小"></a>设置线程池的大小</h3><p>对于计算密集型任务而言，在有N个CPU的环境中，一般设在N+1个线程为最优。</p>
+<p>对于使用I/O操作或是其他阻塞操作的任务时，线程池应该更大</p>
+<h3 id="配置ThreadPoolExecutor"><a href="#配置ThreadPoolExecutor" class="headerlink" title="配置ThreadPoolExecutor"></a>配置ThreadPoolExecutor</h3><p>通过Executors中的工厂方法，基于<code>ThreadPoolExecutor</code>实现了一个稳定灵活的线程池</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,//线程池的大小</span></span></span><br><span class="line"><span class="function"><span class="params">                          <span class="keyword">int</span> maximumPoolSize,//线程池中允许的最大线程数，线程池中的当前线程数目不会超过该值</span></span></span><br><span class="line"><span class="function"><span class="params">                          <span class="keyword">long</span> keepAliveTime,//没有线程任务执行时最多保持多久时间才会停止</span></span></span><br><span class="line"><span class="function"><span class="params">                          TimeUnit unit,//参数keepAliveTime的时间单位，有<span class="number">7</span>种取值</span></span></span><br><span class="line"><span class="function"><span class="params">                          BlockingQueue workQueue,//一个阻塞队列，用于存储等待执行的任务，影响线程池的排队策略</span></span></span><br><span class="line"><span class="function"><span class="params">                          ThreadFactory threadFactory,//用于设置线程的工厂，</span></span></span><br><span class="line"><span class="function"><span class="params">                          RejectedExecutionHandler handler)</span></span>;<span class="comment">//当拒绝处理任务时的策略（饱和策略），有以下四种策略</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight text"><table><tr><td class="code"><pre><span class="line">1、AbortPolicy：直接抛出异常。</span><br><span class="line">2、CallerRunsPolicy：只用调用者所在线程来运行任务。</span><br><span class="line">3、DiscardOldestPolicy：丢弃队列里最近的一个任务，并执行当前任务。</span><br><span class="line">4、DiscardPolicy：不处理，丢弃掉。</span><br><span class="line">5、也可以根据应用场景需要来实现RejectedExecutionHandler接口自定义策略。如记录日志或持久化不能处理的任务。</span><br></pre></td></tr></table></figure>
+
+<p><strong>新提交一个任务时的处理流程很明显：</strong></p>
+<ol>
+<li><p>如果当前线程池的线程数还没有达到基本大小(poolSize &lt; corePoolSize)，<strong>无论是否有空闲的线程新增一个线程处理新提交的任务；</strong></p>
+</li>
+<li><p>如果当前线程池的线程数大于或等于基本大小(poolSize &gt;= corePoolSize) <strong>且任务队列未满时</strong>，就将新提交的任务提交到阻塞队列排队，等候处理workQueue.offer(command)；</p>
+</li>
+<li><p>如果当前线程池的线程数大于或等于基本大小(poolSize &gt;= corePoolSize) <strong>且任务队列满时</strong>；</p>
+<ul>
+<li>当前poolSize&lt;maximumPoolSize，那么就<strong>新增线程</strong>来处理任务；</li>
+<li>当前poolSize=maximumPoolSize，那么意味着线程池的处理能力已经达到了极限，此时需要拒绝新增加的任务。至于如何拒绝处理新增的任务，取决于线程池的饱和策略<code>RejectedExecutionHandler</code></li>
+</ul>
+</li>
+</ol>
+<h4 id="线程的创建与消耗"><a href="#线程的创建与消耗" class="headerlink" title="线程的创建与消耗"></a>线程的创建与消耗</h4><p>线程池的基本大小，最大大小，以及存活时间等硬说共同负责线程的创建于销毁</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//创建使用单个线程的线程池</span></span><br><span class="line">    ExecutorService es1 = Executors.newSingleThreadExecutor();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        es1.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建使用固定线程数的线程池</span></span><br><span class="line">    ExecutorService es2 = Executors.newFixedThreadPool(<span class="number">3</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span><br><span class="line">        es2.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建一个会根据需要创建新线程的线程池</span></span><br><span class="line">    ExecutorService es3 = Executors.newCachedThreadPool();</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">20</span>; i++) &#123;</span><br><span class="line">        es3.submit(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建拥有固定线程数量的定时线程任务的线程池</span></span><br><span class="line">    ScheduledExecutorService es4 = Executors.newScheduledThreadPool(<span class="number">2</span>);</span><br><span class="line">    System.out.println(<span class="string">&quot;时间：&quot;</span> + System.currentTimeMillis());</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        es4.schedule(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;时间：&quot;</span>+System.currentTimeMillis()+<span class="string">&quot;--&quot;</span>+Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//创建只有一个线程的定时线程任务的线程池</span></span><br><span class="line">    ScheduledExecutorService es5 = Executors.newSingleThreadScheduledExecutor();</span><br><span class="line">    System.out.println(<span class="string">&quot;时间：&quot;</span> + System.currentTimeMillis());</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++) &#123;</span><br><span class="line">        es5.schedule(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;时间：&quot;</span>+System.currentTimeMillis()+<span class="string">&quot;--&quot;</span>+Thread.currentThread().getName() + <span class="string">&quot;正在执行任务&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,<span class="number">3</span>, TimeUnit.SECONDS);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>newFixedThreadPool</code>和<code>newSingleThreadPool</code>默认使用一个无界的<code>LinkedBlockingQueue</code>。当所有线程都处于忙碌状态是，任务将在队列中等候。</p>
+</li>
+<li><p>使用有界队列来存放时，队列的大小与线程池的大小需要同步调节。</p>
+</li>
+<li><p><code>SynchronousQueue</code>用于非常大或是无界的线程池，让任务避免排队，但这不是一个真正的队列，而是一种在线程中进行移交的机制，<code>newCachedThreadPool</code>就使用中这个机制</p>
+</li>
+</ul>
+<blockquote>
+<p>当线程中存在依赖时，这时就应该选用无界的线程池，已避免导致线程饥饿死锁的问题</p>
+</blockquote>
+<h4 id="线程工厂"><a href="#线程工厂" class="headerlink" title="线程工厂"></a>线程工厂</h4><p>当线程需要创建线程时的，都是通过线程工厂方法。</p>
+<p>默认的线程工厂方法将创建一个新的、非守护的线程，创建一个线程调用<code>newThread</code></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ThreadFactory</span></span>&#123;</span><br><span class="line">    <span class="function">Thread <span class="title">newThead</span><span class="params">(Runnable r)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以通过自定义的线程工厂，创建了新的myThread。</p>
+<h4 id="定制ThreadPoolExecutor"><a href="#定制ThreadPoolExecutor" class="headerlink" title="定制ThreadPoolExecutor"></a>定制ThreadPoolExecutor</h4><p>调用完构造函数之后，仍然可以通过set来修改大多数传递给它的构造参数。 </p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -2177,29 +2177,6 @@
       </tags>
   </entry>
   <entry>
-    <title>拓扑排序检验图中成环</title>
-    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
-    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
-<ol>
-<li>计算每一个节点的入度</li>
-<li>把入度为0的点加入队列</li>
-<li>把队列中的点从图中删除<ul>
-<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
-<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
-</ul>
-</li>
-<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
-</ol>
-<a id="more"></a>
-
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>排序与查找</title>
     <url>/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/</url>
     <content><![CDATA[<h3 id="选择排序"><a href="#选择排序" class="headerlink" title="选择排序"></a>选择排序</h3><ul>
@@ -2265,6 +2242,29 @@
       </tags>
   </entry>
   <entry>
+    <title>拓扑排序检验图中成环</title>
+    <url>/2021/03/16/%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E6%A3%80%E9%AA%8C%E5%9B%BE%E4%B8%AD%E6%88%90%E7%8E%AF/</url>
+    <content><![CDATA[<h1 id="拓扑排序"><a href="#拓扑排序" class="headerlink" title="拓扑排序"></a>拓扑排序</h1><p>拓扑排序判断是否图中成环</p>
+<ol>
+<li>计算每一个节点的入度</li>
+<li>把入度为0的点加入队列</li>
+<li>把队列中的点从图中删除<ul>
+<li>队列poll得到row，根据这个row变量他的所有连接节点，让这些点的入度-1</li>
+<li>如果这些点的入度成为0了，从图中删除，并加入队列</li>
+</ul>
+</li>
+<li>判断这些点所有的入度是否都为0了，如存在不为0的就说明有环</li>
+</ol>
+<a id="more"></a>
+
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> admin</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@title</span>: Solution11</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@projectName</span> jianzhi</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span>: TODO</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2021/3/1615:38</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Solution11</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">boolean</span> isDGA = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span> n;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[] vis;</span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">int</span>[][] graph;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//ArrayList&lt;String&gt; edge = new ArrayList&lt;&gt;();</span></span><br><span class="line">        Scanner sc = <span class="keyword">new</span> Scanner(System.in);</span><br><span class="line">        <span class="keyword">int</span> n = sc.nextInt();</span><br><span class="line">        graph = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>][n + <span class="number">10</span>];</span><br><span class="line">        <span class="comment">//标记矩阵,0为当前结点未访问,1为访问过,-1表示当前结点后边的结点都被访问过。</span></span><br><span class="line">        vis = <span class="keyword">new</span> <span class="keyword">int</span>[n + <span class="number">10</span>];</span><br><span class="line">        <span class="keyword">int</span>[] in = <span class="keyword">new</span> <span class="keyword">int</span>[n+<span class="number">10</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pre = sc.nextInt();</span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">int</span> rs = sc.nextInt();</span><br><span class="line">            graph[pre][rs] = <span class="number">1</span>;</span><br><span class="line">            in[pre]++;<span class="comment">//入度+1</span></span><br><span class="line">        &#125;</span><br><span class="line">        judge(n,in,graph);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">judge</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">int</span>[] in,<span class="keyword">int</span>[][] graph)</span></span>&#123;</span><br><span class="line">        Queue&lt;Integer&gt; queue = <span class="keyword">new</span> LinkedList&lt;&gt;();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;<span class="comment">//把入度为0的局放入队列</span></span><br><span class="line">            <span class="keyword">if</span>(in[i]==<span class="number">0</span>)&#123;</span><br><span class="line">                queue.add(i);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">while</span> (!queue.isEmpty())&#123;</span><br><span class="line">            <span class="keyword">int</span> row = queue.poll();</span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> col=<span class="number">1</span>;col&lt;=n;col++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(graph[row][col]==<span class="number">1</span>)&#123;</span><br><span class="line">                    <span class="comment">//把入度为0的点加入队列</span></span><br><span class="line">                    in[col]--;</span><br><span class="line">                    <span class="keyword">if</span>(in[col]==<span class="number">0</span>)&#123;</span><br><span class="line">                        queue.add(col);</span><br><span class="line">                    &#125;</span><br><span class="line">                    graph[row][col] =<span class="number">0</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;=n ; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span>(in[i]!=<span class="number">0</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;有环&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;无环&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>数据库事务与隔离级别</title>
     <url>/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/</url>
     <content><![CDATA[<h1 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h1><p>因为MyIsAM是没有事务的，所以说数据库事务只存在于InnoDB中</p>
@@ -2302,30 +2302,6 @@
 ]]></content>
       <tags>
         <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>泛型的具体含义与区别</title>
-    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
-<p>主要是从为了把运行时异常提前到编译时抛出</p>
-<p><strong>通配符的几种形式：</strong></p>
-<ol>
-<li><p>无限定通配符，&lt;?&gt;</p>
-</li>
-<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
-</li>
-<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
-</li>
-</ol>
-<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
-<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
-<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2404,6 +2380,30 @@
 ]]></content>
       <tags>
         <tag>正则</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>泛型的具体含义与区别</title>
+    <url>/2021/02/05/%E6%B3%9B%E5%9E%8B%E7%9A%84%E5%85%B7%E4%BD%93%E5%90%AB%E4%B9%89%E4%B8%8E%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<h1 id="Object-T-的区别以及具体含义"><a href="#Object-T-的区别以及具体含义" class="headerlink" title="Object,T,?的区别以及具体含义"></a>Object,T,?的区别以及具体含义</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printDif</span><span class="params">(ArrayList&lt;?&gt; al)</span></span>&#123;</span><br><span class="line"> Iterator&lt;?&gt; it = al.iterator();</span><br><span class="line"> <span class="keyword">while</span>(it.hasNext()&#123;</span><br><span class="line"> Object ob = it.next();</span><br><span class="line"> System.out.println(it.next());</span><br><span class="line"> &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> <span class="keyword">public</span> &lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">printDifT</span><span class="params">(ArrayList&lt;T&gt; al)</span></span>&#123;</span><br><span class="line">    Iterator&lt;T&gt; it = al.iterator();</span><br><span class="line">    <span class="keyword">while</span>(it.hasNext())&#123;</span><br><span class="line">        T t = it.next();  </span><br><span class="line">        System.out.println(t);</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>区别就在此处，T可以作为类型来使用,而？仅能作为接收任意类型(Object)</p>
+<p>主要是从为了把运行时异常提前到编译时抛出</p>
+<p><strong>通配符的几种形式：</strong></p>
+<ol>
+<li><p>无限定通配符，&lt;?&gt;</p>
+</li>
+<li><p>上限通配符,&lt;? extends test&gt;。表示参数类型只能是Number的子类。</p>
+</li>
+<li><p>下限通配符，&lt;? super test&gt;。表示参数类型只能是Number的父类。</p>
+</li>
+</ol>
+<p>如果使用extends,super就能将范围缩小 ,<em>使用泛型、通配符提高了代码的复用性。</em></p>
+<p>上面已经定义了一个?方法了,就不在举例 了,很多东西其实还的靠自己去思考的*和object相似,但具体说,?会比object更细致化一些.</p>
+<p>把一个对象分为声明、使用两部分的话。泛型侧重于类型的声明上代码复用，通配符则侧重于使用上的代码复用。泛型用于定义内部数据类型的不确定性，通配符则用于定义使用的对象类型不确定性。</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
@@ -2494,6 +2494,58 @@
       </tags>
   </entry>
   <entry>
+    <title>通过反射定义注解</title>
+    <url>/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</url>
+    <content><![CDATA[<p>本文则以输入校验的 <code>@Length</code>注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。</p>
+<h2 id="第一步：首先定义注解：-Length"><a href="#第一步：首先定义注解：-Length" class="headerlink" title="第一步：首先定义注解：@Length"></a>第一步：首先定义注解：@Length</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.FIELD&#125;)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Length&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">min</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最小值</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最大值</span></span><br><span class="line">    <span class="function">String <span class="title">errorMsg</span><span class="params">()</span></span>; <span class="comment">// 自定义的错误提示信息</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<ul>
+<li><p>说明：</p>
+<ol>
+<li><p>注解的定义有点像定义接口 <code>interface</code>，但唯一不同的是前面需要加一个 <code>@</code>符号。</p>
+</li>
+<li><p>注解的成员变量只能使用基本类型、 <code>String</code>或者 <code>enum</code>枚举，比如 <code>int</code>可以，但 <code>Integer</code>这种包装类型就不行，需注意。</p>
+</li>
+<li><p>像上面 <code>@Target</code>、 <code>@Retention</code>这种加在注解定义上面的注解，我们称为 <strong>“元注解”</strong>，元注解就是专门用于给注解添加注解的注解，哈哈，很拗口，简单理解，元注解就是天生就有的注解，可直接用于注解的定义上。</p>
+</li>
+<li><p><code>@Target(xxx)</code> 用来说明该自定义注解可以用在什么位置，比如：</p>
+<ul>
+<li><code>ElementType.FIELD</code>：说明自定义的注解可以用于类的变量</li>
+<li><code>ElementType.METHOD</code>：说明自定义的注解可以用于类的方法</li>
+<li><code>ElementType.TYPE</code>：说明自定义的注解可以用于类本身、接口或 <code>enum</code>类型</li>
+<li>等等… 还有很多，如果记不住，建议现用现查</li>
+</ul>
+</li>
+<li><p><code>@Retention(xxx)</code> 用来说明你自定义注解的生命周期，比如：</p>
+<ul>
+<li><code>@Retention(RetentionPolicy.RUNTIME)</code>：表示注解可以一直保留到运行时，因此可以通过反射获取注解信息</li>
+<li><code>@Retention(RetentionPolicy.CLASS)</code>：表示注解被编译器编译进 <code>class</code>文件，但运行时会忽略</li>
+<li><code>@Retention(RetentionPolicy.SOURCE)</code>：表示注解仅在源文件中有效，编译时就会被忽略</li>
+</ul>
+<p>所以声明周期从长到短分别为：<strong>RUNTIME</strong> &gt; <strong>CLASS</strong> &gt; <strong>SOURCE</strong> ，一般来说，如果需要在运行时去动态获取注解的信息，还是得用RUNTIME，就像本文所用。</p>
+</li>
+</ol>
+</li>
+</ul>
+<h2 id="获取注解并对其认证"><a href="#获取注解并对其认证" class="headerlink" title="获取注解并对其认证"></a>获取注解并对其认证</h2><p>在运行时候获取注解包含的信息，得用<strong>java反射机制</strong></p>
+<p>下面写了一个验证函数 <code>validate()</code>，代码中会<strong>逐行用注释去解释</strong>想要达到的目的，认真看一下每一行的注释：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">validate</span><span class="params">(Object object)</span> <span class="keyword">throws</span> IllagelAccessException</span>&#123;</span><br><span class="line">    <span class="comment">//先通过反射获取object对象的类有哪些字段</span></span><br><span class="line">    <span class="comment">//本文就是获取到Student的id、name、mobile的三个字段</span></span><br><span class="line">    <span class="comment">//getClass()获得获得一个实例的类型类；getDeclaredFields()获得某个类的所有声明的字段，即包括public、private和proteced，但是不包括父类的申明字段。</span></span><br><span class="line">    Field[] fields = object.getClass().getDeclaredFields();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//for循环逐个检测校验，看看哪个字段标了注解</span></span><br><span class="line">    <span class="keyword">for</span>(Field field : fields)&#123;</span><br><span class="line">        <span class="comment">//if判断：检测字段是有没有@Length注解</span></span><br><span class="line">        <span class="keyword">if</span>(field.isAnnotationPresent(Length.class))&#123; <span class="comment">//Length类型的注解是否在反射获得的那个类上</span></span><br><span class="line">            <span class="comment">//通过反射获取到字段上面标注的@Length的详细信息</span></span><br><span class="line">            Length length = field.getAnnotation(Length.class);</span><br><span class="line">            field.setAccessable(<span class="keyword">true</span>);<span class="comment">//允许反射时候可以获得私有变量</span></span><br><span class="line">            <span class="comment">//用反射获取字段的实际值</span></span><br><span class="line">            <span class="keyword">int</span> value = ((String)field.get(objedt)).length;</span><br><span class="line">            <span class="comment">//将字段的实际值和注解上做标志的值进行比对</span></span><br><span class="line">            <span class="keyword">if</span>(value&lt;length.min() || value&gt;length.max)&#123;</span><br><span class="line">                <span class="keyword">return</span> lenth.errorMsh();</span><br><span class="line">            &#125;   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="使用注解"><a href="#使用注解" class="headerlink" title="使用注解"></a>使用注解</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Length(min = 11,max = 11, erroeMsg = &quot;error phone number&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mobile;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>感谢CodeSheep的<a href="https://mp.weixin.qq.com/s/gdYysBB3aD_HmPyvEThFXw">原文</a></p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>转发与重定向</title>
     <url>/2020/11/11/%E8%BD%AC%E5%8F%91%E4%B8%8E%E9%87%8D%E5%AE%9A%E5%90%91/</url>
     <content><![CDATA[<h1 id="转发与重定向"><a href="#转发与重定向" class="headerlink" title="转发与重定向"></a>转发与重定向</h1><p> 转发和重定向都是作为实现页面跳转的方法，他们的区别</p>
@@ -2545,58 +2597,6 @@
 ]]></content>
       <tags>
         <tag>web</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>通过反射定义注解</title>
-    <url>/2020/11/15/%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/</url>
-    <content><![CDATA[<p>本文则以输入校验的 <code>@Length</code>注解为例，自己动手实现一遍，这个学会了，其他注解实现原理也是类似。</p>
-<h2 id="第一步：首先定义注解：-Length"><a href="#第一步：首先定义注解：-Length" class="headerlink" title="第一步：首先定义注解：@Length"></a>第一步：首先定义注解：@Length</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.FIELD&#125;)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span><span class="comment">//元注解</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Length&#123;</span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">min</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最小值</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">max</span><span class="params">()</span></span>; <span class="comment">// 允许字符串长度的最大值</span></span><br><span class="line">    <span class="function">String <span class="title">errorMsg</span><span class="params">()</span></span>; <span class="comment">// 自定义的错误提示信息</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<ul>
-<li><p>说明：</p>
-<ol>
-<li><p>注解的定义有点像定义接口 <code>interface</code>，但唯一不同的是前面需要加一个 <code>@</code>符号。</p>
-</li>
-<li><p>注解的成员变量只能使用基本类型、 <code>String</code>或者 <code>enum</code>枚举，比如 <code>int</code>可以，但 <code>Integer</code>这种包装类型就不行，需注意。</p>
-</li>
-<li><p>像上面 <code>@Target</code>、 <code>@Retention</code>这种加在注解定义上面的注解，我们称为 <strong>“元注解”</strong>，元注解就是专门用于给注解添加注解的注解，哈哈，很拗口，简单理解，元注解就是天生就有的注解，可直接用于注解的定义上。</p>
-</li>
-<li><p><code>@Target(xxx)</code> 用来说明该自定义注解可以用在什么位置，比如：</p>
-<ul>
-<li><code>ElementType.FIELD</code>：说明自定义的注解可以用于类的变量</li>
-<li><code>ElementType.METHOD</code>：说明自定义的注解可以用于类的方法</li>
-<li><code>ElementType.TYPE</code>：说明自定义的注解可以用于类本身、接口或 <code>enum</code>类型</li>
-<li>等等… 还有很多，如果记不住，建议现用现查</li>
-</ul>
-</li>
-<li><p><code>@Retention(xxx)</code> 用来说明你自定义注解的生命周期，比如：</p>
-<ul>
-<li><code>@Retention(RetentionPolicy.RUNTIME)</code>：表示注解可以一直保留到运行时，因此可以通过反射获取注解信息</li>
-<li><code>@Retention(RetentionPolicy.CLASS)</code>：表示注解被编译器编译进 <code>class</code>文件，但运行时会忽略</li>
-<li><code>@Retention(RetentionPolicy.SOURCE)</code>：表示注解仅在源文件中有效，编译时就会被忽略</li>
-</ul>
-<p>所以声明周期从长到短分别为：<strong>RUNTIME</strong> &gt; <strong>CLASS</strong> &gt; <strong>SOURCE</strong> ，一般来说，如果需要在运行时去动态获取注解的信息，还是得用RUNTIME，就像本文所用。</p>
-</li>
-</ol>
-</li>
-</ul>
-<h2 id="获取注解并对其认证"><a href="#获取注解并对其认证" class="headerlink" title="获取注解并对其认证"></a>获取注解并对其认证</h2><p>在运行时候获取注解包含的信息，得用<strong>java反射机制</strong></p>
-<p>下面写了一个验证函数 <code>validate()</code>，代码中会<strong>逐行用注释去解释</strong>想要达到的目的，认真看一下每一行的注释：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">validate</span><span class="params">(Object object)</span> <span class="keyword">throws</span> IllagelAccessException</span>&#123;</span><br><span class="line">    <span class="comment">//先通过反射获取object对象的类有哪些字段</span></span><br><span class="line">    <span class="comment">//本文就是获取到Student的id、name、mobile的三个字段</span></span><br><span class="line">    <span class="comment">//getClass()获得获得一个实例的类型类；getDeclaredFields()获得某个类的所有声明的字段，即包括public、private和proteced，但是不包括父类的申明字段。</span></span><br><span class="line">    Field[] fields = object.getClass().getDeclaredFields();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//for循环逐个检测校验，看看哪个字段标了注解</span></span><br><span class="line">    <span class="keyword">for</span>(Field field : fields)&#123;</span><br><span class="line">        <span class="comment">//if判断：检测字段是有没有@Length注解</span></span><br><span class="line">        <span class="keyword">if</span>(field.isAnnotationPresent(Length.class))&#123; <span class="comment">//Length类型的注解是否在反射获得的那个类上</span></span><br><span class="line">            <span class="comment">//通过反射获取到字段上面标注的@Length的详细信息</span></span><br><span class="line">            Length length = field.getAnnotation(Length.class);</span><br><span class="line">            field.setAccessable(<span class="keyword">true</span>);<span class="comment">//允许反射时候可以获得私有变量</span></span><br><span class="line">            <span class="comment">//用反射获取字段的实际值</span></span><br><span class="line">            <span class="keyword">int</span> value = ((String)field.get(objedt)).length;</span><br><span class="line">            <span class="comment">//将字段的实际值和注解上做标志的值进行比对</span></span><br><span class="line">            <span class="keyword">if</span>(value&lt;length.min() || value&gt;length.max)&#123;</span><br><span class="line">                <span class="keyword">return</span> lenth.errorMsh();</span><br><span class="line">            &#125;   </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="使用注解"><a href="#使用注解" class="headerlink" title="使用注解"></a>使用注解</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Student</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Long id;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Length(min = 11,max = 11, erroeMsg = &quot;error phone number&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mobile;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<p>感谢CodeSheep的<a href="https://mp.weixin.qq.com/s/gdYysBB3aD_HmPyvEThFXw">原文</a></p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
       </tags>
   </entry>
   <entry>
