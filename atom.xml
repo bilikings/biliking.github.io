@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-03-31T09:56:36.052Z</updated>
+  <updated>2021-04-01T06:18:28.919Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,41 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Linux查看日志</title>
+    <link href="http://bilikings.top/2021/04/01/Linux%E6%9F%A5%E7%9C%8B%E6%97%A5%E5%BF%97/"/>
+    <id>http://bilikings.top/2021/04/01/Linux%E6%9F%A5%E7%9C%8B%E6%97%A5%E5%BF%97/</id>
+    <published>2021-04-01T06:15:31.000Z</published>
+    <updated>2021-04-01T06:18:28.919Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;Linux查看日志&quot;&gt;&lt;a href=&quot;#Linux查看日志&quot; class=&quot;headerlink&quot; title=&quot;Linux查看日志&quot;&gt;&lt;/a&gt;Linux查看日志&lt;/h1&gt;&lt;h3 id=&quot;查看linux日志（以tomcat为例，先切换到：cd-usr-local-tomcat3-logs）&quot;&gt;&lt;a href=&quot;#查看linux日志（以tomcat为例，先切换到：cd-usr-local-tomcat3-logs）&quot; class=&quot;headerlink&quot; title=&quot;查看linux日志（以tomcat为例，先切换到：cd usr/local/tomcat3/logs）&quot;&gt;&lt;/a&gt;查看linux日志（以tomcat为例，先切换到：cd usr/local/tomcat3/logs）&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;tail（查看尾部）&lt;/li&gt;
+&lt;li&gt;head（查看头部）&lt;/li&gt;
+&lt;li&gt;cat&lt;/li&gt;
+&lt;li&gt;tac（由最后一行到第一行反向在萤幕上显示出来）&lt;/li&gt;
+&lt;li&gt;sed（查找日志文件特定的一段 , 也可以根据时间的一个范围查询）&lt;/li&gt;
+&lt;li&gt;less&lt;/li&gt;
+&lt;li&gt;echo&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;-f 循环读取&lt;/p&gt;
+&lt;p&gt;-q 不显示处理信息&lt;/p&gt;
+&lt;p&gt;-v 显示详细的处理信息&lt;/p&gt;
+&lt;p&gt;-c&amp;lt;数目&amp;gt; 显示的字节数&lt;/p&gt;
+&lt;p&gt;-n&amp;lt;行数&amp;gt; 显示行数&lt;/p&gt;
+&lt;p&gt;-q, –quiet, –silent 从不输出给出文件名的首部&lt;/p&gt;
+&lt;p&gt;-s, –sleep-interval=S 与-f合用,表示在每次反复的间隔休眠S秒&lt;/p&gt;
+&lt;p&gt;tail -n 100 catalina.out 查询日志尾部最后100行的日志;&lt;/p&gt;
+&lt;p&gt;tail -n +100 catalina.out 查询100行之后的所有日志;&lt;/p&gt;
+&lt;p&gt;tail -fn 100 catalina.out 循环实时查看最后100行记录(最常用的)&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Linux" scheme="http://bilikings.top/tags/Linux/"/>
+    
+  </entry>
   
   <entry>
     <title>Spring事务</title>
@@ -478,29 +513,6 @@
     <summary type="html">&lt;h2 id=&quot;显式锁&quot;&gt;&lt;a href=&quot;#显式锁&quot; class=&quot;headerlink&quot; title=&quot;显式锁&quot;&gt;&lt;/a&gt;显式锁&lt;/h2&gt;&lt;h3 id=&quot;Lock与ReentrantLock&quot;&gt;&lt;a href=&quot;#Lock与ReentrantLock&quot; class=&quot;headerlink&quot; title=&quot;Lock与ReentrantLock&quot;&gt;&lt;/a&gt;Lock与ReentrantLock&lt;/h3&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Lock&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;lock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;lockInterruptibly&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;span class=&quot;comment&quot;&gt;//获取可中断的锁&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;tryLock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;tryLock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;long&lt;/span&gt; timeout,TimeUint unit)&lt;/span&gt;&lt;/span&gt;;&lt;span class=&quot;comment&quot;&gt;//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;unlock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;Condition &lt;span class=&quot;title&quot;&gt;newCondition&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
 
 &lt;p&gt;&lt;code&gt;ReentrantLock&lt;/code&gt;实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java并发编程笔记(7)——线程池</title>
-    <link href="http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/"/>
-    <id>http://bilikings.top/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</id>
-    <published>2020-11-22T12:19:12.000Z</published>
-    <updated>2020-11-22T12:23:07.738Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;线程池的使用&quot;&gt;&lt;a href=&quot;#线程池的使用&quot; class=&quot;headerlink&quot; title=&quot;线程池的使用&quot;&gt;&lt;/a&gt;线程池的使用&lt;/h2&gt;&lt;p&gt;有些任务需要明确的指定执行策略：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;依赖性任务：如果线程池中的任务需要依赖其他任务的活动，那么就隐含的给执行策略带来了约束&lt;/li&gt;
-&lt;li&gt;使用线程封闭机制的任务：单线程的Executor可以对并发性做出更强的承诺，对象封闭在任务线程中，使得线程中的任务访问这个对象时不会同步，&lt;/li&gt;
-&lt;li&gt;对响应时间敏感的任务：把每个运行时间长的任务交给单线程的Executor中，会降低Executor管理服务的响应性&lt;/li&gt;
-&lt;li&gt;使用ThreadLocal的任务：ThreadLocal可以让每个线程都拥有一个变量的私有复制。只有当线程本地值的什么周期受限于任务的生命周期时，在线程池中使用ThreadLocal才有意义，而且在线程池中的线程不应该使用ThreadLocal在任务之间传递值&lt;/li&gt;
-&lt;/ul&gt;</summary>
     
     
     
