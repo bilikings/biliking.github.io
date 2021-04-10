@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-04-01T06:18:28.919Z</updated>
+  <updated>2021-04-10T03:18:28.002Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>接口幂等性</title>
+    <link href="http://bilikings.top/2021/04/10/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7/"/>
+    <id>http://bilikings.top/2021/04/10/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7/</id>
+    <published>2021-04-10T03:16:01.000Z</published>
+    <updated>2021-04-10T03:18:28.002Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;Spring-Boot-实现接口幂等性的-4-种方案&quot;&gt;&lt;a href=&quot;#Spring-Boot-实现接口幂等性的-4-种方案&quot; class=&quot;headerlink&quot; title=&quot;Spring Boot 实现接口幂等性的 4 种方案&quot;&gt;&lt;/a&gt;Spring Boot 实现接口幂等性的 4 种方案&lt;/h2&gt;&lt;blockquote&gt;
+&lt;p&gt;老板：怎么点击这个付款按钮我钱直接少了两遍啊？&lt;/p&gt;
+&lt;p&gt;程序：你可以点第三次，扣三次的钱（大雾）&lt;/p&gt;
+&lt;p&gt;老板：我不管，你给我把这个bug修复了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;一、什么是幂等性&quot;&gt;&lt;a href=&quot;#一、什么是幂等性&quot; class=&quot;headerlink&quot; title=&quot;一、什么是幂等性&quot;&gt;&lt;/a&gt;&lt;strong&gt;一、什么是幂等性&lt;/strong&gt;&lt;/h3&gt;&lt;p&gt;幂等是一个数学与计算机学概念，在数学中某一元运算为幂等时，其作用在任一元素两次后会和其作用一次的结果相同。&lt;/p&gt;
+&lt;p&gt;在计算机中编程中，一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同。幂等函数或幂等方法是指可以使用相同参数重复执行，并能获得相同结果的函数。这些函数不会影响系统状态，也不用担心重复执行会对系统造成改变。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
+    
+  </entry>
   
   <entry>
     <title>Linux查看日志</title>
@@ -499,25 +522,6 @@
     
     
     <category term="SQL" scheme="http://bilikings.top/tags/SQL/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Java并发编程笔记(8)——显式锁</title>
-    <link href="http://bilikings.top/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/"/>
-    <id>http://bilikings.top/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</id>
-    <published>2020-11-27T13:07:25.000Z</published>
-    <updated>2020-11-27T13:07:54.627Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;显式锁&quot;&gt;&lt;a href=&quot;#显式锁&quot; class=&quot;headerlink&quot; title=&quot;显式锁&quot;&gt;&lt;/a&gt;显式锁&lt;/h2&gt;&lt;h3 id=&quot;Lock与ReentrantLock&quot;&gt;&lt;a href=&quot;#Lock与ReentrantLock&quot; class=&quot;headerlink&quot; title=&quot;Lock与ReentrantLock&quot;&gt;&lt;/a&gt;Lock与ReentrantLock&lt;/h3&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;5&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;6&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;7&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;8&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;class&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;Lock&lt;/span&gt;&lt;/span&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;lock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;lockInterruptibly&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;span class=&quot;comment&quot;&gt;//获取可中断的锁&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;tryLock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;boolean&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;tryLock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;(&lt;span class=&quot;keyword&quot;&gt;long&lt;/span&gt; timeout,TimeUint unit)&lt;/span&gt;&lt;/span&gt;;&lt;span class=&quot;comment&quot;&gt;//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）&lt;/span&gt;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;&lt;span class=&quot;keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;title&quot;&gt;unlock&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;    &lt;span class=&quot;function&quot;&gt;Condition &lt;span class=&quot;title&quot;&gt;newCondition&lt;/span&gt;&lt;span class=&quot;params&quot;&gt;()&lt;/span&gt;&lt;/span&gt;;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-
-&lt;p&gt;&lt;code&gt;ReentrantLock&lt;/code&gt;实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
     
   </entry>
   
