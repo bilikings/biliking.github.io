@@ -1,69 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>JAV中STW和CMS</title>
-    <url>/2021/03/14/JAV%E4%B8%ADSTW%E5%92%8CCMS/</url>
-    <content><![CDATA[<h1 id="JVM中的STW和CMS"><a href="#JVM中的STW和CMS" class="headerlink" title="JVM中的STW和CMS"></a>JVM中的STW和CMS</h1><p><strong>Java中Stop-The-World机制简称STW</strong>，是在执行垃圾收集算法时，Java应用程序的其他所有线程都被挂起（除了垃圾收集帮助器之外）。Java中一种全局暂停现象，全局停顿，所有Java代码停止，native代码可以执行，但不能与JVM交互；这些现象多半是由于gc引起。</p>
-<p>GC时的Stop the World(STW)是大家最大的敌人。但可能很多人还不清楚，除了GC，JVM下还会发生停顿现象。</p>
-<a id="more"></a>
-
-<p><strong>JVM里有一条特殊的线程－－VM Threads</strong>，专门用来执行一些特殊的VM Operation，比如分派GC，thread dump等，这些任务，都需要整个Heap，以及所有线程的状态是静止的，一致的才能进行。所以JVM引入了安全点(Safe Point)的概念，想办法在需要进行VM Operation时，通知所有的线程进入一个静止的安全点。</p>
-<p>除了GC，其他触发安全点的VM Operation包括：</p>
-<ol>
-<li><p>JIT相关，比如Code deoptimization, Flushing code cache ；</p>
-</li>
-<li><p>Class redefinition (e.g. javaagent，AOP代码植入的产生的instrumentation) ；</p>
-</li>
-<li><p>Biased lock revocation 取消偏向锁 ；</p>
-</li>
-<li><p>Various debug operation (e.g. thread dump or deadlock check)；</p>
-</li>
-</ol>
-<h3 id="监控安全点看看JVM到底发生了什么？"><a href="#监控安全点看看JVM到底发生了什么？" class="headerlink" title="监控安全点看看JVM到底发生了什么？"></a>监控安全点看看JVM到底发生了什么？</h3><p>最简单的做法，在JVM启动参数的GC参数里，多加一句:</p>
-<blockquote>
-<p>-XX:+PrintGCApplicationStoppedTime</p>
-</blockquote>
-<p>它就会把全部的JVM停顿时间（不只是GC），打印在GC日志里。</p>
-<p>2016-08-22T00:19:49.559+0800: 219.140: Total time for which application threads were stopped: 0.0053630 seconds</p>
-<p>这是个很有用的必配参数，可以打出几乎一切的停顿……</p>
-<p>但是，在JDK1.7.40以前的版本，它居然没有打印时间戳，所以只能知道JVM停了多久，但不知道什么时候停的。此时一个土办法就是加多一句“ -XX:+PrintGCApplicationConcurrentTime”，打印JVM在两次停顿之间的正常运行时间（同样没有时间戳），但好歹能配合有时间戳的GC日志，反推出Stop发生的时间了。</p>
-<p>2016-08-22T00:19:50.183+0800: 219.764: Application time: 5.6240430 seconds</p>
-<p>如何打印出事哪种原因导致的停顿呢？</p>
-<p>再多加两个参数：-XX:+PrintSafepointStatistics -XX: PrintSafepointStatisticsCount=1</p>
-<p>此时，在stdout中会打出类似的内容</p>
-<p>vmop [threads: total initially_running wait_to_block]1913.425: GenCollectForAllocation [ 55 2 0 ] [time: spin block sync cleanup vmop] page_trap_count[ 0 0 0 0 6 ] 0</p>
-<p>此日志分两段，第一段是时间戳，VM Operation的类型，以及线程概况</p>
-<p>total: 安全点里的总线程数 </p>
-<p>initially_running: 安全点时开始时正在运行状态的线程数 </p>
-<p>wait_to_block: 在VM Operation开始前需要等待其暂停的线程数</p>
-<p>第二行是到达安全点时的各个阶段以及执行操作所花的时间，其中最重要的是vmop</p>
-<p>spin: 等待线程响应</p>
-<p>safepoint号召的时间 </p>
-<p>block: 暂停所有线程所用的时间 </p>
-<p>sync: 等于 spin+block，这是从开始到进入安全点所耗的时间，可用于判断进入安全点耗时 </p>
-<p>cleanup: 清理所用时间 </p>
-<p>vmop: 真正执行VM Operation的时间</p>
-<p>可见，那些很多但又很短的安全点，全都是RevokeBias(取消偏离)，详见 偏向锁实现原理， 高并发的应用一般会干脆在启动参数里加一句”-XX:-UseBiasedLocking”取消掉它。另外还看到有些类型是no vm operation， 文档上说是保证每秒都有一次进入安全点（如果这秒已经GC过就不用了），给一些需要在安全点里进行，又非紧急的操作使用，比如一些采样型的Profiler工具，可用-DGuaranteedSafepointInterval来调整，不过实际看它并不是每秒都会发生，时间不定。</p>
-<p>在实战中，我们利用安全点日志，发现过有程序定时调用Thread Dump等等情况。不过因为安全点日志默认输出到stdout，因为性能及stdout日志的整洁性等原因，我们平时默认没有开启它。只有在需要时才打开。</p>
-<p>再再增加下面三个参数，可以知道更多VM里发生的事情。可惜JVM不会因为设了这三个参数，就把安全点日志转移到vm.log里面来，而是白白打印了两次。</p>
-<p>-XX:+UnlockDiagnosticVMOptions -XX:+LogVMOutput -XX:LogFile=/dev/shm/vm.log</p>
-<p><strong>并发标记清除（CMS）垃圾收集器</strong></p>
-<p>CMS GC设计之初最根本的目的就是减小最大响应时间。</p>
-<p>随着越来越多的应用要求有一个垃圾收集器，它能比串行或并行垃圾收集器有更短的最坏情况的中断时间，牺牲一些应用的吞吐量来消除或极大地减少漫长的GC 中断数量也是能够接受的，针对这种情况，CMS 垃圾收集器被开发出来。</p>
-<p>在CMS 垃圾收集器中，年轻代的垃圾收集与并行垃圾收集器很类似，它们是并行的而且会stop-the-world，也就是说在年轻代的垃圾收集过程中所有的Java 应用线程都会被暂停，而垃圾收集工作会用多线程的方式来执行。需要注意的是，你可以给CMS 垃圾收集器配置一个单线程模式的年轻代收集器，但在Java 8 中并不推荐这个方式，这个选项在Java 9 中被移除了。</p>
-<p>并行垃圾收集器与CMS 垃圾收集器最主要的区别是在老年代的收集上。CMS 收集器的老年代收集活动试图避免应用线程的长时间中断。为了实现这个目的，CMS 老年代收集器在应用线程执行的同时做了大部分工作（垃圾收集线程与应用线程同时工作），除了少量相对短的GC 同步暂停。通常来说，绝大多数情况下CMS 是并发的，老年代收集的某些阶段会暂停应用线程，比如初始标记和重新标记阶段。在CMS 最初的实现中，初始标记和重新标记阶段都是单线程的，但现在它们都已经被改为多线程的。激活多线程的初始标记和重新标记阶段的HotSpot 命令行选项分别是-XX:+CMSParallelInitial Mark Enabled和-XX:CMSParallelRemarkEnabled，当通过命令行选项XX:+UseConcurrentMarkSweepGC 激活CMS 垃圾收集器时也会缺省自动激活这两个选项。</p>
-<p>有可能，或者说极有可能会在一个老年代并发收集正在进行的时候，又发生了一个年轻代收集。一旦发生这种情况，老年代并发收集会被年轻代收集所中断，直到后者结束之后立刻恢复执行。CMS GC 的缺省年轻代收集器被称为ParNew 收集器。</p>
-<p>图中描述了由于年轻代垃圾收集（黑色箭头）、CMS 初始标记，重新标记阶段以及老年代垃圾收集stop-the-world 阶段，导致Java 应用线程被暂停。CMS 垃圾收集器的老年代收集活动从一个stop-the-world 的初始标记阶段开始。一旦完成初始标记，就进入并发标记阶段，在这个阶段允许Java 应用线程和CMS 标记线程同时执行。图1.3 中，在“标记／预清理”标签下方，前两个比较长的黑色箭头就是并发标记线程。一旦并发标记完成，CMS线程就执行并发预清理，即图中“标记／预清理”标签下方两个较短的黑色箭头。需要注意的是，如果有足够的可用硬件线程，CMS 线程的执行成本并不会对Java 应用线程的性能产生太大影响。但如果硬件线程是饱和的或被高度利用的，CMS 线程就会和Java 应用线程竞争CPU 周期。一旦并发预清理完成，stop-the-world 的重新标记阶段就会开始。在重新标记阶段会标记初始标记、并发标记以及并发预清理过程中可能错过的对象。当重新标记阶段结束后，并发清除启动，释放所有死亡对象的空间。</p>
-<p><a href="http://s4.51cto.com/wyfs02/M01/8E/D9/wKiom1jMtyiz3O7fAABbgLHHejM043.jpg"><img src="http://s4.51cto.com/wyfs02/M01/8E/D9/wKiom1jMtyiz3O7fAABbgLHHejM043.jpg" alt="img"></a></p>
-<p>使用CMS 垃圾收集器面临的一个挑战就是要在应用消耗完Java 的可用堆空间之前完成并发收集工作。因此对CMS 来说有个很棘手的部分，就是找到一个合适的时机来启动这个并发工作。这种并发方式往往导致一个结果，就是处理同一个应用，CMS GC 会比并行GC 多占用10%～20%的Java 堆空间。这也是为了缩短垃圾收集暂停时间所付出的代价。</p>
-<p>CMS 垃圾收集器的另一个挑战是如何处理老年代中的空间碎片，也就是当老年代中对象间的空间碎片太小，以至于无法容纳从年轻代晋升上来的对象，因为在CMS 的并发收集循环中并不执行压缩，哪怕是增量或局部压缩。一旦无法找到可用空间，就会使CMS 回过来使用串行GC，触发一次full 收集，导致一个漫长的暂停。伴随CMS 碎片的另一个很不幸的挑战就是上述问题完全无法预测。同样都是老年代碎片，某些应用可能没有经历过一次full GC，而有些可能时不时就要经历一次。</p>
-<p>对CMS 垃圾收集器做些调整，对应用做些优化改动，诸如避免生成大尺寸对象，会有助于延缓空间碎片的产生。当然，调优本就是个不寻常的工作，对专业能力有很高的要求，所以改动应用来避免碎片也是个不小的挑战。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>JVM内存回收概述</title>
     <url>/2020/11/11/JVM%E5%86%85%E5%AD%98%E5%9B%9E%E6%94%B6%E6%A6%82%E8%BF%B0/</url>
     <content><![CDATA[<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
@@ -152,6 +89,69 @@
 <p>每次 Old的垃圾回收需要更长的时间</p>
 <h4 id="permanent代"><a href="#permanent代" class="headerlink" title="permanent代"></a>permanent代</h4><p>主要用于转载Class，方法等信息，默认为64M</p>
 <p>通常不会对这里面的对象执行垃圾回收</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>JAV中STW和CMS</title>
+    <url>/2021/03/14/JAV%E4%B8%ADSTW%E5%92%8CCMS/</url>
+    <content><![CDATA[<h1 id="JVM中的STW和CMS"><a href="#JVM中的STW和CMS" class="headerlink" title="JVM中的STW和CMS"></a>JVM中的STW和CMS</h1><p><strong>Java中Stop-The-World机制简称STW</strong>，是在执行垃圾收集算法时，Java应用程序的其他所有线程都被挂起（除了垃圾收集帮助器之外）。Java中一种全局暂停现象，全局停顿，所有Java代码停止，native代码可以执行，但不能与JVM交互；这些现象多半是由于gc引起。</p>
+<p>GC时的Stop the World(STW)是大家最大的敌人。但可能很多人还不清楚，除了GC，JVM下还会发生停顿现象。</p>
+<a id="more"></a>
+
+<p><strong>JVM里有一条特殊的线程－－VM Threads</strong>，专门用来执行一些特殊的VM Operation，比如分派GC，thread dump等，这些任务，都需要整个Heap，以及所有线程的状态是静止的，一致的才能进行。所以JVM引入了安全点(Safe Point)的概念，想办法在需要进行VM Operation时，通知所有的线程进入一个静止的安全点。</p>
+<p>除了GC，其他触发安全点的VM Operation包括：</p>
+<ol>
+<li><p>JIT相关，比如Code deoptimization, Flushing code cache ；</p>
+</li>
+<li><p>Class redefinition (e.g. javaagent，AOP代码植入的产生的instrumentation) ；</p>
+</li>
+<li><p>Biased lock revocation 取消偏向锁 ；</p>
+</li>
+<li><p>Various debug operation (e.g. thread dump or deadlock check)；</p>
+</li>
+</ol>
+<h3 id="监控安全点看看JVM到底发生了什么？"><a href="#监控安全点看看JVM到底发生了什么？" class="headerlink" title="监控安全点看看JVM到底发生了什么？"></a>监控安全点看看JVM到底发生了什么？</h3><p>最简单的做法，在JVM启动参数的GC参数里，多加一句:</p>
+<blockquote>
+<p>-XX:+PrintGCApplicationStoppedTime</p>
+</blockquote>
+<p>它就会把全部的JVM停顿时间（不只是GC），打印在GC日志里。</p>
+<p>2016-08-22T00:19:49.559+0800: 219.140: Total time for which application threads were stopped: 0.0053630 seconds</p>
+<p>这是个很有用的必配参数，可以打出几乎一切的停顿……</p>
+<p>但是，在JDK1.7.40以前的版本，它居然没有打印时间戳，所以只能知道JVM停了多久，但不知道什么时候停的。此时一个土办法就是加多一句“ -XX:+PrintGCApplicationConcurrentTime”，打印JVM在两次停顿之间的正常运行时间（同样没有时间戳），但好歹能配合有时间戳的GC日志，反推出Stop发生的时间了。</p>
+<p>2016-08-22T00:19:50.183+0800: 219.764: Application time: 5.6240430 seconds</p>
+<p>如何打印出事哪种原因导致的停顿呢？</p>
+<p>再多加两个参数：-XX:+PrintSafepointStatistics -XX: PrintSafepointStatisticsCount=1</p>
+<p>此时，在stdout中会打出类似的内容</p>
+<p>vmop [threads: total initially_running wait_to_block]1913.425: GenCollectForAllocation [ 55 2 0 ] [time: spin block sync cleanup vmop] page_trap_count[ 0 0 0 0 6 ] 0</p>
+<p>此日志分两段，第一段是时间戳，VM Operation的类型，以及线程概况</p>
+<p>total: 安全点里的总线程数 </p>
+<p>initially_running: 安全点时开始时正在运行状态的线程数 </p>
+<p>wait_to_block: 在VM Operation开始前需要等待其暂停的线程数</p>
+<p>第二行是到达安全点时的各个阶段以及执行操作所花的时间，其中最重要的是vmop</p>
+<p>spin: 等待线程响应</p>
+<p>safepoint号召的时间 </p>
+<p>block: 暂停所有线程所用的时间 </p>
+<p>sync: 等于 spin+block，这是从开始到进入安全点所耗的时间，可用于判断进入安全点耗时 </p>
+<p>cleanup: 清理所用时间 </p>
+<p>vmop: 真正执行VM Operation的时间</p>
+<p>可见，那些很多但又很短的安全点，全都是RevokeBias(取消偏离)，详见 偏向锁实现原理， 高并发的应用一般会干脆在启动参数里加一句”-XX:-UseBiasedLocking”取消掉它。另外还看到有些类型是no vm operation， 文档上说是保证每秒都有一次进入安全点（如果这秒已经GC过就不用了），给一些需要在安全点里进行，又非紧急的操作使用，比如一些采样型的Profiler工具，可用-DGuaranteedSafepointInterval来调整，不过实际看它并不是每秒都会发生，时间不定。</p>
+<p>在实战中，我们利用安全点日志，发现过有程序定时调用Thread Dump等等情况。不过因为安全点日志默认输出到stdout，因为性能及stdout日志的整洁性等原因，我们平时默认没有开启它。只有在需要时才打开。</p>
+<p>再再增加下面三个参数，可以知道更多VM里发生的事情。可惜JVM不会因为设了这三个参数，就把安全点日志转移到vm.log里面来，而是白白打印了两次。</p>
+<p>-XX:+UnlockDiagnosticVMOptions -XX:+LogVMOutput -XX:LogFile=/dev/shm/vm.log</p>
+<p><strong>并发标记清除（CMS）垃圾收集器</strong></p>
+<p>CMS GC设计之初最根本的目的就是减小最大响应时间。</p>
+<p>随着越来越多的应用要求有一个垃圾收集器，它能比串行或并行垃圾收集器有更短的最坏情况的中断时间，牺牲一些应用的吞吐量来消除或极大地减少漫长的GC 中断数量也是能够接受的，针对这种情况，CMS 垃圾收集器被开发出来。</p>
+<p>在CMS 垃圾收集器中，年轻代的垃圾收集与并行垃圾收集器很类似，它们是并行的而且会stop-the-world，也就是说在年轻代的垃圾收集过程中所有的Java 应用线程都会被暂停，而垃圾收集工作会用多线程的方式来执行。需要注意的是，你可以给CMS 垃圾收集器配置一个单线程模式的年轻代收集器，但在Java 8 中并不推荐这个方式，这个选项在Java 9 中被移除了。</p>
+<p>并行垃圾收集器与CMS 垃圾收集器最主要的区别是在老年代的收集上。CMS 收集器的老年代收集活动试图避免应用线程的长时间中断。为了实现这个目的，CMS 老年代收集器在应用线程执行的同时做了大部分工作（垃圾收集线程与应用线程同时工作），除了少量相对短的GC 同步暂停。通常来说，绝大多数情况下CMS 是并发的，老年代收集的某些阶段会暂停应用线程，比如初始标记和重新标记阶段。在CMS 最初的实现中，初始标记和重新标记阶段都是单线程的，但现在它们都已经被改为多线程的。激活多线程的初始标记和重新标记阶段的HotSpot 命令行选项分别是-XX:+CMSParallelInitial Mark Enabled和-XX:CMSParallelRemarkEnabled，当通过命令行选项XX:+UseConcurrentMarkSweepGC 激活CMS 垃圾收集器时也会缺省自动激活这两个选项。</p>
+<p>有可能，或者说极有可能会在一个老年代并发收集正在进行的时候，又发生了一个年轻代收集。一旦发生这种情况，老年代并发收集会被年轻代收集所中断，直到后者结束之后立刻恢复执行。CMS GC 的缺省年轻代收集器被称为ParNew 收集器。</p>
+<p>图中描述了由于年轻代垃圾收集（黑色箭头）、CMS 初始标记，重新标记阶段以及老年代垃圾收集stop-the-world 阶段，导致Java 应用线程被暂停。CMS 垃圾收集器的老年代收集活动从一个stop-the-world 的初始标记阶段开始。一旦完成初始标记，就进入并发标记阶段，在这个阶段允许Java 应用线程和CMS 标记线程同时执行。图1.3 中，在“标记／预清理”标签下方，前两个比较长的黑色箭头就是并发标记线程。一旦并发标记完成，CMS线程就执行并发预清理，即图中“标记／预清理”标签下方两个较短的黑色箭头。需要注意的是，如果有足够的可用硬件线程，CMS 线程的执行成本并不会对Java 应用线程的性能产生太大影响。但如果硬件线程是饱和的或被高度利用的，CMS 线程就会和Java 应用线程竞争CPU 周期。一旦并发预清理完成，stop-the-world 的重新标记阶段就会开始。在重新标记阶段会标记初始标记、并发标记以及并发预清理过程中可能错过的对象。当重新标记阶段结束后，并发清除启动，释放所有死亡对象的空间。</p>
+<p><a href="http://s4.51cto.com/wyfs02/M01/8E/D9/wKiom1jMtyiz3O7fAABbgLHHejM043.jpg"><img src="http://s4.51cto.com/wyfs02/M01/8E/D9/wKiom1jMtyiz3O7fAABbgLHHejM043.jpg" alt="img"></a></p>
+<p>使用CMS 垃圾收集器面临的一个挑战就是要在应用消耗完Java 的可用堆空间之前完成并发收集工作。因此对CMS 来说有个很棘手的部分，就是找到一个合适的时机来启动这个并发工作。这种并发方式往往导致一个结果，就是处理同一个应用，CMS GC 会比并行GC 多占用10%～20%的Java 堆空间。这也是为了缩短垃圾收集暂停时间所付出的代价。</p>
+<p>CMS 垃圾收集器的另一个挑战是如何处理老年代中的空间碎片，也就是当老年代中对象间的空间碎片太小，以至于无法容纳从年轻代晋升上来的对象，因为在CMS 的并发收集循环中并不执行压缩，哪怕是增量或局部压缩。一旦无法找到可用空间，就会使CMS 回过来使用串行GC，触发一次full 收集，导致一个漫长的暂停。伴随CMS 碎片的另一个很不幸的挑战就是上述问题完全无法预测。同样都是老年代碎片，某些应用可能没有经历过一次full GC，而有些可能时不时就要经历一次。</p>
+<p>对CMS 垃圾收集器做些调整，对应用做些优化改动，诸如避免生成大尺寸对象，会有助于延缓空间碎片的产生。当然，调优本就是个不寻常的工作，对专业能力有很高的要求，所以改动应用来避免碎片也是个不小的挑战。</p>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -722,40 +722,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(8)——显式锁</title>
-    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
-    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
-<a id="more"></a>
-
-<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
-<ul>
-<li>公平：FIFO</li>
-<li>非公平：先请求的锁不一定先取得</li>
-</ul>
-<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
-<p>内置的synchronize的锁也是非公平的</p>
-<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
-<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
-<ul>
-<li>await</li>
-<li>signal</li>
-</ul>
-<p>相当于Object类中提供的wait和notify方法</p>
-<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
-<li>ReentranLock</li>
-<li>Semaphore</li>
-<li>CountDownLatch</li>
-<li>FutureTask</li>
-<li>ReentrantReadWriteLock</li>
-</ul>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(7)——线程池</title>
     <url>/2020/11/22/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-7-%E2%80%94%E2%80%94%E7%BA%BF%E7%A8%8B%E6%B1%A0/</url>
     <content><![CDATA[<h2 id="线程池的使用"><a href="#线程池的使用" class="headerlink" title="线程池的使用"></a>线程池的使用</h2><p>有些任务需要明确的指定执行策略：</p>
@@ -809,6 +775,40 @@
 
 <p>可以通过自定义的线程工厂，创建了新的myThread。</p>
 <h4 id="定制ThreadPoolExecutor"><a href="#定制ThreadPoolExecutor" class="headerlink" title="定制ThreadPoolExecutor"></a>定制ThreadPoolExecutor</h4><p>调用完构造函数之后，仍然可以通过set来修改大多数传递给它的构造参数。 </p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(8)——显式锁</title>
+    <url>/2020/11/27/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-8-%E2%80%94%E2%80%94%E6%98%BE%E5%BC%8F%E9%94%81/</url>
+    <content><![CDATA[<h2 id="显式锁"><a href="#显式锁" class="headerlink" title="显式锁"></a>显式锁</h2><h3 id="Lock与ReentrantLock"><a href="#Lock与ReentrantLock" class="headerlink" title="Lock与ReentrantLock"></a>Lock与ReentrantLock</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Lock</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lockInterruptibly</span><span class="params">()</span></span>;<span class="comment">//获取可中断的锁</span></span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">(<span class="keyword">long</span> timeout,TimeUint unit)</span></span>;<span class="comment">//带有时间限制的锁，持有锁时间超时（没在规定时间完成操作就让代码失败，并需要释放锁）</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="function">Condition <span class="title">newCondition</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>ReentrantLock</code>实现了lock接口，并提供了与Synchronize相同的互斥性和内存可见性</p>
+<a id="more"></a>
+
+<h3 id="公平性"><a href="#公平性" class="headerlink" title="公平性"></a>公平性</h3><p><code>ReentrantLock</code>提供了两种公平性的选择，创建一个非公平的锁<strong>（默认）</strong>，或是‘一个公平的锁，</p>
+<ul>
+<li>公平：FIFO</li>
+<li>非公平：先请求的锁不一定先取得</li>
+</ul>
+<p>默认使用非公平的原因：性能更高：在恢复一个被挂起的线程与这个线程正在开启运行的时间中存在严重的延迟。</p>
+<p>内置的synchronize的锁也是非公平的</p>
+<h3 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h3><p><code>ReadWriteLock</code></p>
+<h2 id="构建显式的同步工具"><a href="#构建显式的同步工具" class="headerlink" title="构建显式的同步工具"></a>构建显式的同步工具</h2><h3 id="显式的Condition对象"><a href="#显式的Condition对象" class="headerlink" title="显式的Condition对象"></a>显式的Condition对象</h3><p>把Condition对象和一个lock，连接在一起。</p>
+<ul>
+<li>await</li>
+<li>signal</li>
+</ul>
+<p>相当于Object类中提供的wait和notify方法</p>
+<h3 id="AQS"><a href="#AQS" class="headerlink" title="AQS"></a>AQS</h3><h4 id="JUC中的AQS实现"><a href="#JUC中的AQS实现" class="headerlink" title="JUC中的AQS实现"></a>JUC中的AQS实现</h4><ul>
+<li>ReentranLock</li>
+<li>Semaphore</li>
+<li>CountDownLatch</li>
+<li>FutureTask</li>
+<li>ReentrantReadWriteLock</li>
+</ul>
 ]]></content>
       <tags>
         <tag>Java</tag>
@@ -1735,6 +1735,86 @@
       </tags>
   </entry>
   <entry>
+    <title>web开发基础</title>
+    <url>/2021/04/24/web%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/</url>
+    <content><![CDATA[<h2 id="名词概念"><a href="#名词概念" class="headerlink" title="名词概念"></a>名词概念</h2><p>端口：端口是TCP/IP协议簇中，应用层与传输层协议实体间的通信接口，每个端口都有一个端口号的整形标识</p>
+<p>SOCKET： 套接字，是一个抽象层，应用程序可以通过他发送或者接受数据，套接字提供在应用层进程利用网络协议栈交换数据的机制，网络套接字是IP地址和端口的组合</p>
+<p>INADDR_ANY：代指IP为0.0.0.0，泛指本机，也就是表示本机所有的ip</p>
+<p>网络字节顺序：网络数据的一种编排方式，网络自己顺序采用big endian（大端最高有效位存于内存低处，最低有效位存于内存最高处）的排序方式。</p>
+<p>本机字节顺序：本地数据的一种编排方式，一般x86的处理器都采用小端</p>
+<p>WM_SOCKET_NOTIFY：异步网络事件消息</p>
+<p>进程阻塞：正在进行的进程由于发生某种事件而无法继续执行时候，处理机而处于暂停状态，也就是说进程的执行受到阻塞</p>
+<p>HINTERNET句柄：WinINet函数创建和使用的句柄为HINTERNET类型。WinINet函数返回HINTERNET句柄，此句柄不能与其他句柄类型互换。因此，它们不能作为ReadFile或CloseHandle之类的方法参数。同样，其他句柄类型不能与WinlNet函数-起使用。 例如，CreateFile返回的句柄不能传递给InternetReadFile。</p>
+<a id="more"></a>
+
+<h2 id="简答"><a href="#简答" class="headerlink" title="简答"></a>简答</h2><h4 id="简述基于消息的传输协议和基于流的传输协议的特点"><a href="#简述基于消息的传输协议和基于流的传输协议的特点" class="headerlink" title="简述基于消息的传输协议和基于流的传输协议的特点"></a><strong>简述基于消息的传输协议和基于流的传输协议的特点</strong></h4><p><strong>面向消息的协议以消息位单位</strong>在网络上传输，消息由发送段一条条发送，接受端一条条接收，各个消息都是独立的</p>
+<p><strong>基于流的协议不保护消息边界</strong>，将数据当做字节流进行连续传输，不管实际的消息边界是否存在，如果连续发送数据。接收端的每次接受的数据包不固定，允许发送段把原始信息分割后发送。或者把好几个消息集合成一个大的数据包，一次送出。一般发送的数据都有编号，接收端有缓存。</p>
+<h4 id="C-S模式的优缺点"><a href="#C-S模式的优缺点" class="headerlink" title="C/S模式的优缺点"></a><strong>C/S模式的优缺点</strong></h4><p>优点：</p>
+<ol>
+<li>结构简单，在系统中不同类型的任务分别由服务器和客户承担，由利于发挥不同机器平台的优势</li>
+<li>支持分布式，并发环境，特别是客户端和服务器是多对多的时候可以有效提供资源利用率和共享程度</li>
+<li>服务器资源集中管理，由利用权限系统的控制和系统安全</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>在大多数C/S系统中，构建的连接通过（远程）过程调用，接近于代码一级，表达能力弱</li>
+</ol>
+<h4 id="结构体socketaddr-in是专门针对Internet的通信延时，请给出这个结构体的原型"><a href="#结构体socketaddr-in是专门针对Internet的通信延时，请给出这个结构体的原型" class="headerlink" title="结构体socketaddr_in是专门针对Internet的通信延时，请给出这个结构体的原型"></a>结构体socketaddr_in是专门针对Internet的通信延时，请给出这个结构体的原型</h4>   <figure class="highlight c"><table><tr><td class="code"><pre><span class="line">struck socketaddr_in&#123;</span><br><span class="line">    <span class="keyword">short</span> <span class="keyword">int</span> sin_family;<span class="comment">//协议族</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">short</span> <span class="keyword">int</span> sin_port;<span class="comment">//端口号</span></span><br><span class="line">    struck in_addr;<span class="comment">//ip地址</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">char</span> sin_zero[<span class="number">8</span>];<span class="comment">//全为0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="简述select-的功能"><a href="#简述select-的功能" class="headerlink" title="简述select()的功能"></a>简述select()的功能</h4><p>使用函数进行I/O管理，select函数可以判断套接字上是否有数据，或者是否可以向套接字上写数据，设计这个函数的目的是防止套接字在阻塞模式中，I/O调用过程处于阻塞模式，或者在非阻塞模式中，产生WSAEWOULDBOLOCK错误，若不满足实现给定的参数条件，那么select在执行I/O操作时候会阻塞。</p>
+<h4 id="简述WinSock规范和Berkeley在哪些方面有区别"><a href="#简述WinSock规范和Berkeley在哪些方面有区别" class="headerlink" title="简述WinSock规范和Berkeley在哪些方面有区别"></a>简述WinSock规范和Berkeley在哪些方面有区别</h4><p>winsock是是以bsd套接字为规范的，因此在这个基础上添加了对windows的扩展库函数，使用者可以充分利用windows的消息驱动进行编程</p>
+<h4 id="简述TCP的三次握手"><a href="#简述TCP的三次握手" class="headerlink" title="简述TCP的三次握手"></a>简述TCP的三次握手</h4><ul>
+<li>第一次握手：建立连接时，客户端发送syn包到服务器，便今日syn-send状态，等待服务器确认</li>
+<li>第二次握手：服务器收到syn包，必须确认客户的syn（ack=j+1），同时也发送一个数据包syn（syn=k），此时服务器进入syn-recv状态</li>
+<li>第三次握手：</li>
+<li>客户端收到syn+ack包，向服务器打算确认包ack（ack=k+1），发送完毕，客户端和服务器都进入ESTABLISHED（已建立状态）状态，完成三次握手。</li>
+</ul>
+<h4 id="如何理解套接口"><a href="#如何理解套接口" class="headerlink" title="如何理解套接口"></a>如何理解套接口</h4><p>套接口是对网络中不同主机的应用进程之间进行双向通信的端点的抽象，一款套接口就是网络上进行网络通信的一端，提供了应用层利用网络协议栈交换数据的机制</p>
+<h4 id="简述MFC和windows的关系"><a href="#简述MFC和windows的关系" class="headerlink" title="简述MFC和windows的关系"></a>简述MFC和windows的关系</h4><p>windows对象是win32由句柄表示的windows操作系统对象，MFC是指MFC中封装的C++对象，是C++中类的实例，MFC中很多类是通过对系统句柄的封装对windows的实现操作的</p>
+<h2 id="套接字编程"><a href="#套接字编程" class="headerlink" title="套接字编程"></a>套接字编程</h2><h4 id="TCP服务器编程的操作"><a href="#TCP服务器编程的操作" class="headerlink" title="TCP服务器编程的操作"></a>TCP服务器编程的操作</h4><ol>
+<li>加载套接字字库（WSAStartip()），创建套接字（socket()）;</li>
+<li>绑定套接字到一个ip和一个端口上（bind（））；</li>
+<li>把套接字设为监听模式（listen（））；</li>
+<li>请求到来之后，接受连接请求，返回一个对于于此的连接套接字（accept（））；</li>
+<li>用发送的套接字进行和客户端通信（recv（）/send（））；</li>
+<li>返回，等待另一个连接请求；</li>
+<li>关闭套接字，关闭加载的套接字库(closesocket(/WSACleanup0)。</li>
+</ol>
+<h4 id="TCP客户端的编程"><a href="#TCP客户端的编程" class="headerlink" title="TCP客户端的编程"></a>TCP客户端的编程</h4><ol>
+<li>加载套接字库，通过服务器域名获得服务器的IP地址，创建套接字（WSAStartip()（socket()））;</li>
+<li>发出请求（connect（））；</li>
+<li>与服务器进行通信（send（）/recv（））</li>
+<li>关闭套接字，关闭加载的套接字库(closesocket(/WSACleanup0)。</li>
+</ol>
+<h4 id="基于udp（用户数据报）的步骤："><a href="#基于udp（用户数据报）的步骤：" class="headerlink" title="基于udp（用户数据报）的步骤："></a>基于udp（用户数据报）的步骤：</h4><ol>
+<li>加载套接字字库（WSAStartip()），创建套接字（socket()）;</li>
+<li>绑定套接字到一个ip和一个端口上（bind（））；</li>
+<li>等待和接受数据（send（）/recv（））；</li>
+<li>关闭套接字，关闭加载的套接字库(closesocket(/WSACleanup0)。</li>
+</ol>
+<h4 id="基于UDp的socket客户端："><a href="#基于UDp的socket客户端：" class="headerlink" title="基于UDp的socket客户端："></a>基于UDp的socket客户端：</h4><ol>
+<li>创建一个套接字（socket（））；</li>
+<li>发送数据（sendto（））</li>
+<li>关闭套接字</li>
+</ol>
+<h2 id="程序部分"><a href="#程序部分" class="headerlink" title="程序部分"></a>程序部分</h2><h4 id="NetClient"><a href="#NetClient" class="headerlink" title="NetClient"></a>NetClient</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	SOCKET sockClient=socket(AF_INET,SOCK_DGRAM,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=inet_addr(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">char</span> recvBuf[<span class="number">100</span>];</span><br><span class="line">	<span class="keyword">char</span> sendBuf[<span class="number">100</span>];</span><br><span class="line">	<span class="keyword">char</span> tempBuf[<span class="number">200</span>];</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> len=<span class="keyword">sizeof</span>(SOCKADDR);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Please input data:\n&quot;</span>);</span><br><span class="line">		gets(sendBuf);</span><br><span class="line">		sendto(sockClient,sendBuf,<span class="built_in">strlen</span>(sendBuf)+<span class="number">1</span>,<span class="number">0</span>,</span><br><span class="line">			(SOCKADDR*)&amp;addrSrv,len);</span><br><span class="line">		recvfrom(sockClient,recvBuf,<span class="number">100</span>,<span class="number">0</span>,(SOCKADDR*)&amp;addrSrv,&amp;len);</span><br><span class="line">		<span class="keyword">if</span>(<span class="string">&#x27;q&#x27;</span>==recvBuf[<span class="number">0</span>])</span><br><span class="line">		&#123;</span><br><span class="line">			sendto(sockClient,<span class="string">&quot;q&quot;</span>,<span class="built_in">strlen</span>(<span class="string">&quot;q&quot;</span>)+<span class="number">1</span>,<span class="number">0</span>,</span><br><span class="line">				(SOCKADDR*)&amp;addrSrv,len);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Chat end!\n&quot;</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">sprintf</span>(tempBuf,<span class="string">&quot;%s say : %s&quot;</span>,inet_ntoa(addrSrv.sin_addr),recvBuf);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,tempBuf);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	closesocket(sockClient);</span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="NetSrv"><a href="#NetSrv" class="headerlink" title="NetSrv"></a>NetSrv</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line">	SOCKET sockSrv=socket(AF_INET,SOCK_DGRAM,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=htonl(INADDR_ANY);</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line"></span><br><span class="line">	bind(sockSrv,(SOCKADDR*)&amp;addrSrv,<span class="keyword">sizeof</span>(SOCKADDR));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">char</span> recvBuf[<span class="number">100</span>];</span><br><span class="line">	<span class="keyword">char</span> sendBuf[<span class="number">100</span>];</span><br><span class="line">	<span class="keyword">char</span> tempBuf[<span class="number">200</span>];</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrClient;</span><br><span class="line">	<span class="keyword">int</span> len=<span class="keyword">sizeof</span>(SOCKADDR);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		recvfrom(sockSrv,recvBuf,<span class="number">100</span>,<span class="number">0</span>,(SOCKADDR*)&amp;addrClient,&amp;len);</span><br><span class="line">		<span class="keyword">if</span>(<span class="string">&#x27;q&#x27;</span>==recvBuf[<span class="number">0</span>])</span><br><span class="line">		&#123;</span><br><span class="line">			sendto(sockSrv,<span class="string">&quot;q&quot;</span>,<span class="built_in">strlen</span>(<span class="string">&quot;q&quot;</span>)+<span class="number">1</span>,<span class="number">0</span>,(SOCKADDR*)&amp;addrClient,len);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;Chat end!\n&quot;</span>);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">sprintf</span>(tempBuf,<span class="string">&quot;%s say : %s&quot;</span>,inet_ntoa(addrClient.sin_addr),recvBuf);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,tempBuf);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Please input data:\n&quot;</span>);</span><br><span class="line">		gets(sendBuf);</span><br><span class="line">		sendto(sockSrv,sendBuf,<span class="built_in">strlen</span>(sendBuf)+<span class="number">1</span>,<span class="number">0</span>,(SOCKADDR*)&amp;addrClient,len);</span><br><span class="line">	&#125;</span><br><span class="line">	closesocket(sockSrv);</span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="TcpClient"><a href="#TcpClient" class="headerlink" title="TcpClient"></a>TcpClient</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line">	SOCKET sockClient=socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=inet_addr(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line">	connect(sockClient,(SOCKADDR*)&amp;addrSrv,<span class="keyword">sizeof</span>(SOCKADDR));</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	char recvBuf[100];</span></span><br><span class="line"><span class="comment">	recv(sockClient,recvBuf,100,0);</span></span><br><span class="line"><span class="comment">	printf(&quot;%s\n&quot;,recvBuf);</span></span><br><span class="line"><span class="comment">	send(sockClient,&quot;This is lisi&quot;,strlen(&quot;This is lisi&quot;)+1,0);</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">    <span class="keyword">char</span> sendBuf[<span class="number">100</span>];</span><br><span class="line">    <span class="built_in">memset</span>(sendBuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(sendBuf));</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=<span class="number">100</span>;i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">sprintf</span>(sendBuf,<span class="string">&quot;QUREY TIME ORDER: %d\n&quot;</span>,i);</span><br><span class="line">		send(sockClient,sendBuf,<span class="built_in">strlen</span>(sendBuf),<span class="number">0</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	closesocket(sockClient);</span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="TcpSrv"><a href="#TcpSrv" class="headerlink" title="TcpSrv"></a>TcpSrv</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line">	SOCKET sockSrv=socket(AF_INET,SOCK_STREAM,<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=INADDR_ANY;</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line"></span><br><span class="line">	bind(sockSrv,(SOCKADDR*)&amp;addrSrv,<span class="keyword">sizeof</span>(SOCKADDR));</span><br><span class="line"></span><br><span class="line">	listen(sockSrv,<span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrClient;</span><br><span class="line">	<span class="keyword">int</span> len=<span class="keyword">sizeof</span>(SOCKADDR);</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	while(1)</span></span><br><span class="line"><span class="comment">	&#123;</span></span><br><span class="line"><span class="comment">		SOCKET sockConn=accept(sockSrv,(SOCKADDR*)&amp;addrClient,&amp;len);</span></span><br><span class="line"><span class="comment">		char sendBuf[100];</span></span><br><span class="line"><span class="comment">		sprintf(sendBuf,&quot;Welcome %s to http://www.chd.edu.cn&quot;,</span></span><br><span class="line"><span class="comment">			inet_ntoa(addrClient.sin_addr));</span></span><br><span class="line"><span class="comment">		send(sockConn,sendBuf,strlen(sendBuf)+1,0);</span></span><br><span class="line"><span class="comment">		char recvBuf[100];</span></span><br><span class="line"><span class="comment">		recv(sockConn,recvBuf,100,0);</span></span><br><span class="line"><span class="comment">		printf(&quot;%s\n&quot;,recvBuf);</span></span><br><span class="line"><span class="comment">		closesocket(sockConn);</span></span><br><span class="line"><span class="comment">	&#125;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">	<span class="keyword">char</span> recvBuf[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">int</span> i=<span class="number">0</span>,recvlen=<span class="number">0</span>;</span><br><span class="line">	<span class="built_in">memset</span>(recvBuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(recvBuf));</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		SOCKET sockConn=accept(sockSrv,(SOCKADDR*)&amp;addrClient,&amp;len);</span><br><span class="line">	</span><br><span class="line">	    <span class="keyword">while</span>(recvlen=recv(sockConn,recvBuf,<span class="number">100</span>,<span class="number">0</span>)!=<span class="number">0</span>)&#123;</span><br><span class="line">           </span><br><span class="line">		   <span class="built_in">printf</span>(<span class="string">&quot;No.%d ==========================\n&quot;</span>,i++);</span><br><span class="line">		   <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,recvBuf);</span><br><span class="line">           <span class="built_in">memset</span>(recvBuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(recvBuf));</span><br><span class="line">		   </span><br><span class="line">		&#125;</span><br><span class="line">		closesocket(sockConn);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="UDPClient"><a href="#UDPClient" class="headerlink" title="UDPClient"></a>UDPClient</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	SOCKET sockClient=socket(AF_INET,SOCK_DGRAM,<span class="number">0</span>);</span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=inet_addr(<span class="string">&quot;127.0.0.1&quot;</span>);</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line">    <span class="keyword">char</span> sendBuf[<span class="number">100</span>];</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">1</span>; i&lt;=<span class="number">100</span>;i++)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">sprintf</span>(sendBuf,<span class="string">&quot;QUREY TIME ORDER: %d\n&quot;</span>,i);</span><br><span class="line">		sendto(sockClient,sendBuf,<span class="built_in">strlen</span>(sendBuf),<span class="number">0</span>,(SOCKADDR*)&amp;addrSrv,<span class="keyword">sizeof</span>(SOCKADDR));</span><br><span class="line">	&#125;</span><br><span class="line">	closesocket(sockClient);</span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="UDPSrv"><a href="#UDPSrv" class="headerlink" title="UDPSrv"></a>UDPSrv</h4><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;Winsock2.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	WORD wVersionRequested;</span><br><span class="line">	WSADATA wsaData;</span><br><span class="line">	<span class="keyword">int</span> err;</span><br><span class="line">	</span><br><span class="line">	wVersionRequested = MAKEWORD( <span class="number">1</span>, <span class="number">1</span> );</span><br><span class="line">	</span><br><span class="line">	err = WSAStartup( wVersionRequested, &amp;wsaData );</span><br><span class="line">	<span class="keyword">if</span> ( err != <span class="number">0</span> ) &#123;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ( LOBYTE( wsaData.wVersion ) != <span class="number">1</span> ||</span><br><span class="line">        HIBYTE( wsaData.wVersion ) != <span class="number">1</span> ) &#123;</span><br><span class="line">		WSACleanup( );</span><br><span class="line">		<span class="keyword">return</span>; </span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	SOCKET sockSrv=socket(AF_INET,SOCK_DGRAM,<span class="number">0</span>);</span><br><span class="line">	SOCKADDR_IN addrSrv;</span><br><span class="line">	addrSrv.sin_addr.S_un.S_addr=INADDR_ANY;</span><br><span class="line">	addrSrv.sin_family=AF_INET;</span><br><span class="line">	addrSrv.sin_port=htons(<span class="number">6000</span>);</span><br><span class="line"></span><br><span class="line">	bind(sockSrv,(SOCKADDR*)&amp;addrSrv,<span class="keyword">sizeof</span>(SOCKADDR));</span><br><span class="line"></span><br><span class="line">	SOCKADDR_IN addrClient;</span><br><span class="line">	<span class="keyword">int</span> len=<span class="keyword">sizeof</span>(SOCKADDR);</span><br><span class="line">	<span class="keyword">char</span> recvBuf[<span class="number">100</span>];</span><br><span class="line">    <span class="keyword">int</span> recvlen=<span class="number">0</span>;</span><br><span class="line">	<span class="built_in">memset</span>(recvBuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(recvBuf));</span><br><span class="line">	<span class="keyword">while</span>(recvlen=recvfrom(sockSrv,recvBuf,<span class="number">100</span>,<span class="number">0</span>,(SOCKADDR*)&amp;addrClient,&amp;len)!=<span class="number">0</span>)&#123;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,recvBuf);</span><br><span class="line">        <span class="built_in">memset</span>(recvBuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(recvBuf));</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	closesocket(sockSrv);</span><br><span class="line">	WSACleanup();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>C/C++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>一道题搞懂JVM类加载</title>
     <url>/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/</url>
     <content><![CDATA[<h1 id="一道题搞懂JVM类加载机制"><a href="#一道题搞懂JVM类加载机制" class="headerlink" title="一道题搞懂JVM类加载机制"></a>一道题搞懂JVM类加载机制</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton2 singleton2 = <span class="keyword">new</span> Singleton2();</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton2 <span class="title">getInstance2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton2;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton singleton = Singleton.getInstance();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value1:&quot;</span> + singleton.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value2:&quot;</span> + singleton.value2);</span><br><span class="line">		</span><br><span class="line">		Singleton2 singleton2 = Singleton2.getInstance2();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value1:&quot;</span> + singleton2.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value2:&quot;</span> + singleton2.value2);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
@@ -1834,6 +1914,69 @@
       </tags>
   </entry>
   <entry>
+    <title>创建型模式——单例模式</title>
+    <url>/2020/11/16/%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
+    <content><![CDATA[<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
+<h4 id="饿汉式（静态常量）"><a href="#饿汉式（静态常量）" class="headerlink" title="饿汉式（静态常量）"></a>饿汉式（静态常量）</h4><ol>
+<li><p>构造器私有化（防止new）</p>
+</li>
+<li><p>类的内部创建对象</p>
+</li>
+<li><p>向外暴露一个静态公共方法</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Single instance =<span class="keyword">new</span> Single();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ul>
+<li>优点：写法简单，类装载的时候实例化，避免了线程同步</li>
+<li>缺点：可能造成内存的浪费</li>
+</ul>
+<a id="more"></a>
+
+<h4 id="饿汉式（静态代码块）"><a href="#饿汉式（静态代码块）" class="headerlink" title="饿汉式（静态代码块）"></a>饿汉式（静态代码块）</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance ;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态代码块</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        instance =<span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="懒汉式（线程不安全）"><a href="#懒汉式（线程不安全）" class="headerlink" title="懒汉式（线程不安全）"></a>懒汉式（线程不安全）</h4><p>提供一个静态的公有方法，使用这个方法时候才去创建instance</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：懒加载</li>
+<li>缺点：只能单线程使用</li>
+</ul>
+<h4 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h4><p>加入同步代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：可以多线程了</li>
+<li>缺点：同步效率低，每次new都要同步</li>
+</ul>
+<h4 id="懒汉式（无法解决线程安全，同步代码块）"><a href="#懒汉式（无法解决线程安全，同步代码块）" class="headerlink" title="懒汉式（无法解决线程安全，同步代码块）"></a>懒汉式（无法解决线程安全，同步代码块）</h4><p>没有实际意义的代码，所以需要双重检查</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class)&#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="双重检查"><a href="#双重检查" class="headerlink" title="双重检查"></a>双重检查</h4><p><code>volatile</code>是把可以把修改值直接放入储存(实现可见性,实现有序性,不能保证原子性)</p>
+<ul>
+<li>提供一个静态的公有方法，加入双重检查，解决了线程安全问题，同时解决懒加载问题</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instance = <span class="keyword">new</span> Single();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：线程安全，延迟加载，效率高</li>
+</ul>
+<h4 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h4><p>静态内部类的特点：当一个类被装载的时候，里面的static的类不会被装载。当调用到了静态内部类里面的东西的时候，静态内部类才会被装载，而类装载的时候线程的安全的。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleGetInstance</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Single INSTANCE = <span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingleGetInstance.INSTANCE;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>优点：避免线程不安全，利用静态内部类的特点实现延迟加载，效率高</li>
+</ul>
+<h4 id="枚举-（enum）"><a href="#枚举-（enum）" class="headerlink" title="枚举 （enum）"></a>枚举 （enum）</h4><p>枚举是一个特殊的类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    INSTANCE;<span class="comment">//属性</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">say</span><span class="params">()</span></span>&#123;<span class="comment">//方法</span></span><br><span class="line">        System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不仅避免多线程同步问题，还能防止反序列化重新创建新的对象</p>
+<p>effective Java 作者推荐使用此方法实现</p>
+]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>代理模式浅析</title>
     <url>/2021/02/13/%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E6%B5%85%E6%9E%90/</url>
     <content><![CDATA[<h1 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h1><h2 id="静态代理"><a href="#静态代理" class="headerlink" title="静态代理"></a>静态代理</h2><p>因为要搞清楚动态代理必须知道静态代理是什么玩意</p>
@@ -1903,69 +2046,6 @@
 <p>静态代理需要自己手动编写代理类和目标方法。</p>
 <p>动态代理就不需要自己手动实现代理类和目标方法，但动态代理的目标类要必须实现接口！</p>
 <p>Cglib 代理的目标类可以实现接口也可以不实现，因为可以使用继承子类的方式代理。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>创建型模式——单例模式</title>
-    <url>/2020/11/16/%E5%88%9B%E5%BB%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F%E2%80%94%E2%80%94%E5%8D%95%E4%BE%8B%E6%A8%A1%E5%BC%8F/</url>
-    <content><![CDATA[<h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>   <strong>确保一个类只有一个实例</strong>，而且自行实例化并向整个系统提供这个实例，该类只提供一个取得其对象的方法。</p>
-<h4 id="饿汉式（静态常量）"><a href="#饿汉式（静态常量）" class="headerlink" title="饿汉式（静态常量）"></a>饿汉式（静态常量）</h4><ol>
-<li><p>构造器私有化（防止new）</p>
-</li>
-<li><p>类的内部创建对象</p>
-</li>
-<li><p>向外暴露一个静态公共方法</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> Single instance =<span class="keyword">new</span> Single();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
-</li>
-</ol>
-<ul>
-<li>优点：写法简单，类装载的时候实例化，避免了线程同步</li>
-<li>缺点：可能造成内存的浪费</li>
-</ul>
-<a id="more"></a>
-
-<h4 id="饿汉式（静态代码块）"><a href="#饿汉式（静态代码块）" class="headerlink" title="饿汉式（静态代码块）"></a>饿汉式（静态代码块）</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    <span class="comment">//1构造器私有化</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//内部创建实例对象</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance ;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//静态代码块</span></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        instance =<span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="懒汉式（线程不安全）"><a href="#懒汉式（线程不安全）" class="headerlink" title="懒汉式（线程不安全）"></a>懒汉式（线程不安全）</h4><p>提供一个静态的公有方法，使用这个方法时候才去创建instance</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：懒加载</li>
-<li>缺点：只能单线程使用</li>
-</ul>
-<h4 id="懒汉式（线程安全，同步方法）"><a href="#懒汉式（线程安全，同步方法）" class="headerlink" title="懒汉式（线程安全，同步方法）"></a>懒汉式（线程安全，同步方法）</h4><p>加入同步代码</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">synchronized</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：可以多线程了</li>
-<li>缺点：同步效率低，每次new都要同步</li>
-</ul>
-<h4 id="懒汉式（无法解决线程安全，同步代码块）"><a href="#懒汉式（无法解决线程安全，同步代码块）" class="headerlink" title="懒汉式（无法解决线程安全，同步代码块）"></a>懒汉式（无法解决线程安全，同步代码块）</h4><p>没有实际意义的代码，所以需要双重检查</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class)&#123;</span><br><span class="line">            instance= <span class="keyword">new</span> Single();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="双重检查"><a href="#双重检查" class="headerlink" title="双重检查"></a>双重检查</h4><p><code>volatile</code>是把可以把修改值直接放入储存(实现可见性,实现有序性,不能保证原子性)</p>
-<ul>
-<li>提供一个静态的公有方法，加入双重检查，解决了线程安全问题，同时解决懒加载问题</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Single instance;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">synchronized</span> (Single.class) &#123;</span><br><span class="line">                <span class="keyword">if</span> (instance == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    instance = <span class="keyword">new</span> Single();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：线程安全，延迟加载，效率高</li>
-</ul>
-<h4 id="静态内部类"><a href="#静态内部类" class="headerlink" title="静态内部类"></a>静态内部类</h4><p>静态内部类的特点：当一个类被装载的时候，里面的static的类不会被装载。当调用到了静态内部类里面的东西的时候，静态内部类才会被装载，而类装载的时候线程的安全的。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Single</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Single</span><span class="params">()</span> </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SingleGetInstance</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Single INSTANCE = <span class="keyword">new</span> Single();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Single <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> SingleGetInstance.INSTANCE;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>优点：避免线程不安全，利用静态内部类的特点实现延迟加载，效率高</li>
-</ul>
-<h4 id="枚举-（enum）"><a href="#枚举-（enum）" class="headerlink" title="枚举 （enum）"></a>枚举 （enum）</h4><p>枚举是一个特殊的类</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Single</span></span>&#123;</span><br><span class="line">    INSTANCE;<span class="comment">//属性</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">say</span><span class="params">()</span></span>&#123;<span class="comment">//方法</span></span><br><span class="line">        System.out.println(<span class="string">&quot;ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>不仅避免多线程同步问题，还能防止反序列化重新创建新的对象</p>
-<p>effective Java 作者推荐使用此方法实现</p>
 ]]></content>
       <tags>
         <tag>Java</tag>

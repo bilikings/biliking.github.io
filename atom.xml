@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-04-10T03:18:28.002Z</updated>
+  <updated>2021-04-24T02:12:31.342Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,30 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>web开发基础</title>
+    <link href="http://bilikings.top/2021/04/24/web%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/"/>
+    <id>http://bilikings.top/2021/04/24/web%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/</id>
+    <published>2021-04-24T02:11:18.000Z</published>
+    <updated>2021-04-24T02:12:31.342Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;名词概念&quot;&gt;&lt;a href=&quot;#名词概念&quot; class=&quot;headerlink&quot; title=&quot;名词概念&quot;&gt;&lt;/a&gt;名词概念&lt;/h2&gt;&lt;p&gt;端口：端口是TCP/IP协议簇中，应用层与传输层协议实体间的通信接口，每个端口都有一个端口号的整形标识&lt;/p&gt;
+&lt;p&gt;SOCKET： 套接字，是一个抽象层，应用程序可以通过他发送或者接受数据，套接字提供在应用层进程利用网络协议栈交换数据的机制，网络套接字是IP地址和端口的组合&lt;/p&gt;
+&lt;p&gt;INADDR_ANY：代指IP为0.0.0.0，泛指本机，也就是表示本机所有的ip&lt;/p&gt;
+&lt;p&gt;网络字节顺序：网络数据的一种编排方式，网络自己顺序采用big endian（大端最高有效位存于内存低处，最低有效位存于内存最高处）的排序方式。&lt;/p&gt;
+&lt;p&gt;本机字节顺序：本地数据的一种编排方式，一般x86的处理器都采用小端&lt;/p&gt;
+&lt;p&gt;WM_SOCKET_NOTIFY：异步网络事件消息&lt;/p&gt;
+&lt;p&gt;进程阻塞：正在进行的进程由于发生某种事件而无法继续执行时候，处理机而处于暂停状态，也就是说进程的执行受到阻塞&lt;/p&gt;
+&lt;p&gt;HINTERNET句柄：WinINet函数创建和使用的句柄为HINTERNET类型。WinINet函数返回HINTERNET句柄，此句柄不能与其他句柄类型互换。因此，它们不能作为ReadFile或CloseHandle之类的方法参数。同样，其他句柄类型不能与WinlNet函数-起使用。 例如，CreateFile返回的句柄不能传递给InternetReadFile。&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="C/C++" scheme="http://bilikings.top/tags/C-C/"/>
+    
+  </entry>
   
   <entry>
     <title>接口幂等性</title>
@@ -500,28 +524,6 @@
     
     
     <category term="Mysql" scheme="http://bilikings.top/tags/Mysql/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>常用数据库引擎对比</title>
-    <link href="http://bilikings.top/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/"/>
-    <id>http://bilikings.top/2020/11/29/%E5%B8%B8%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93%E5%BC%95%E6%93%8E%E5%AF%B9%E6%AF%94/</id>
-    <published>2020-11-29T04:56:34.000Z</published>
-    <updated>2020-11-29T04:57:19.381Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;InnoDB和MyIsAM的区别&quot;&gt;&lt;a href=&quot;#InnoDB和MyIsAM的区别&quot; class=&quot;headerlink&quot; title=&quot;InnoDB和MyIsAM的区别&quot;&gt;&lt;/a&gt;InnoDB和MyIsAM的区别&lt;/h1&gt;&lt;p&gt;&lt;strong&gt;InnoDB&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;InnoDB是MySQL默认的事务型引擎，也是最重要、最广泛的存储引擎。它的设计是用来处理大量短期事务，短期事务大部分是正常提交的，很少回滚。InnoDB的性能和自动崩溃恢复特性，使得它在非事务型存储的需求中，也很流行。除了非常特别的原因需要使用其他引擎，InnoDB也是非常好值得花时间研究的对象。&lt;/p&gt;
-&lt;p&gt;InnoDB的数据存储在表空间中，表空间是由InnoDB管理的黑盒文件系统，由一系列系统文件组成。InnoDB可以将每个表的数据和索引存放在单独的文件中。InnoDB也可以使用裸设备作为表空间存储介质。&lt;/p&gt;
-&lt;p&gt;InnoDB通过间隙锁（next-key locking）防止幻读的出现。InnoDB是基于聚簇索引建立，与其他存储引擎有很大的区别，聚簇索引对主键查询有很高的性能，不过它的二级索引（secondary ind ex，非主键索引）必须包含主键列。所以如果主键列很大的话，索引会很大。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;MyISAM&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;在5.1之前，MyISAM是默认的引擎，MyISAM有大量的特心态，包括全文索引、压缩、空间函数。但是MyISAM不支持事务和行级锁，而且在崩溃后无法安全恢复。即使后续版本中MyISAM支持了事务，但是很多人的概念中依然是不支持事务的引擎。&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="SQL" scheme="http://bilikings.top/tags/SQL/"/>
     
   </entry>
   
