@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-04-24T02:12:31.342Z</updated>
+  <updated>2021-05-10T09:38:27.500Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Spring事务失效出现场景与解决方案</title>
+    <link href="http://bilikings.top/2021/05/10/Spring%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E5%87%BA%E7%8E%B0%E5%9C%BA%E6%99%AF%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/"/>
+    <id>http://bilikings.top/2021/05/10/Spring%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E5%87%BA%E7%8E%B0%E5%9C%BA%E6%99%AF%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/</id>
+    <published>2021-05-10T09:35:45.000Z</published>
+    <updated>2021-05-10T09:38:27.500Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;Spring的事务失效的场景与解决方案&quot;&gt;&lt;a href=&quot;#Spring的事务失效的场景与解决方案&quot; class=&quot;headerlink&quot;</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
+    
+  </entry>
   
   <entry>
     <title>web开发基础</title>
@@ -506,24 +529,6 @@
     
     
     <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Mysql数据字段类型</title>
-    <link href="http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/"/>
-    <id>http://bilikings.top/2020/11/29/Mysql%E6%95%B0%E6%8D%AE%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B/</id>
-    <published>2020-11-29T07:11:29.000Z</published>
-    <updated>2020-11-29T07:13:23.081Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;基本数据类型&quot;&gt;&lt;a href=&quot;#基本数据类型&quot; class=&quot;headerlink&quot; title=&quot;基本数据类型&quot;&gt;&lt;/a&gt;基本数据类型&lt;/h2&gt;&lt;p&gt;MySQL中定义数据字段的类型对你数据库的优化是非常重要的。&lt;/p&gt;
-&lt;p&gt;MySQL支持多种类型，大致可以分为三类：数值、日期/时间和字符串(字符)类型。&lt;/p&gt;</summary>
-    
-    
-    
-    
-    <category term="Mysql" scheme="http://bilikings.top/tags/Mysql/"/>
     
   </entry>
   

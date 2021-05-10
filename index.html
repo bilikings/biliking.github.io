@@ -177,6 +177,87 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/05/10/Spring%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E5%87%BA%E7%8E%B0%E5%9C%BA%E6%99%AF%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/05/10/Spring%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E5%87%BA%E7%8E%B0%E5%9C%BA%E6%99%AF%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88/" class="post-title-link" itemprop="url">Spring事务失效出现场景与解决方案</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-05-10 17:35:45 / 修改时间：17:38:27" itemprop="dateCreated datePublished" datetime="2021-05-10T17:35:45+08:00">2021-05-10</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Spring的事务失效的场景与解决方案"><a href="#Spring的事务失效的场景与解决方案" class="headerlink" title="Spring的事务失效的场景与解决方案"></a>Spring的事务失效的场景与解决方案</h1><p>在实际项目开发过程，如果涉及到多张表操作时，为了保证业务数据的一致性，大家一般都会采用事务机制；</p>
+<p>以下简述一下事务失效的场景</p>
+<ol>
+<li>注解@Transactional配置的方法非public权限修饰符</li>
+<li>注解@Transactional所在类并不是spring管理的bean</li>
+<li>注解@Transactional所存在类中，注解修饰的方法被类的内部方法调用（同一个类中，一个事务注解A方法调用另一个事务注解的B方法，事务B方法失效）</li>
+<li>业务代码抛出非运行时异常，事务失效</li>
+<li>业务代码中存在异常时，使用try…catch…语句块捕获，而catch语句块没有<code>throw new RuntimeExecption</code>异常;（最难被排查到问题且容易忽略）</li>
+<li>注解@Transactional中Propagation属性值设置错误即Propagation.NOT_SUPPORTED（一般不会设置此种传播机制）</li>
+<li>mysql关系型数据库，且存储引擎是MyISAM而非InnoDB，则事务会不起作用(基本开发中不会遇到)；</li>
+</ol>
+<p>详解一下<strong>第三条</strong>，这是日常开发中最常踩坑的地方</p>
+<p>其实原因很简单，Spring在扫描Bean的时候会自动为标注了@Transactional注解的类生成一个代理类（proxy）,当有注解的方法被调用的时候，实际上是代理类调用的，代理类在调用之前会开启事务，执行事务的操作，但是同类中的方法互相调用，相当于this.B()，此时的B方法并非是代理类调用，而是直接通过原有的Bean直接调用，所以注解会失效。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="comment">//失效操作</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassServiceImpl</span> <span class="keyword">implements</span> <span class="title">ClassService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> ClassMapper classMapper;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insertClass</span><span class="params">(ClassDo classDo)</span> <span class="keyword">throws</span> CustomException </span>&#123;</span><br><span class="line">        insertClassByException(classDo);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="meta">@Transactional(propagation = Propagation.REQUIRED)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insertClassByException</span><span class="params">(ClassDo classDo)</span> <span class="keyword">throws</span> CustomException </span>&#123;</span><br><span class="line">        classMapper.insertClass(classDo);</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解决方案</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">insertClass</span><span class="params">(ClassDo classDo)</span> <span class="keyword">throws</span> CustomException </span>&#123;</span><br><span class="line"><span class="comment">//         insertClassByException(classDo);</span></span><br><span class="line">    ((ClassServiceImpl)AopContext.currentProxy()).insertClassByException(classDo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>第四条</strong>解决方案</p>
+<p>@Transactional注解修饰的方法，加上rollbackfor属性值，指定回滚异常类型：<code>@Transactional(propagation = Propagation.REQUIRED,rollbackFor = Exception.class)</code></p>
+<p>其余的都是正常编码时注意就行了，并不存在改写逻辑代码的地方</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/04/24/web%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -850,72 +931,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/" class="post-title-link" itemprop="url">mysql优化建议</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-01 15:55:31 / 修改时间：15:59:13" itemprop="dateCreated datePublished" datetime="2021-03-01T15:55:31+08:00">2021-03-01</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="SQL性能优化汇总"><a href="#SQL性能优化汇总" class="headerlink" title="SQL性能优化汇总"></a>SQL性能优化汇总</h1><h3 id="库表设计规范"><a href="#库表设计规范" class="headerlink" title="库表设计规范"></a>库表设计规范</h3><h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>云数据库 <code>MySQL</code> 5.6 及以上版本不支持 <code>MyISAM</code> 引擎和 Memory 引擎，若有 Memory 引擎的需求建议使用云数据库 <code>Redis</code> 、<code>Memcached</code>；自建数据库迁移到云数据库 <code>MySQL</code> 时，会自动将 <code>MyISAM</code> 引擎转换成 <code>InnoDB</code> 引擎。<br>存在自增列的表，自增列上必须存在一个单独的索引，若在复合索引中，自增列必须置于第一位。<br>row_format必须保证为非 fixed。<br>每张表必须要有主键，即使选不出合适的列做主键，亦必须添加一个无意义的列做主键，<code>MySQL</code> 第一范式标准 <code>InnoDB</code> 辅助索引叶子节点会保存一份主键值，推荐用自增短列作为主键，降低索引所占磁盘空间提升效率，<code>binlog_format</code>为 row 的场景下，批量删数据没主键会导致严重的主从延迟。<br><strong>字段尽量定义为 NOT NULL 并加上默认值，NULL 会给 SQL 开发带来很多问题导致走不了索引，对 NULL 计算时只能用 IS NULL 和 IS NOT NULL 来判断。</strong></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/01/mysql%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -987,7 +1002,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">46</span>
+          <span class="site-state-item-count">47</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
