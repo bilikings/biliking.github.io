@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-05-10T09:38:27.500Z</updated>
+  <updated>2021-07-08T11:47:26.162Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,44 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>idea 插件开发常见事件</title>
+    <link href="http://bilikings.top/2021/07/08/idea-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E5%B8%B8%E8%A7%81%E4%BA%8B%E4%BB%B6/"/>
+    <id>http://bilikings.top/2021/07/08/idea-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E5%B8%B8%E8%A7%81%E4%BA%8B%E4%BB%B6/</id>
+    <published>2021-07-08T11:46:32.000Z</published>
+    <updated>2021-07-08T11:47:26.162Z</updated>
+    
+    
+    <summary type="html">&lt;h2 id=&quot;idea插件开发中常用事件（持续更新）&quot;&gt;&lt;a href=&quot;#idea插件开发中常用事件（持续更新）&quot; class=&quot;headerlink&quot; title=&quot;idea插件开发中常用事件（持续更新）&quot;&gt;&lt;/a&gt;idea插件开发中常用事件（持续更新）&lt;/h2&gt;&lt;h3 id=&quot;添加一个右键点击之后的子菜单&quot;&gt;&lt;a href=&quot;#添加一个右键点击之后的子菜单&quot; class=&quot;headerlink&quot; title=&quot;添加一个右键点击之后的子菜单&quot;&gt;&lt;/a&gt;添加一个右键点击之后的子菜单&lt;/h3&gt;&lt;p&gt;&lt;img src=&quot;https://i.loli.net/2021/07/08/OJ9z3YKREBWahHQ.png&quot; alt=&quot;image-20210708093039492&quot;&gt;&lt;/p&gt;</summary>
+    
+    
+    
+    
+    <category term="idea" scheme="http://bilikings.top/tags/idea/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>idea 插件开发</title>
+    <link href="http://bilikings.top/2021/07/08/idea-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/"/>
+    <id>http://bilikings.top/2021/07/08/idea-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91/</id>
+    <published>2021-07-08T11:43:28.000Z</published>
+    <updated>2021-07-08T11:46:05.148Z</updated>
+    
+    
+    <summary type="html">&lt;h1 id=&quot;编写idea插件&quot;&gt;&lt;a href=&quot;#编写idea插件&quot; class=&quot;headerlink&quot; title=&quot;编写idea插件&quot;&gt;&lt;/a&gt;编写idea插件&lt;/h1&gt;&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;需要准备idea社区版，idea社区版源码一份&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;使用gradle开发不需要准备源码，所以这里按不需要过度配置的方案来说&lt;/p&gt;
+&lt;img src=&quot;https://imgconvert.csdnimg.cn/aHR0cHM6Ly9jZG4ubmxhcmsuY29tL3l1cXVlLzAvMjAyMC9wbmcvMTMxMzY3NC8xNTk3MTQwNjkyODczLTc2ODE0ODVmLTExZjktNDk2Mi1hNDUzLTUwNmU2NzJjZTcwYi5wbmc?x-oss-process=image/format,png&quot; style=&quot;zoom: 67%;&quot;&gt;&lt;/li&gt;&lt;/ul&gt;</summary>
+    
+    
+    
+    
+    <category term="idea" scheme="http://bilikings.top/tags/idea/"/>
+    
+  </entry>
   
   <entry>
     <title>Spring事务失效出现场景与解决方案</title>
@@ -465,70 +503,6 @@
     
     
     <category term="Java" scheme="http://bilikings.top/tags/Java/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Zuul微服务网关</title>
-    <link href="http://bilikings.top/2020/11/30/Zuul%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/"/>
-    <id>http://bilikings.top/2020/11/30/Zuul%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BD%91%E5%85%B3/</id>
-    <published>2020-11-30T06:05:25.000Z</published>
-    <updated>2020-11-30T06:06:00.564Z</updated>
-    
-    
-    <summary type="html">&lt;h1 id=&quot;zuul路由网关&quot;&gt;&lt;a href=&quot;#zuul路由网关&quot; class=&quot;headerlink&quot; title=&quot;zuul路由网关&quot;&gt;&lt;/a&gt;zuul路由网关&lt;/h1&gt;&lt;ul&gt;
-&lt;li&gt;为了解决客户端不同请求的服务&lt;/li&gt;
-&lt;li&gt;解决跨域问题&lt;/li&gt;
-&lt;li&gt;解决认证问题&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;客户端和服务端直连弊端：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;解决客户端不同请求的服务，会增加客户端的复杂性&lt;/li&gt;
-&lt;li&gt;存在跨域请求是，需要进行额外处理（转发，重定向）&lt;/li&gt;
-&lt;li&gt;认证服务，各个辅助需要独立认证&lt;/li&gt;
-&lt;li&gt;UI端和微服务端进行耦合&lt;/li&gt;
-&lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Springboot核心注解详解</title>
-    <link href="http://bilikings.top/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/"/>
-    <id>http://bilikings.top/2020/11/29/Springboot%E6%A0%B8%E5%BF%83%E6%B3%A8%E8%A7%A3%E8%AF%A6%E8%A7%A3/</id>
-    <published>2020-11-29T07:17:43.000Z</published>
-    <updated>2020-11-29T07:18:43.330Z</updated>
-    
-    
-    <summary type="html">&lt;h2 id=&quot;核心注解&quot;&gt;&lt;a href=&quot;#核心注解&quot; class=&quot;headerlink&quot; title=&quot;核心注解&quot;&gt;&lt;/a&gt;核心注解&lt;/h2&gt;&lt;h3 id=&quot;spring相关&quot;&gt;&lt;a href=&quot;#spring相关&quot; class=&quot;headerlink&quot; title=&quot;spring相关&quot;&gt;&lt;/a&gt;spring相关&lt;/h3&gt;&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;@Configuration&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;用于定义配置类，代替以前的xml文件&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;@ComponentScan&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;包扫描组件，&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;@Conditional&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;为根据代码中的不同条件来注册bean&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;@Import&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;把没有被spring容器管理的类添加到Spring容器中&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;@Component&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;带有这个注解的类被称为组件，为@Controller，@Service, @Respositoryu的共同注解（这三个注解也就是这个注解的特殊注解），&lt;/p&gt;
-&lt;/blockquote&gt;</summary>
-    
-    
-    
-    
-    <category term="Spring" scheme="http://bilikings.top/tags/Spring/"/>
     
   </entry>
   
