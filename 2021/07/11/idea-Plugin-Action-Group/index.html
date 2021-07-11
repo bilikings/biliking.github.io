@@ -1,0 +1,2965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"bilikings.top","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":true},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":"ture"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Action Group这些是 IntelliJ IDEA 中内置操作的名称。您可以&lt;add-to-group&gt; 在插件的plugin.xml. 每个表显示一个组中的操作，其 ID 显示在 中 fixed-width font，以及其父组的 ID（供参考）及其显示名称。您可以在&lt;add-to-group&gt;的group-id属性中使用组 ID 。 表中的每一行代表一个动作，其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="idea Plugin Action Group">
+<meta property="og:url" content="http://bilikings.top/2021/07/11/idea-Plugin-Action-Group/index.html">
+<meta property="og:site_name" content="Groza&#39;s">
+<meta property="og:description" content="Action Group这些是 IntelliJ IDEA 中内置操作的名称。您可以&lt;add-to-group&gt; 在插件的plugin.xml. 每个表显示一个组中的操作，其 ID 显示在 中 fixed-width font，以及其父组的 ID（供参考）及其显示名称。您可以在&lt;add-to-group&gt;的group-id属性中使用组 ID 。 表中的每一行代表一个动作，其">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-07-11T11:18:20.000Z">
+<meta property="article:modified_time" content="2021-07-11T11:20:33.983Z">
+<meta property="article:author" content="Biliking">
+<meta property="article:tag" content="idea">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://bilikings.top/2021/07/11/idea-Plugin-Action-Group/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>idea Plugin Action Group | Groza's</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Groza's" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Groza's</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">噫|呜|呜|噫</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/bilikings" class="github-corner" title="I on GitHub" aria-label="I on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/07/11/idea-Plugin-Action-Group/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          idea Plugin Action Group
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-11 19:18:20 / 修改时间：19:20:33" itemprop="dateCreated datePublished" datetime="2021-07-11T19:18:20+08:00">2021-07-11</time>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Action-Group"><a href="#Action-Group" class="headerlink" title="Action Group"></a>Action Group</h1><p>这些是 IntelliJ IDEA 中内置操作的名称。您可以<code>&lt;add-to-group&gt;</code> 在插件的<code>plugin.xml</code>.</p>
+<p>每个表显示一个组中的操作，其 ID 显示在 中 <code>fixed-width font</code>，以及其父组的 ID（供参考）及其显示名称。您可以在<code>&lt;add-to-group&gt;</code>的<code>group-id</code>属性中使用组 ID 。</p>
+<p>表中的每一行代表一个动作，其 ID 可以在 <code>&lt;add-to-group&gt;</code>的<code>relative-to-action</code> 属性中使用。</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CaptureMemorySnapShot</code></td>
+<td>捕获内存快照</td>
+</tr>
+<tr>
+<td><code>CaptureCPUUsageData</code></td>
+<td>捕获cpu使用数据</td>
+</tr>
+<tr>
+<td><code>ContextHelp</code></td>
+<td>上下文帮助</td>
+</tr>
+<tr>
+<td><code>RunConfiguration</code></td>
+<td>选择运行/调试配置</td>
+</tr>
+<tr>
+<td><code>ShowIntentionActions</code></td>
+<td>显示意图操作</td>
+</tr>
+<tr>
+<td><code>ToggleReadOnlyAttribute</code></td>
+<td>切换只读属性</td>
+</tr>
+<tr>
+<td><code>TogglePopupHints</code></td>
+<td>Toggle 当前文件的弹出提示</td>
+</tr>
+<tr>
+<td><code>RunGc</code></td>
+<td>运行垃圾收集器</td>
+</tr>
+<tr>
+<td><code>ShowPopupMenu</code></td>
+<td>显示上下文菜单</td>
+</tr>
+<tr>
+<td><code>CloseWindow</code></td>
+<td>关闭活动窗口</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowHistory</code></td>
+<td>显示文件历史</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowHistoryForBlock</code></td>
+<td>显示选择历史</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowTabbedFileHistory</code></td>
+<td>显示历史</td>
+</tr>
+<tr>
+<td><code>AddToFavoritesPopup</code></td>
+<td>添加到收藏夹</td>
+</tr>
+<tr>
+<td><code>AddNewFavoritesList</code></td>
+<td>添加新的收藏夹列表</td>
+</tr>
+<tr>
+<td><code>ExpandAll</code></td>
+<td>展开全部</td>
+</tr>
+<tr>
+<td><code>CollapseAll</code></td>
+<td>全部收缩</td>
+</tr>
+<tr>
+<td><code>ExportToTextFile</code></td>
+<td>导出到文本文件</td>
+</tr>
+<tr>
+<td><code>ExpandTreeNode</code></td>
+<td>展开树节点</td>
+</tr>
+<tr>
+<td><code>CollapseTreeNode</code></td>
+<td>折叠树节点</td>
+</tr>
+<tr>
+<td><code>FullyExpandTreeNode</code></td>
+<td>完全展开树节点</td>
+</tr>
+<tr>
+<td><code>NextDiff</code></td>
+<td>移至下一个差异</td>
+</tr>
+<tr>
+<td><code>PreviousDiff</code></td>
+<td>移至上一个差异</td>
+</tr>
+<tr>
+<td><code>Refresh</code></td>
+<td>刷新</td>
+</tr>
+<tr>
+<td><code>CheckinProject</code></td>
+<td>签入项目</td>
+</tr>
+<tr>
+<td><code>CheckinFiles</code></td>
+<td>报到</td>
+</tr>
+<tr>
+<td><code>UpdateFiles</code></td>
+<td>更新</td>
+</tr>
+<tr>
+<td><code>CheckStatusForFiles</code></td>
+<td>检查状态</td>
+</tr>
+<tr>
+<td><code>Annotate</code></td>
+<td>注释</td>
+</tr>
+<tr>
+<td><code>Compare.SameVersion</code></td>
+<td>与相同版本库比较</td>
+</tr>
+<tr>
+<td><code>Compare.LastVersion</code></td>
+<td>与上一个存储库版本比较</td>
+</tr>
+<tr>
+<td><code>Compare.Selected</code></td>
+<td>与之比较…</td>
+</tr>
+<tr>
+<td><code>Compare.Specified</code></td>
+<td>与指定修订版比较…</td>
+</tr>
+<tr>
+<td><code>CompareTwoFiles</code></td>
+<td>比较两个文件</td>
+</tr>
+<tr>
+<td><code>CompareFileWithEditor</code></td>
+<td>比较文件与编辑器</td>
+</tr>
+<tr>
+<td><code>ModuleSettings</code></td>
+<td>模块设置…</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<table>
+<thead>
+<tr>
+<th align="center"><code>RunContextGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CreateRunConfiguration</code></td>
+<td>创建运行配置</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorActions</code> （编辑器操作）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>EditorChooseLookupItem</code></td>
+<td>选择查找项</td>
+</tr>
+<tr>
+<td align="center"><code>EditorChooseLookupItemReplace</code></td>
+<td>选择查找项替换</td>
+</tr>
+<tr>
+<td align="center"><code>NextTemplateVariable</code></td>
+<td>下一个模板变量</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousTemplateVariable</code></td>
+<td>上一个模板变量</td>
+</tr>
+<tr>
+<td align="center"><code>NextParameter</code></td>
+<td>下一个参数</td>
+</tr>
+<tr>
+<td align="center"><code>PrevParameter</code></td>
+<td>上一个参数</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageUp</code></td>
+<td>向上翻页</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageDown</code></td>
+<td>向下翻页</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageUpWithSelection</code></td>
+<td>向上翻页并选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageDownWithSelection</code></td>
+<td>向上翻页并选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCopy</code></td>
+<td>复制</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCut</code></td>
+<td>切</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPaste</code></td>
+<td>粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPasteSimple</code></td>
+<td>粘贴简单</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPasteFromX11</code></td>
+<td>从 X 剪贴板粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDelete</code></td>
+<td>删除</td>
+</tr>
+<tr>
+<td align="center"><code>EditorBackSpace</code></td>
+<td>退格</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageTop</code></td>
+<td>将插入符号移至页面顶部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageBottom</code></td>
+<td>将插入符号移至页面底部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageTopWithSelection</code></td>
+<td>使用选择将插入符号移动到页面顶部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageBottomWithSelection</code></td>
+<td>使用选择将插入符号移动到页面底部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorEnter</code></td>
+<td>进入</td>
+</tr>
+<tr>
+<td align="center"><code>EditorEscape</code></td>
+<td>逃脱</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUp</code></td>
+<td>向上</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDown</code></td>
+<td>下</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLeft</code></td>
+<td>剩下</td>
+</tr>
+<tr>
+<td align="center"><code>EditorRight</code></td>
+<td>正确的</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUpWithSelection</code></td>
+<td>选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDownWithSelection</code></td>
+<td>打倒选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLeftWithSelection</code></td>
+<td>左边有选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorRightWithSelection</code></td>
+<td>正确选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorIndentSelection</code></td>
+<td>缩进选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUnindentSelection</code></td>
+<td>取消缩进选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTab</code></td>
+<td>标签</td>
+</tr>
+<tr>
+<td align="center"><code>EmacsStyleIndent</code></td>
+<td>Emacs 选项卡</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollUp</code></td>
+<td>向上滑动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollDown</code></td>
+<td>向下滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveUpAndScroll</code></td>
+<td>向上移动和滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveDownAndScroll</code></td>
+<td>向下移动并滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveUpAndScrollWithSelection</code></td>
+<td>向上移动和滚动选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveDownAndScrollWithSelection</code></td>
+<td>向下移动并滚动选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineStart</code></td>
+<td>将插入符号移至行首</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineEnd</code></td>
+<td>将插入符号移动到行尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCutLineEnd</code></td>
+<td>切割至线尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextStart</code></td>
+<td>将插入符号移至文本开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextEnd</code></td>
+<td>将插入符号移动到文本结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineStartWithSelection</code></td>
+<td>将插入符号移动到选择行的开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineEndWithSelection</code></td>
+<td>将插入符号移动到带有选择的行尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextStartWithSelection</code></td>
+<td>将插入符号移动到文本开头的选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextEndWithSelection</code></td>
+<td>将插入符号移动到带有选择的文本结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorNextWord</code></td>
+<td>将插入符号移到下一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPreviousWord</code></td>
+<td>将插入符号移动到上一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorNextWordWithSelection</code></td>
+<td>使用选择将插入符号移动到下一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPreviousWordWithSelection</code></td>
+<td>使用选择将插入符号移动到上一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockStart</code></td>
+<td>将插入符号移至代码块开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockEnd</code></td>
+<td>将插入符号移动到代码块末尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockStartWithSelection</code></td>
+<td>将插入符号移至代码块以选择开始</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockEndWithSelection</code></td>
+<td>将插入符号移动到代码块以选择结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteToWordStart</code></td>
+<td>删除到 Word 开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteToWordEnd</code></td>
+<td>删除到词尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteLine</code></td>
+<td>删除插入符号处的行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDuplicate</code></td>
+<td>复制线或块</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSelectWord</code></td>
+<td>选择插入符号处的单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUnSelectWord</code></td>
+<td>取消选择插入符号处的单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleInsertState</code></td>
+<td>切换插入/覆盖</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleColumnMode</code></td>
+<td>列模式</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleShowWhitespaces</code></td>
+<td>显示空格</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleShowLineNumbers</code></td>
+<td>显示行号</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollToCenter</code></td>
+<td>滚动到中心</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleCase</code></td>
+<td>切换案例</td>
+</tr>
+<tr>
+<td align="center"><code>EditorJoinLines</code></td>
+<td>连接线</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSelectLine</code></td>
+<td>在插入符号处选择行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSplitLine</code></td>
+<td>分割线</td>
+</tr>
+<tr>
+<td align="center"><code>EditorStartNewLine</code></td>
+<td>开始新行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCompleteStatement</code></td>
+<td>完成当前声明</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>J2EEGenerateGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CreateSessionBean</code></td>
+<td>会话豆</td>
+</tr>
+<tr>
+<td align="center"><code>CreateContainerManagedEntityBeanAction</code></td>
+<td>CMP 实体 Bean</td>
+</tr>
+<tr>
+<td align="center"><code>CreateBeanManagedEntityBeanAction</code></td>
+<td>BMP实体Bean</td>
+</tr>
+<tr>
+<td align="center"><code>CreateMessageBean</code></td>
+<td>消息豆</td>
+</tr>
+<tr>
+<td align="center"><code>CreateTransferObject</code></td>
+<td>传输对象</td>
+</tr>
+<tr>
+<td align="center"><code>CreateCMPField</code></td>
+<td>CMP 字段</td>
+</tr>
+<tr>
+<td align="center"><code>CreateEJBRelationship</code></td>
+<td>EJB 关系</td>
+</tr>
+<tr>
+<td align="center"><code>CreateJSPAction</code></td>
+<td>jsp</td>
+</tr>
+<tr>
+<td align="center"><code>CreateJSPXAction</code></td>
+<td>jspx</td>
+</tr>
+<tr>
+<td align="center"><code>CreateServletAction</code></td>
+<td>小服务程序</td>
+</tr>
+<tr>
+<td align="center"><code>CreateFilterAction</code></td>
+<td>筛选</td>
+</tr>
+<tr>
+<td align="center"><code>CreateListenerAction</code></td>
+<td>听众</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GenerateGroup</code> （生成器）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateConstructor</code></td>
+<td>构造函数</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateGetter</code></td>
+<td>吸气剂</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateSetter</code></td>
+<td>二传手</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateGetterAndSetter</code></td>
+<td>吸气剂和吸气剂</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateEquals</code></td>
+<td>equals() 和 hashCode()</td>
+</tr>
+<tr>
+<td align="center"><code>OverrideMethods</code></td>
+<td>覆盖方法…</td>
+</tr>
+<tr>
+<td align="center"><code>ImplementMethods</code></td>
+<td>实现方法…</td>
+</tr>
+<tr>
+<td align="center"><code>DelegateMethods</code></td>
+<td>委托方法…</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateSuperMethodCall</code></td>
+<td>超级方法调用</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>NewGroup</code> （新的）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>NewClass</code></td>
+<td>班级</td>
+</tr>
+<tr>
+<td align="center"><code>NewInterface</code></td>
+<td>界面</td>
+</tr>
+<tr>
+<td align="center"><code>NewEnum</code></td>
+<td>枚举</td>
+</tr>
+<tr>
+<td align="center"><code>NewAnnotationType</code></td>
+<td>@界面</td>
+</tr>
+<tr>
+<td align="center"><code>NewFile</code></td>
+<td>文件</td>
+</tr>
+<tr>
+<td align="center"><code>NewDir</code></td>
+<td>目录/包</td>
+</tr>
+<tr>
+<td align="center"><code>NewFromTemplate</code></td>
+<td>从模板</td>
+</tr>
+<tr>
+<td align="center"><code>NewDialog</code></td>
+<td>对话</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>LocalVcsGroup</code> （当地历史）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowHistory</code></td>
+<td>显示历史</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.HistoryForBlock</code></td>
+<td>显示选择历史</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.AddLabel</code></td>
+<td>添加标签…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>VcsGroups</code> （版本控制）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.MarkSourcesAsCurrent</code></td>
+<td>将项目标记为当前</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>VcsGroups &gt; VcsGlobalGroup</code> （版本控制组）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.FileView</code></td>
+<td>显示文件视图</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.UpdateProject</code></td>
+<td>更新项目</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ProjectStatus</code></td>
+<td>检查项目状态</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; FileMenu</code> （文件）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>NewProject</code></td>
+<td>新项目…</td>
+</tr>
+<tr>
+<td align="center"><code>NewModule</code></td>
+<td>新模块…</td>
+</tr>
+<tr>
+<td align="center"><code>OpenProject</code></td>
+<td>打开项目…</td>
+</tr>
+<tr>
+<td align="center"><code>OpenFile</code></td>
+<td>打开文件…</td>
+</tr>
+<tr>
+<td align="center"><code>CloseProject</code></td>
+<td>关闭项目</td>
+</tr>
+<tr>
+<td align="center"><code>ShowSettings</code></td>
+<td>设置</td>
+</tr>
+<tr>
+<td align="center"><code>TemplateProjectProperties</code></td>
+<td>模板项目设置</td>
+</tr>
+<tr>
+<td align="center"><code>SaveAll</code></td>
+<td>保存全部</td>
+</tr>
+<tr>
+<td align="center"><code>ExportSettings</code></td>
+<td>导出设置…</td>
+</tr>
+<tr>
+<td align="center"><code>ImportSettings</code></td>
+<td>导入设置…</td>
+</tr>
+<tr>
+<td align="center"><code>ImportFromJBuilder</code></td>
+<td>从 JBuilder 导入</td>
+</tr>
+<tr>
+<td align="center"><code>Synchronize</code></td>
+<td>同步</td>
+</tr>
+<tr>
+<td align="center"><code>ReloadFromDisk</code></td>
+<td>从磁盘重新加载</td>
+</tr>
+<tr>
+<td align="center"><code>ExportToHTML</code></td>
+<td>导出为 HTML…</td>
+</tr>
+<tr>
+<td align="center"><code>Print</code></td>
+<td>打印…</td>
+</tr>
+<tr>
+<td align="center"><code>Exit</code></td>
+<td>出口</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; EditMenu</code> （编辑）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>$Undo</code></td>
+<td>撤消</td>
+</tr>
+<tr>
+<td align="center"><code>$Redo</code></td>
+<td>重做</td>
+</tr>
+<tr>
+<td align="center"><code>$SelectAll</code></td>
+<td>全选</td>
+</tr>
+<tr>
+<td align="center"><code>NewElement</code></td>
+<td>新的…</td>
+</tr>
+<tr>
+<td align="center"><code>$Delete</code></td>
+<td>删除</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark</code></td>
+<td>切换书签</td>
+</tr>
+<tr>
+<td align="center"><code>ShowBookmarks</code></td>
+<td>显示书签</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; EditMenu &gt; CutCopyPasteGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>$Cut</code></td>
+<td>切</td>
+</tr>
+<tr>
+<td align="center"><code>$Copy</code></td>
+<td>复制</td>
+</tr>
+<tr>
+<td align="center"><code>CopyPaths</code></td>
+<td>复制路径</td>
+</tr>
+<tr>
+<td align="center"><code>CopyReference</code></td>
+<td>复制参考</td>
+</tr>
+<tr>
+<td align="center"><code>$Paste</code></td>
+<td>粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>PasteMultiple</code></td>
+<td>粘贴…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; SearchMenu</code> （搜索）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Find</code></td>
+<td>找…</td>
+</tr>
+<tr>
+<td align="center"><code>Replace</code></td>
+<td>代替…</td>
+</tr>
+<tr>
+<td align="center"><code>FindNext</code></td>
+<td>找下一个</td>
+</tr>
+<tr>
+<td align="center"><code>FindPrevious</code></td>
+<td>查找上一个</td>
+</tr>
+<tr>
+<td align="center"><code>FindWordAtCaret</code></td>
+<td>在插入符号中查找单词</td>
+</tr>
+<tr>
+<td align="center"><code>IncrementalSearch</code></td>
+<td>增量搜索</td>
+</tr>
+<tr>
+<td align="center"><code>FindUsages</code></td>
+<td>查找用法…</td>
+</tr>
+<tr>
+<td align="center"><code>FindUsagesInFile</code></td>
+<td>在文件中查找用法…</td>
+</tr>
+<tr>
+<td align="center"><code>HighlightUsagesInFile</code></td>
+<td>突出显示文件中的用法</td>
+</tr>
+<tr>
+<td align="center"><code>FindJoinpointsByPointcutAction</code></td>
+<td>查找由切入点标识的连接点</td>
+</tr>
+<tr>
+<td align="center"><code>FindInPath</code></td>
+<td>在路径中查找…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceInPath</code></td>
+<td>在路径中替换…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu</code> （看法）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ViewToolBar</code></td>
+<td>工具栏</td>
+</tr>
+<tr>
+<td align="center"><code>ViewStatusBar</code></td>
+<td>状态栏</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFullScreenMode</code></td>
+<td>全屏</td>
+</tr>
+<tr>
+<td align="center"><code>EditSource</code></td>
+<td>跳转到源</td>
+</tr>
+<tr>
+<td align="center"><code>ViewSource</code></td>
+<td>显示来源</td>
+</tr>
+<tr>
+<td align="center"><code>OpenInBrowser</code></td>
+<td>在浏览器中打开</td>
+</tr>
+<tr>
+<td align="center"><code>ExternalJavaDoc</code></td>
+<td>外部 JavaDoc</td>
+</tr>
+<tr>
+<td align="center"><code>RecentFiles</code></td>
+<td>最近的文件…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickChangeScheme</code></td>
+<td>快速切换方案…</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy</code></td>
+<td>类型层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy</code></td>
+<td>方法层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>CallHierarchy</code></td>
+<td>呼叫层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>RecentChanges</code></td>
+<td>近期变动…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; CodeEditorViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>FileStructurePopup</code></td>
+<td>文件结构弹出窗口</td>
+</tr>
+<tr>
+<td align="center"><code>SelectIn</code></td>
+<td>选择在…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickJavaDoc</code></td>
+<td>快速文档查找</td>
+</tr>
+<tr>
+<td align="center"><code>QuickImplementations</code></td>
+<td>快速定义查找</td>
+</tr>
+<tr>
+<td align="center"><code>ParameterInfo</code></td>
+<td>参数信息</td>
+</tr>
+<tr>
+<td align="center"><code>EditorContextInfo</code></td>
+<td>上下文信息</td>
+</tr>
+<tr>
+<td align="center"><code>ShowErrorDescription</code></td>
+<td>错误描述</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; CommanderViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CommanderSyncViews</code></td>
+<td>同步视图</td>
+</tr>
+<tr>
+<td align="center"><code>CommanderSwapPanels</code></td>
+<td>交换面板</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; ProjectViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ProjectViewChangeView</code></td>
+<td>更改视图</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; FoldingGroup</code> （折叠式的）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandRegion</code></td>
+<td>扩张</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseRegion</code></td>
+<td>坍塌</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandAllRegions</code></td>
+<td>展开全部</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseAllRegions</code></td>
+<td>全部收缩</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandJavadocs</code></td>
+<td>展开 Javadocs</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseJavadocs</code></td>
+<td>收起 Javadoc</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseSelection</code></td>
+<td>折叠选择/删除区域</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseBlock</code></td>
+<td>折叠代码块</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; GoToMenu</code> （去）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GotoClass</code></td>
+<td>班级…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoFile</code></td>
+<td>文件…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoSymbol</code></td>
+<td>象征…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoLine</code></td>
+<td>线…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoDeclaration</code></td>
+<td>宣言</td>
+</tr>
+<tr>
+<td align="center"><code>GotoDefinition</code></td>
+<td>定义</td>
+</tr>
+<tr>
+<td align="center"><code>GotoUsage</code></td>
+<td>用法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoImplementation</code></td>
+<td>实施</td>
+</tr>
+<tr>
+<td align="center"><code>SmartGotoImplementation</code></td>
+<td>调用的实现</td>
+</tr>
+<tr>
+<td align="center"><code>GotoTypeDeclaration</code></td>
+<td>类型声明</td>
+</tr>
+<tr>
+<td align="center"><code>GotoSuperMethod</code></td>
+<td>超级方法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoAspect</code></td>
+<td>方面</td>
+</tr>
+<tr>
+<td align="center"><code>GotoNextError</code></td>
+<td>下一个突出显示的错误</td>
+</tr>
+<tr>
+<td align="center"><code>GotoPreviousError</code></td>
+<td>上一个突出显示的错误</td>
+</tr>
+<tr>
+<td align="center"><code>MethodDown</code></td>
+<td>下一个方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodUp</code></td>
+<td>以前的方法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoNextBookmark</code></td>
+<td>下一个书签</td>
+</tr>
+<tr>
+<td align="center"><code>GotoPreviousBookmark</code></td>
+<td>上一个书签</td>
+</tr>
+<tr>
+<td align="center"><code>Back</code></td>
+<td>后退</td>
+</tr>
+<tr>
+<td align="center"><code>Forward</code></td>
+<td>向前</td>
+</tr>
+<tr>
+<td align="center"><code>JumpToLastChange</code></td>
+<td>上次编辑位置</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousOccurence</code></td>
+<td>上一次发生</td>
+</tr>
+<tr>
+<td align="center"><code>NextOccurence</code></td>
+<td>下次发生</td>
+</tr>
+<tr>
+<td align="center"><code>VcsShowNextChangeMarker</code></td>
+<td>转到下一个更改</td>
+</tr>
+<tr>
+<td align="center"><code>VcsShowPrevChangeMarker</code></td>
+<td>转到上一个更改</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; CodeMenu</code> （代码）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>SurroundWith</code></td>
+<td>环绕…</td>
+</tr>
+<tr>
+<td align="center"><code>Generate</code></td>
+<td>产生…</td>
+</tr>
+<tr>
+<td align="center"><code>InsertLiveTemplate</code></td>
+<td>插入实时模板…</td>
+</tr>
+<tr>
+<td align="center"><code>SurroundWithLiveTemplate</code></td>
+<td>用实时模板环绕…</td>
+</tr>
+<tr>
+<td align="center"><code>CommentByLineComment</code></td>
+<td>带行注释的注释</td>
+</tr>
+<tr>
+<td align="center"><code>CommentByBlockComment</code></td>
+<td>带块注释的注释</td>
+</tr>
+<tr>
+<td align="center"><code>ReformatCode</code></td>
+<td>重新格式化代码…</td>
+</tr>
+<tr>
+<td align="center"><code>AutoIndentLines</code></td>
+<td>自动缩进行</td>
+</tr>
+<tr>
+<td align="center"><code>OptimizeImports</code></td>
+<td>优化导入…</td>
+</tr>
+<tr>
+<td align="center"><code>MoveStatementDown</code></td>
+<td>下移语句</td>
+</tr>
+<tr>
+<td align="center"><code>MoveStatementUp</code></td>
+<td>向上移动语句</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; CodeMenu &gt; CodeCompletionGroup</code> （完整代码）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CodeCompletion</code></td>
+<td>基本的</td>
+</tr>
+<tr>
+<td align="center"><code>WordCompletion</code></td>
+<td>完整的单词</td>
+</tr>
+<tr>
+<td align="center"><code>SmartTypeCompletion</code></td>
+<td>智能字体</td>
+</tr>
+<tr>
+<td align="center"><code>ClassNameCompletion</code></td>
+<td>班级名称</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; AnalyzeMenu</code> （分析）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>InspectCode</code></td>
+<td>检查代码…</td>
+</tr>
+<tr>
+<td align="center"><code>InspectCodeWithEditorProfile</code></td>
+<td>使用编辑器设置检查代码</td>
+</tr>
+<tr>
+<td align="center"><code>ViewOfflineInspection</code></td>
+<td>查看离线检测结果…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowPackageDeps</code></td>
+<td>分析依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowBackwardPackageDeps</code></td>
+<td>分析向后依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowPackageCycles</code></td>
+<td>分析循环依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowModulesDependencies</code></td>
+<td>分析模块依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>DupLocate</code></td>
+<td>找到重复项…</td>
+</tr>
+<tr>
+<td align="center"><code>Unscramble</code></td>
+<td>分析堆栈跟踪…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; RefactoringMenu</code> （重构）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>RenameElement</code></td>
+<td>改名…</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeSignature</code></td>
+<td>更改签名…</td>
+</tr>
+<tr>
+<td align="center"><code>MakeStatic</code></td>
+<td>使静态…</td>
+</tr>
+<tr>
+<td align="center"><code>ConvertToInstanceMethod</code></td>
+<td>转换为实例方法…</td>
+</tr>
+<tr>
+<td align="center"><code>Move</code></td>
+<td>移动…</td>
+</tr>
+<tr>
+<td align="center"><code>CopyElement</code></td>
+<td>复制…</td>
+</tr>
+<tr>
+<td align="center"><code>CloneElement</code></td>
+<td>克隆…</td>
+</tr>
+<tr>
+<td align="center"><code>SafeDelete</code></td>
+<td>安全删除…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractMethod</code></td>
+<td>提取方法…</td>
+</tr>
+<tr>
+<td align="center"><code>MethodDuplicates</code></td>
+<td>替换方法代码重复…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceVariable</code></td>
+<td>引入变量…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceField</code></td>
+<td>介绍领域…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceConstant</code></td>
+<td>介绍恒…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceParameter</code></td>
+<td>引入参数…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractInterface</code></td>
+<td>提取接口…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractSuperclass</code></td>
+<td>提取超类…</td>
+</tr>
+<tr>
+<td align="center"><code>TurnRefsToSuper</code></td>
+<td>尽可能使用接口…</td>
+</tr>
+<tr>
+<td align="center"><code>MembersPullUp</code></td>
+<td>拉会员…</td>
+</tr>
+<tr>
+<td align="center"><code>MemberPushDown</code></td>
+<td>将成员推倒…</td>
+</tr>
+<tr>
+<td align="center"><code>InheritanceToDelegation</code></td>
+<td>将继承替换为委托…</td>
+</tr>
+<tr>
+<td align="center"><code>Inline</code></td>
+<td>排队…</td>
+</tr>
+<tr>
+<td align="center"><code>AnonymousToInner</code></td>
+<td>将匿名转换为内部…</td>
+</tr>
+<tr>
+<td align="center"><code>EncapsulateFields</code></td>
+<td>封装字段…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceTempWithQuery</code></td>
+<td>用查询替换 Temp…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceConstructorWithFactory</code></td>
+<td>用工厂方法替换构造函数…</td>
+</tr>
+<tr>
+<td align="center"><code>Generify</code></td>
+<td>生成…</td>
+</tr>
+<tr>
+<td align="center"><code>Migrate</code></td>
+<td>迁移…</td>
+</tr>
+<tr>
+<td align="center"><code>Type Migration</code></td>
+<td>类型迁移…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractInclude</code></td>
+<td>提取包含文件…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; BuildMenu</code> （建造）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CompileProject</code></td>
+<td>重建项目</td>
+</tr>
+<tr>
+<td align="center"><code>CompileDirty</code></td>
+<td>制作项目</td>
+</tr>
+<tr>
+<td align="center"><code>MakeModule</code></td>
+<td>制作模块</td>
+</tr>
+<tr>
+<td align="center"><code>Compile</code></td>
+<td>编译</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateAntBuild</code></td>
+<td>生成 Ant 构建</td>
+</tr>
+<tr>
+<td align="center"><code>BuildJar</code></td>
+<td>构建罐子…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; RunMenu</code> （跑步）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>editRunConfigurations</code></td>
+<td>编辑配置</td>
+</tr>
+<tr>
+<td align="center"><code>Stop</code></td>
+<td>停止</td>
+</tr>
+<tr>
+<td align="center"><code>Hotswap</code></td>
+<td>重新加载更改的类</td>
+</tr>
+<tr>
+<td align="center"><code>StepOver</code></td>
+<td>跨过</td>
+</tr>
+<tr>
+<td align="center"><code>StepInto</code></td>
+<td>踏入</td>
+</tr>
+<tr>
+<td align="center"><code>StepOut</code></td>
+<td>走出去</td>
+</tr>
+<tr>
+<td align="center"><code>ForceStepOver</code></td>
+<td>强制越过</td>
+</tr>
+<tr>
+<td align="center"><code>ForceStepInto</code></td>
+<td>强行进入</td>
+</tr>
+<tr>
+<td align="center"><code>RunToCursor</code></td>
+<td>运行到光标</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.PopFrame</code></td>
+<td>流行框架</td>
+</tr>
+<tr>
+<td align="center"><code>Pause</code></td>
+<td>暂停程序</td>
+</tr>
+<tr>
+<td align="center"><code>Resume</code></td>
+<td>简历计划</td>
+</tr>
+<tr>
+<td align="center"><code>EvaluateExpression</code></td>
+<td>评估表达式…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickEvaluateExpression</code></td>
+<td>快速评估表达式</td>
+</tr>
+<tr>
+<td align="center"><code>ShowExecutionPoint</code></td>
+<td>显示执行点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleLineBreakpoint</code></td>
+<td>切换行断点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleMethodBreakpoint</code></td>
+<td>切换方法断点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFieldBreakpoint</code></td>
+<td>切换字段观察点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBreakpointEnabled</code></td>
+<td>切换断点已启用</td>
+</tr>
+<tr>
+<td align="center"><code>ViewBreakpoints</code></td>
+<td>查看断点</td>
+</tr>
+<tr>
+<td align="center"><code>ExportThreads</code></td>
+<td>导出线程…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu</code> （工具）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>SaveAsTemplate</code></td>
+<td>另存为实时模板…</td>
+</tr>
+<tr>
+<td align="center"><code>SaveFileAsTemplate</code></td>
+<td>将文件另存为模板…</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateJavadoc</code></td>
+<td>生成 JavaDoc…</td>
+</tr>
+<tr>
+<td align="center"><code>DataSources</code></td>
+<td>数据源…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; Macros &gt; StanardMacroActions</code> （标准宏操作）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>PlaybackLastMacro</code></td>
+<td>回放最后一个宏</td>
+</tr>
+<tr>
+<td align="center"><code>StartStopMacroRecording</code></td>
+<td>开始/停止宏录制</td>
+</tr>
+<tr>
+<td align="center"><code>EditMacros</code></td>
+<td>编辑宏…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt;</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ValidateXml</code></td>
+<td>证实</td>
+</tr>
+<tr>
+<td align="center"><code>AddAntBuildFile</code></td>
+<td>添加为 Ant 构建文件</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateDTD</code></td>
+<td>从 XML 文件生成 DTD</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; </code>（内部行动）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>PsiViewer</code></td>
+<td>查看 PSI 结构</td>
+</tr>
+<tr>
+<td align="center"><code>DebugListen</code></td>
+<td>抛出调试异常</td>
+</tr>
+<tr>
+<td align="center"><code>VirtualFileInfo</code></td>
+<td>虚拟文件信息</td>
+</tr>
+<tr>
+<td align="center"><code>Merge3Files</code></td>
+<td>合并</td>
+</tr>
+<tr>
+<td align="center"><code>DecodeBytesAction</code></td>
+<td>解码字节</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowStatistics</code></td>
+<td>显示本地 VCS 统计信息…</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowRepHistory</code></td>
+<td>存储库历史</td>
+</tr>
+<tr>
+<td align="center"><code>DropAnError</code></td>
+<td>删除错误</td>
+</tr>
+<tr>
+<td align="center"><code>ShowUserActivities</code></td>
+<td>表演活动</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; &gt; MemoryManagement</code> （内存管理）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>DumpPsiMemoryCaches</code></td>
+<td>转储 PSI 中缓存的内容</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; WindowMenu</code> （窗户）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>StoreDefaultLayout</code></td>
+<td>将当前布局存储为默认值</td>
+</tr>
+<tr>
+<td align="center"><code>RestoreDefaultLayout</code></td>
+<td>恢复默认布局</td>
+</tr>
+<tr>
+<td align="center"><code>HideActiveWindow</code></td>
+<td>隐藏活动窗口</td>
+</tr>
+<tr>
+<td align="center"><code>HideAllWindows</code></td>
+<td>隐藏所有窗口</td>
+</tr>
+<tr>
+<td align="center"><code>JumpToLastWindow</code></td>
+<td>跳到最后一个窗口</td>
+</tr>
+<tr>
+<td align="center"><code>TogglePinnedMode</code></td>
+<td>固定模式</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleDockMode</code></td>
+<td>停靠模式</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFloatingMode</code></td>
+<td>浮动模式</td>
+</tr>
+<tr>
+<td align="center"><code>NextTab</code></td>
+<td>选择下一个标签</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousTab</code></td>
+<td>选择上一个标签</td>
+</tr>
+<tr>
+<td align="center"><code>CloseActiveTab</code></td>
+<td>关闭活动标签</td>
+</tr>
+<tr>
+<td align="center"><code>PinActiveTab</code></td>
+<td>引脚活动选项卡</td>
+</tr>
+<tr>
+<td align="center"><code>CloseEditor</code></td>
+<td>关闭活动编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllEditors</code></td>
+<td>关闭所有编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllEditorsButActive</code></td>
+<td>关闭所有编辑器但处于活动状态</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllUnmodifiedEditors</code></td>
+<td>关闭所有未修改的编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>SplitVertically</code></td>
+<td>垂直分割</td>
+</tr>
+<tr>
+<td align="center"><code>SplitHorizontally</code></td>
+<td>水平分割</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeSplitOrientation</code></td>
+<td>更改分路器方向</td>
+</tr>
+<tr>
+<td align="center"><code>Unsplit</code></td>
+<td>未拆分</td>
+</tr>
+<tr>
+<td align="center"><code>UnsplitAll</code></td>
+<td>全部取消拆分</td>
+</tr>
+<tr>
+<td align="center"><code>NextSplitter</code></td>
+<td>转到下一个分路器</td>
+</tr>
+<tr>
+<td align="center"><code>PrevSplitter</code></td>
+<td>转到上一个拆分器</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; HelpMenu</code> （帮助）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>HelpTopics</code></td>
+<td>帮助主题</td>
+</tr>
+<tr>
+<td align="center"><code>ShowTips</code></td>
+<td>每日提示</td>
+</tr>
+<tr>
+<td align="center"><code>ProductivityGude</code></td>
+<td>生产力指南</td>
+</tr>
+<tr>
+<td align="center"><code>OnlineDocAction</code></td>
+<td>在线文档</td>
+</tr>
+<tr>
+<td align="center"><code>WhatsNewAction</code></td>
+<td>IDEA 5.0 中的新功能</td>
+</tr>
+<tr>
+<td align="center"><code>Help.KeymapReference</code></td>
+<td>默认键盘映射参考</td>
+</tr>
+<tr>
+<td align="center"><code>Register</code></td>
+<td>登记…</td>
+</tr>
+<tr>
+<td align="center"><code>CheckForUpdate</code></td>
+<td>检查更新…</td>
+</tr>
+<tr>
+<td align="center"><code>About</code></td>
+<td>关于</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Bookmarks</code> （书签）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark0</code></td>
+<td>切换书签 0</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark1</code></td>
+<td>切换书签 1</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark2</code></td>
+<td>切换书签 2</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark3</code></td>
+<td>切换书签 3</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark4</code></td>
+<td>切换书签 4</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark5</code></td>
+<td>切换书签 5</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark6</code></td>
+<td>切换书签 6</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark7</code></td>
+<td>切换书签 7</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark8</code></td>
+<td>切换书签 8</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark9</code></td>
+<td>切换书签 9</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark0</code></td>
+<td>转到书签 0</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark1</code></td>
+<td>转到书签 1</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark2</code></td>
+<td>转到书签 2</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark3</code></td>
+<td>转到书签 3</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark4</code></td>
+<td>转到书签 4</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark5</code></td>
+<td>转到书签 5</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark6</code></td>
+<td>转到书签 6</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark7</code></td>
+<td>转到书签 7</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark8</code></td>
+<td>转到书签 8</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark9</code></td>
+<td>转到书签 9</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>DebuggerActions</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AdjustArrayRange</code></td>
+<td>调整范围…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.Inspect</code></td>
+<td>检查</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CopyValue</code></td>
+<td>复制值</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CustomizeContextView</code></td>
+<td>自定义数据视图…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CustomizeThreadsView</code></td>
+<td>自定义线程视图…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.NewWatch</code></td>
+<td>新手表…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditWatch</code></td>
+<td>编辑手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditFrameSource</code></td>
+<td>编辑帧源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditNodeSource</code></td>
+<td>编辑节点源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditTypeSource</code></td>
+<td>跳转到对象源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.RemoveAllWatches</code></td>
+<td>删除所有手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.RemoveWatch</code></td>
+<td>移除手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ViewAsGroup</code></td>
+<td>查看为</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.SetValue</code></td>
+<td>设定值…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ShowFrame</code></td>
+<td>显示框架</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ResumeThread</code></td>
+<td>恢复</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.FreezeThread</code></td>
+<td>冻结</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.MuteBreakpoints</code></td>
+<td>静音断点</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ToggleStepThreadSuspendPolicy</code></td>
+<td>步进时挂起所有线程</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AddToWatch</code></td>
+<td>添加到手表</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Debugger.Representation</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AutoRenderer</code></td>
+<td>Auto</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorPopupMenu</code> （编辑器弹出菜单）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Add to migration roots</code></td>
+<td>添加到迁移根</td>
+</tr>
+<tr>
+<td align="center"><code>ValidateJsp</code></td>
+<td>验证 JSP</td>
+</tr>
+<tr>
+<td align="center"><code>PackageFile</code></td>
+<td>打包文件</td>
+</tr>
+<tr>
+<td align="center"><code>CompareClipboardWithSelection</code></td>
+<td>与剪贴板比较</td>
+</tr>
+<tr>
+<td align="center"><code>ShowAppliedStylesAction</code></td>
+<td>显示标签的应用样式</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>ChangeScheme</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeColorScheme</code></td>
+<td>切换配色方案</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeCodeStyleScheme</code></td>
+<td>切换代码样式方案</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeKeymap</code></td>
+<td>切换键盘映射</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeLaf</code></td>
+<td>切换外观和感觉</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeInspectionProfile</code></td>
+<td>切换编辑器突出显示</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeCustomizationSchema</code></td>
+<td>交换机自定义架构</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorTabPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>MoveEditorToOppositeTabGroup</code></td>
+<td>将编辑器移动到相反的选项卡组</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>ProjectViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>AssociateWithFileType</code></td>
+<td>与文件类型关联</td>
+</tr>
+<tr>
+<td align="center"><code>SynchronizeCurrentFile</code></td>
+<td>同步所选文件</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>J2EEViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>OpenCustomEditor</code></td>
+<td>编辑…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>FavoritesViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>RemoveFromFavorites</code></td>
+<td>从收藏夹中删除</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TypeHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.BaseOnThisType</code></td>
+<td>基于此类型</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Class</code></td>
+<td>类层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Subtypes</code></td>
+<td>子类型层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Supertypes</code></td>
+<td>超类型层次结构</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MethodHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.ImplementMethodAction</code></td>
+<td>实施方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.OverrideMethodAction</code></td>
+<td>覆盖方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.BaseOnThisType</code></td>
+<td>基于此类型</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>CallHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CallHierarchy.BaseOnThisType</code></td>
+<td>基于此方法</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Lvcs.DirectoryHistoryPopup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Lvcs.ShowLvcsDiffAction</code></td>
+<td>比较版本</td>
+</tr>
+<tr>
+<td align="center"><code>Lvcs.RollbackFileAction</code></td>
+<td>回滚文件</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Vcs.CheckinProjectPopup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ShowDiffAction</code></td>
+<td>显示更改</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.RollbackChanges</code></td>
+<td>回滚更改</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.EditSourceAction</code></td>
+<td>编辑源</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ExcludeAction</code></td>
+<td>从提交中排除</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.IncludeAction</code></td>
+<td>包含到提交中</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TestTreePopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>openAssertEqualsDiff</code></td>
+<td>查看 assertEquals 差异</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TestStatisticsTablePopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>JUnitTesting.SelectInTree</code></td>
+<td>在树中选择</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>UsageView.Popup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>UsageView.Include</code></td>
+<td>包括</td>
+</tr>
+<tr>
+<td align="center"><code>UsageView.Exclude</code></td>
+<td>排除</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GuiDesigner.EditorPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.PreviewForm</code></td>
+<td>预习</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.DataBindingWizard</code></td>
+<td>数据绑定向导…</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutHorizontally</code></td>
+<td>水平放置</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutVertically</code></td>
+<td>垂直布局</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutInGrid</code></td>
+<td>在网格中布置</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.BreakLayout</code></td>
+<td>休息布局</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.ExpandSelection</code></td>
+<td>展开选择</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.ShrinkSelection</code></td>
+<td>收缩选择</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GuiDesigner.PropertyInspectorPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.QuickJavadoc</code></td>
+<td>快速 JavaDoc</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>StructuralSearchActions</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>StructuralSearchPlugin.StructuralSearchAction</code></td>
+<td>搜索结构…</td>
+</tr>
+<tr>
+<td align="center"><code>StructuralSearchPlugin.StructuralReplaceAction</code></td>
+<td>替换结构…</td>
+</tr>
+</tbody></table>
+<p>原文来自</p>
+<p>个人渣翻</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Biliking
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://bilikings.top/2021/07/11/idea-Plugin-Action-Group/" title="idea Plugin Action Group">http://bilikings.top/2021/07/11/idea-Plugin-Action-Group/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/idea/" rel="tag"># idea</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/08/idea-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E5%B8%B8%E8%A7%81%E4%BA%8B%E4%BB%B6/" rel="prev" title="idea 插件开发常见事件">
+      <i class="fa fa-chevron-left"></i> idea 插件开发常见事件
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Action-Group"><span class="nav-number">1.</span> <span class="nav-text">Action Group</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Biliking"
+      src="/images/peiky.png">
+  <p class="site-author-name" itemprop="name">Biliking</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">50</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/bilikings" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;bilikings" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml"><i class="rss fa-fw"></i>RSS</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://kiritostna.github.io/Rice/" title="https:&#x2F;&#x2F;kiritostna.github.io&#x2F;Rice&#x2F;" rel="noopener" target="_blank">MuMing</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">bilikings</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

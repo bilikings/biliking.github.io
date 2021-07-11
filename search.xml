@@ -512,60 +512,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Java并发编程笔记(4)——同步工具类</title>
-    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
-    <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
-<ul>
-<li>阻塞队列</li>
-<li>信号量（Semaphore）</li>
-<li>栅栏（Barrier）</li>
-<li>闭锁（Latch）</li>
-</ul>
-<blockquote>
-<p>也可以通过一些机制来创建自己的同步工具类</p>
-</blockquote>
-<a id="more"></a>
-
-<h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>他作为一种同步工具类， 可以延迟线程的进度直到到达终止状态。</p>
-<p>可以用来保证模型或者直到其他活动都完成后再继续执行</p>
-<ul>
-<li><p><strong>CountDownLatch</strong>是一种灵活的闭锁实现，有一个递减计数器，先初始为一个正数，当一件事发生之后count递减，当count==0时为结束状态，如果一直不为0，就一直阻塞，或线程中断或超时。</p>
-</li>
-<li><p><strong>FutureTask</strong>是计算Callable来实现的，是一种可以生成结果的Runable，有三种状态</p>
-<ul>
-<li>Waiting to Run：等待运行</li>
-<li>Complete：运行完成</li>
-<li>Running ：正在运行</li>
-</ul>
-<p>当运行完成时，<code>FutureTask</code>会停在这状态上</p>
-</li>
-</ul>
-<h4 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h4><p>计算信号量的简化操作是二值信号量（初始值为1的信号量），用作互斥体，并拥有不可重入的语义，所以，谁拥有这个唯一的许可，谁就拥有互斥锁。</p>
-<p>个人感觉就是PV操作。</p>
-<h4 id="栅栏"><a href="#栅栏" class="headerlink" title="栅栏"></a>栅栏</h4><p>juc包中提供了<code>CyclicBarrier</code>（循环栅栏）。</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException, TimeoutException</span></span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>线程调用 await() 表示自己已经到达栅栏</li>
-<li><code>BrokenBarrierException</code> 表示栅栏已经被破坏，破坏的原因可能是其中一个线程 await() 时被中断或者超时</li>
-</ul>
-<p>栅栏类似于闭锁，他可以阻塞一个线程直到摸个事件的发生，栅栏于闭锁的区别在于，<strong>所有线程必须通道到达栅栏维持，才能继续执行，</strong></p>
-<p>闭锁用于等待事件，而栅栏用于等待其他线程。</p>
-<h3 id="开发缓存组件（高效可伸缩）"><a href="#开发缓存组件（高效可伸缩）" class="headerlink" title="开发缓存组件（高效可伸缩）"></a>开发缓存组件（高效可伸缩）</h3><blockquote>
-<p>基础组件</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Computable</span>&lt;<span class="title">A</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExpensiveFunction</span> <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">String</span> , <span class="title">BigInteger</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> BigInteger <span class="title">computer</span><span class="params">(String arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(arg);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-</blockquote>
-<h4 id="使用HashMap和同步机制"><a href="#使用HashMap和同步机制" class="headerlink" title="使用HashMap和同步机制"></a>使用HashMap和同步机制</h4><p>hashMap不是线程安全的，所以为了确保线程安全性，但是会带来一个明显的<strong>可伸缩</strong>问题：每次只能一个线程调用，其他线程会阻塞。阻塞多了，可能会比不使用记忆的方式还要慢。</p>
-<h4 id="使用ConcurrentHashMap替代"><a href="#使用ConcurrentHashMap替代" class="headerlink" title="使用ConcurrentHashMap替代"></a>使用ConcurrentHashMap替代</h4><p>虽然是使用了行级锁的<code>ConcurrentHashMap</code>，但是同样带来了并发性问题，而且科技风会让一个值被获得多次，</p>
-<h4 id="基于FutureTask"><a href="#基于FutureTask" class="headerlink" title="基于FutureTask"></a>基于FutureTask</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> cache</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/27 20:10</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;A, Future&lt;V&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;A, V&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(Computable&lt;A, V&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Future&lt;V&gt; f = cache.get(arg);</span><br><span class="line">            <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Callable&lt;V&gt; eval = () -&gt; c.computer(arg);</span><br><span class="line">                FutureTask&lt;V&gt; ft = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                f = cache.putIfAbsent(arg, ft);<span class="comment">//没有则添加</span></span><br><span class="line">                <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    ft.run();</span><br><span class="line">                    f = ft;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> f.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CancellationException e)&#123;</span><br><span class="line">                cache.remove(arg,f);<span class="comment">//执行错误时清除缓存，保证计算正确</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
-]]></content>
-      <tags>
-        <tag>Java</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Java并发编程笔记(5)——同步的基础构建模块</title>
     <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-5-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E7%9A%84%E5%9F%BA%E7%A1%80%E6%9E%84%E5%BB%BA%E6%A8%A1%E5%9D%97/</url>
     <content><![CDATA[<h2 id="基础构建模块"><a href="#基础构建模块" class="headerlink" title="基础构建模块"></a>基础构建模块</h2><h3 id="同步容器类"><a href="#同步容器类" class="headerlink" title="同步容器类"></a>同步容器类</h3><p>同步容器类包括早期的Vector（基本弃用）和<code>Hashtable</code>（<strong>ConcurrentHashMap</strong>（一致性hashmap）他不香吗），这些类的创建基本就是由<code>Collections.synchronizedXxx</code>等工厂方法创建的。</p>
@@ -631,6 +577,60 @@
 </ul>
 </blockquote>
 <h3 id><a href="#" class="headerlink" title></a></h3>]]></content>
+      <tags>
+        <tag>Java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java并发编程笔记(4)——同步工具类</title>
+    <url>/2020/11/17/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B%E7%AC%94%E8%AE%B0-4-%E2%80%94%E2%80%94%E5%90%8C%E6%AD%A5%E5%B7%A5%E5%85%B7%E7%B1%BB/</url>
+    <content><![CDATA[<h2 id="同步工具类"><a href="#同步工具类" class="headerlink" title="同步工具类"></a>同步工具类</h2><p>同步工具类可以是任何一个对象，只要他根据自身的状态了协调线程的控制流。</p>
+<ul>
+<li>阻塞队列</li>
+<li>信号量（Semaphore）</li>
+<li>栅栏（Barrier）</li>
+<li>闭锁（Latch）</li>
+</ul>
+<blockquote>
+<p>也可以通过一些机制来创建自己的同步工具类</p>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="闭锁"><a href="#闭锁" class="headerlink" title="闭锁"></a>闭锁</h4><p>他作为一种同步工具类， 可以延迟线程的进度直到到达终止状态。</p>
+<p>可以用来保证模型或者直到其他活动都完成后再继续执行</p>
+<ul>
+<li><p><strong>CountDownLatch</strong>是一种灵活的闭锁实现，有一个递减计数器，先初始为一个正数，当一件事发生之后count递减，当count==0时为结束状态，如果一直不为0，就一直阻塞，或线程中断或超时。</p>
+</li>
+<li><p><strong>FutureTask</strong>是计算Callable来实现的，是一种可以生成结果的Runable，有三种状态</p>
+<ul>
+<li>Waiting to Run：等待运行</li>
+<li>Complete：运行完成</li>
+<li>Running ：正在运行</li>
+</ul>
+<p>当运行完成时，<code>FutureTask</code>会停在这状态上</p>
+</li>
+</ul>
+<h4 id="信号量"><a href="#信号量" class="headerlink" title="信号量"></a>信号量</h4><p>计算信号量的简化操作是二值信号量（初始值为1的信号量），用作互斥体，并拥有不可重入的语义，所以，谁拥有这个唯一的许可，谁就拥有互斥锁。</p>
+<p>个人感觉就是PV操作。</p>
+<h4 id="栅栏"><a href="#栅栏" class="headerlink" title="栅栏"></a>栅栏</h4><p>juc包中提供了<code>CyclicBarrier</code>（循环栅栏）。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">await</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException, BrokenBarrierException, TimeoutException</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>线程调用 await() 表示自己已经到达栅栏</li>
+<li><code>BrokenBarrierException</code> 表示栅栏已经被破坏，破坏的原因可能是其中一个线程 await() 时被中断或者超时</li>
+</ul>
+<p>栅栏类似于闭锁，他可以阻塞一个线程直到摸个事件的发生，栅栏于闭锁的区别在于，<strong>所有线程必须通道到达栅栏维持，才能继续执行，</strong></p>
+<p>闭锁用于等待事件，而栅栏用于等待其他线程。</p>
+<h3 id="开发缓存组件（高效可伸缩）"><a href="#开发缓存组件（高效可伸缩）" class="headerlink" title="开发缓存组件（高效可伸缩）"></a>开发缓存组件（高效可伸缩）</h3><blockquote>
+<p>基础组件</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Computable</span>&lt;<span class="title">A</span>,<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">     <span class="function">V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ExpensiveFunction</span> <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">String</span> , <span class="title">BigInteger</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> BigInteger <span class="title">computer</span><span class="params">(String arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> BigInteger(arg);</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="使用HashMap和同步机制"><a href="#使用HashMap和同步机制" class="headerlink" title="使用HashMap和同步机制"></a>使用HashMap和同步机制</h4><p>hashMap不是线程安全的，所以为了确保线程安全性，但是会带来一个明显的<strong>可伸缩</strong>问题：每次只能一个线程调用，其他线程会阻塞。阻塞多了，可能会比不使用记忆的方式还要慢。</p>
+<h4 id="使用ConcurrentHashMap替代"><a href="#使用ConcurrentHashMap替代" class="headerlink" title="使用ConcurrentHashMap替代"></a>使用ConcurrentHashMap替代</h4><p>虽然是使用了行级锁的<code>ConcurrentHashMap</code>，但是同样带来了并发性问题，而且科技风会让一个值被获得多次，</p>
+<h4 id="基于FutureTask"><a href="#基于FutureTask" class="headerlink" title="基于FutureTask"></a>基于FutureTask</h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> cache;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> atom.hu</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> V1.0</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Package</span> cache</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 2020/9/27 20:10</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Memoizer</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; <span class="keyword">implements</span> <span class="title">Computable</span>&lt;<span class="title">A</span>, <span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;A, Future&lt;V&gt;&gt; cache = <span class="keyword">new</span> ConcurrentHashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Computable&lt;A, V&gt; c;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Memoizer</span><span class="params">(Computable&lt;A, V&gt; c)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.c = c;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> V <span class="title">computer</span><span class="params">(A arg)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">            Future&lt;V&gt; f = cache.get(arg);</span><br><span class="line">            <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                Callable&lt;V&gt; eval = () -&gt; c.computer(arg);</span><br><span class="line">                FutureTask&lt;V&gt; ft = <span class="keyword">new</span> FutureTask&lt;&gt;(eval);</span><br><span class="line">                f = cache.putIfAbsent(arg, ft);<span class="comment">//没有则添加</span></span><br><span class="line">                <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    ft.run();</span><br><span class="line">                    f = ft;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> f.get();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">                <span class="keyword">throw</span> launderThrowable(e.getCause());</span><br><span class="line">            &#125; <span class="keyword">catch</span> (CancellationException e)&#123;</span><br><span class="line">                cache.remove(arg,f);<span class="comment">//执行错误时清除缓存，保证计算正确</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RuntimeException <span class="title">launderThrowable</span><span class="params">(Throwable t)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (t <span class="keyword">instanceof</span> RuntimeException) &#123;</span><br><span class="line">            <span class="keyword">return</span> (RuntimeException) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (t <span class="keyword">instanceof</span> Error) &#123;</span><br><span class="line">            <span class="keyword">throw</span> (Error) t;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">&quot;Not unchecked&quot;</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当缓存的是future而不是值的时候，将导致缓存污染，所以计算被取消时要在cache中移除或者取消，如果有运行时异常，也会移除，这样FutureTask 的计算才可能成功。</p>
+]]></content>
       <tags>
         <tag>Java</tag>
       </tags>
@@ -1868,86 +1868,6 @@
       </tags>
   </entry>
   <entry>
-    <title>一道题搞懂JVM类加载</title>
-    <url>/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/</url>
-    <content><![CDATA[<h1 id="一道题搞懂JVM类加载机制"><a href="#一道题搞懂JVM类加载机制" class="headerlink" title="一道题搞懂JVM类加载机制"></a>一道题搞懂JVM类加载机制</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton2 singleton2 = <span class="keyword">new</span> Singleton2();</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton2 <span class="title">getInstance2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton2;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton singleton = Singleton.getInstance();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value1:&quot;</span> + singleton.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value2:&quot;</span> + singleton.value2);</span><br><span class="line">		</span><br><span class="line">		Singleton2 singleton2 = Singleton2.getInstance2();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value1:&quot;</span> + singleton2.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value2:&quot;</span> + singleton2.value2);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<a id="more"></a>
-
-<blockquote>
-<p>说出运行的结果：<br>Singleton1 value1 : 1<br>Singleton1 value2 : 0<br>Singleton2 value1 : 1<br>Singleton2 value2 : 1</p>
-</blockquote>
-<p>Singleton1的原因：</p>
-<ol>
-<li><p>先执行main中的Singleton singleton = Singleton.getInstance();</p>
-</li>
-<li><p>类的加载：加载类Singleton</p>
-</li>
-<li><p>类的验证</p>
-</li>
-<li><p>类的准备：为静态变量分配内存，设置默认值。这里为singleton(引用类型)设置为null,value1,value2（基本数据类型）设置默认值0</p>
-</li>
-<li><p>类的初始化（按照赋值语句进行修改）：</p>
-<ul>
-<li><p>执行private static Singleton singleton = new Singleton();</p>
-</li>
-<li><p>执行Singleton的构造器：value1++;value2++; 此时value1，value2均等于1</p>
-</li>
-<li><p>执行public static int value1;</p>
-<p>public static int value2 = 0;</p>
-<p>此时value1=1，value2=0</p>
-</li>
-</ul>
-</li>
-</ol>
-<p>Singleton1的原因：</p>
-<ol>
-<li>首先执行main中的Singleton2 singleton2 = Singleton2.getInstance2();</li>
-<li>类的加载：加载类Singleton2</li>
-<li>类的验证</li>
-<li>类的准备：为静态变量分配内存，设置默认值。这里为value1,value2（基本数据类型）设置默认值0,singleton2(引用类型)设置为null,</li>
-<li>类的初始化（按照赋值语句进行修改）：<ul>
-<li>执行public static int value2 = 0;</li>
-<li>此时value2=0(value1不变，依然是0);</li>
-<li>执行private static Singleton singleton = new Singleton();</li>
-<li>执行Singleton2的构造器：value1++;value2++;<br>此时value1，value2均等于1,即为最后结果</li>
-</ul>
-</li>
-</ol>
-<h3 id="JVM类加载"><a href="#JVM类加载" class="headerlink" title="JVM类加载"></a>JVM类加载</h3><p><strong>JVM类加载分为5个过程：加载，验证，准备，解析，初始化，使用，卸载，如下图所示</strong></p>
-<p><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png"></p>
-<p>下面来看看加载，验证，准备，解析，初始化这5个过程的具体动作。</p>
-<h4 id="1-1-加载"><a href="#1-1-加载" class="headerlink" title="1.1 加载"></a>1.1 加载</h4><p>加载主要是将.class文件（并不一定是.class。可以是ZIP包，网络中获取）中的二进制字节流读入到JVM中。<br>在加载阶段，JVM需要完成3件事：<br>1）通过类的全限定名获取该类的二进制字节流；<br>2）将字节流所代表的静态存储结构转化为方法区的运行时数据结构；<br>3）在内存中生成一个该类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
-<h4 id="1-2-连接"><a href="#1-2-连接" class="headerlink" title="1.2 连接"></a>1.2 连接</h4><h5 id="1-2-1-验证"><a href="#1-2-1-验证" class="headerlink" title="1.2.1 验证"></a>1.2.1 验证</h5><p>验证是连接阶段的第一步，主要确保加载进来的字节流符合JVM规范。<br>验证阶段会完成以下4个阶段的检验动作：<br>1）文件格式验证<br>2）元数据验证(是否符合Java语言规范)<br>3）字节码验证（确定程序语义合法，符合逻辑）<br>4）符号引用验证（确保下一步的解析能正常执行）</p>
-<h5 id="1-2-2-准备"><a href="#1-2-2-准备" class="headerlink" title="1.2.2 准备"></a>1.2.2 准备</h5><p>准备是连接阶段的第二步，主要为静态变量在方法区分配内存，并设置默认初始值。</p>
-<h5 id="1-2-3-解析"><a href="#1-2-3-解析" class="headerlink" title="1.2.3 解析"></a>1.2.3 解析</h5><p>解析是连接阶段的第三步，是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
-<h5 id="1-3-初始化"><a href="#1-3-初始化" class="headerlink" title="1.3 初始化"></a>1.3 初始化</h5><p>初始化阶段是类加载过程的最后一步，主要是根据程序中的赋值语句主动为类变量赋值。<br>注：</p>
-<ol>
-<li>当有父类且父类为初始化的时候，先去初始化父类；</li>
-<li>再进行子类初始化语句。</li>
-</ol>
-<p><strong>什么时候需要对类进行初始化？</strong></p>
-<ol>
-<li>使用new该类实例化对象的时候；</li>
-<li>读取或设置类静态字段的时候（但被final修饰的字段，在编译器时就被放入常量池的静态字段除外static final）；</li>
-<li>调用类静态方法的时候；</li>
-<li>使用反射Class.forName(“xxxx”)对类进行反射调用的时候，该类需要初始化；</li>
-<li> 初始化一个类的时候，有父类，先初始化父类（注：1. 接口除外，父接口在调用的时候才会被初始化；2.子类引用父类静态字段，只会引发父类初始化）；</li>
-<li> 被标明为启动类的类（即包含main()方法的类）要初始化；</li>
-<li>当使用JDK1.7的动态语言支持时，如果一个java.invoke.MethodHandle实例最后的解析结果REF_getStatic、REF_putStatic、REF_invokeStatic的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需要先触发其初始化。</li>
-</ol>
-<p>以上情况称为对一个类进行主动引用，且有且只要以上几种情况需要对类进行初始化。</p>
-<h4 id="双亲委派模型的工作过程"><a href="#双亲委派模型的工作过程" class="headerlink" title="双亲委派模型的工作过程"></a>双亲委派模型的工作过程</h4><p>如果一个类接受到类加载请求，他自己不会去加载这个请求，而是将这个类加载请求委派给父类加载器，这样一层一层传送，直到到达启动类加载器（Bootstrap ClassLoader）。<br>只有当父类加载器无法加载这个请求时，子加载器才会尝试自己去加载。</p>
-<h4 id="双亲委派模型的代码实现"><a href="#双亲委派模型的代码实现" class="headerlink" title="双亲委派模型的代码实现"></a>双亲委派模型的代码实现</h4><p>双亲委派模型的代码实现集中在java.lang.ClassLoader的loadClass()方法当中。<br>1）首先检查类是否被加载，没有则调用父类加载器的loadClass()方法；<br>2）若父类加载器为空，则默认使用启动类加载器作为父加载器；<br>3）若父类加载失败，抛出ClassNotFoundException 异常后，再调用自己的findClass() 方法。</p>
-<h3 id="链接加上一个面试题，巩固下类的加载过程。"><a href="#链接加上一个面试题，巩固下类的加载过程。" class="headerlink" title="链接加上一个面试题，巩固下类的加载过程。"></a>链接加上一个面试题，巩固下类的加载过程。</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t1 = <span class="keyword">new</span> B();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t2 = <span class="keyword">new</span> B();</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;构造块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span></span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;静态块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        B t = <span class="keyword">new</span> B();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<p><strong>以上代码输出结果是？</strong><br>根据上文分析，类的加载过程是：<br>（1）加载B类；<br>（2）验证、准备（给静态属性t1、t2赋默认值null）、解析；<br>（3）初始化：执行public static B t1 = new B(); 和 public static B t2 = new B();、static {}；<br>注意，我们之前说的类的加载顺序是 有父类先加载父类静态域，这里的静态域不仅包括static{} 代码块，还有 静态属性；<br>然后再执行构造块{}和构造方法；<br>所以在执行public static B t1 = new B();时，不会加载static{}代码块，否则就会重复执行，只会执行B的构造块和构造方法(默认的无参构造器)，输出”构造块”；<br>执行public static B t2 = new B();时，也同样执行构造块和构造方法，输出”构造块”；<br>第三步再执行static{} 代码块，输出”静态快“；<br>最后执行main方法中的B t = new B();，输出”构造块”；</p>
-]]></content>
-      <tags>
-        <tag>JVM</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>web开发基础</title>
     <url>/2021/04/24/web%E5%BC%80%E5%8F%91%E5%9F%BA%E7%A1%80/</url>
     <content><![CDATA[<h2 id="名词概念"><a href="#名词概念" class="headerlink" title="名词概念"></a>名词概念</h2><p>端口：端口是TCP/IP协议簇中，应用层与传输层协议实体间的通信接口，每个端口都有一个端口号的整形标识</p>
@@ -2025,6 +1945,86 @@
 ]]></content>
       <tags>
         <tag>C/C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>一道题搞懂JVM类加载</title>
+    <url>/2021/03/26/%E4%B8%80%E9%81%93%E9%A2%98%E6%90%9E%E6%87%82JVM%E7%B1%BB%E5%8A%A0%E8%BD%BD/</url>
+    <content><![CDATA[<h1 id="一道题搞懂JVM类加载机制"><a href="#一道题搞懂JVM类加载机制" class="headerlink" title="一道题搞懂JVM类加载机制"></a>一道题搞懂JVM类加载机制</h1><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton singleton = <span class="keyword">new</span> Singleton();</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton2</span></span>&#123;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value1;</span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> value2 = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Singleton2 singleton2 = <span class="keyword">new</span> Singleton2();</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		value1++;</span><br><span class="line">		value2++;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Singleton2 <span class="title">getInstance2</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">return</span> singleton2;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Singleton singleton = Singleton.getInstance();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value1:&quot;</span> + singleton.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton1 value2:&quot;</span> + singleton.value2);</span><br><span class="line">		</span><br><span class="line">		Singleton2 singleton2 = Singleton2.getInstance2();</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value1:&quot;</span> + singleton2.value1);</span><br><span class="line">		System.out.println(<span class="string">&quot;Singleton2 value2:&quot;</span> + singleton2.value2);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<a id="more"></a>
+
+<blockquote>
+<p>说出运行的结果：<br>Singleton1 value1 : 1<br>Singleton1 value2 : 0<br>Singleton2 value1 : 1<br>Singleton2 value2 : 1</p>
+</blockquote>
+<p>Singleton1的原因：</p>
+<ol>
+<li><p>先执行main中的Singleton singleton = Singleton.getInstance();</p>
+</li>
+<li><p>类的加载：加载类Singleton</p>
+</li>
+<li><p>类的验证</p>
+</li>
+<li><p>类的准备：为静态变量分配内存，设置默认值。这里为singleton(引用类型)设置为null,value1,value2（基本数据类型）设置默认值0</p>
+</li>
+<li><p>类的初始化（按照赋值语句进行修改）：</p>
+<ul>
+<li><p>执行private static Singleton singleton = new Singleton();</p>
+</li>
+<li><p>执行Singleton的构造器：value1++;value2++; 此时value1，value2均等于1</p>
+</li>
+<li><p>执行public static int value1;</p>
+<p>public static int value2 = 0;</p>
+<p>此时value1=1，value2=0</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>Singleton1的原因：</p>
+<ol>
+<li>首先执行main中的Singleton2 singleton2 = Singleton2.getInstance2();</li>
+<li>类的加载：加载类Singleton2</li>
+<li>类的验证</li>
+<li>类的准备：为静态变量分配内存，设置默认值。这里为value1,value2（基本数据类型）设置默认值0,singleton2(引用类型)设置为null,</li>
+<li>类的初始化（按照赋值语句进行修改）：<ul>
+<li>执行public static int value2 = 0;</li>
+<li>此时value2=0(value1不变，依然是0);</li>
+<li>执行private static Singleton singleton = new Singleton();</li>
+<li>执行Singleton2的构造器：value1++;value2++;<br>此时value1，value2均等于1,即为最后结果</li>
+</ul>
+</li>
+</ol>
+<h3 id="JVM类加载"><a href="#JVM类加载" class="headerlink" title="JVM类加载"></a>JVM类加载</h3><p><strong>JVM类加载分为5个过程：加载，验证，准备，解析，初始化，使用，卸载，如下图所示</strong></p>
+<p><img src="https://imgconvert.csdnimg.cn/aHR0cDovL2ltZy5ibG9nLmNzZG4ubmV0LzIwMTcwNzA1MTkzMDAyMjU4?x-oss-process=image/format,png"></p>
+<p>下面来看看加载，验证，准备，解析，初始化这5个过程的具体动作。</p>
+<h4 id="1-1-加载"><a href="#1-1-加载" class="headerlink" title="1.1 加载"></a>1.1 加载</h4><p>加载主要是将.class文件（并不一定是.class。可以是ZIP包，网络中获取）中的二进制字节流读入到JVM中。<br>在加载阶段，JVM需要完成3件事：<br>1）通过类的全限定名获取该类的二进制字节流；<br>2）将字节流所代表的静态存储结构转化为方法区的运行时数据结构；<br>3）在内存中生成一个该类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口。</p>
+<h4 id="1-2-连接"><a href="#1-2-连接" class="headerlink" title="1.2 连接"></a>1.2 连接</h4><h5 id="1-2-1-验证"><a href="#1-2-1-验证" class="headerlink" title="1.2.1 验证"></a>1.2.1 验证</h5><p>验证是连接阶段的第一步，主要确保加载进来的字节流符合JVM规范。<br>验证阶段会完成以下4个阶段的检验动作：<br>1）文件格式验证<br>2）元数据验证(是否符合Java语言规范)<br>3）字节码验证（确定程序语义合法，符合逻辑）<br>4）符号引用验证（确保下一步的解析能正常执行）</p>
+<h5 id="1-2-2-准备"><a href="#1-2-2-准备" class="headerlink" title="1.2.2 准备"></a>1.2.2 准备</h5><p>准备是连接阶段的第二步，主要为静态变量在方法区分配内存，并设置默认初始值。</p>
+<h5 id="1-2-3-解析"><a href="#1-2-3-解析" class="headerlink" title="1.2.3 解析"></a>1.2.3 解析</h5><p>解析是连接阶段的第三步，是虚拟机将常量池内的符号引用替换为直接引用的过程。</p>
+<h5 id="1-3-初始化"><a href="#1-3-初始化" class="headerlink" title="1.3 初始化"></a>1.3 初始化</h5><p>初始化阶段是类加载过程的最后一步，主要是根据程序中的赋值语句主动为类变量赋值。<br>注：</p>
+<ol>
+<li>当有父类且父类为初始化的时候，先去初始化父类；</li>
+<li>再进行子类初始化语句。</li>
+</ol>
+<p><strong>什么时候需要对类进行初始化？</strong></p>
+<ol>
+<li>使用new该类实例化对象的时候；</li>
+<li>读取或设置类静态字段的时候（但被final修饰的字段，在编译器时就被放入常量池的静态字段除外static final）；</li>
+<li>调用类静态方法的时候；</li>
+<li>使用反射Class.forName(“xxxx”)对类进行反射调用的时候，该类需要初始化；</li>
+<li> 初始化一个类的时候，有父类，先初始化父类（注：1. 接口除外，父接口在调用的时候才会被初始化；2.子类引用父类静态字段，只会引发父类初始化）；</li>
+<li> 被标明为启动类的类（即包含main()方法的类）要初始化；</li>
+<li>当使用JDK1.7的动态语言支持时，如果一个java.invoke.MethodHandle实例最后的解析结果REF_getStatic、REF_putStatic、REF_invokeStatic的方法句柄，并且这个方法句柄所对应的类没有进行过初始化，则需要先触发其初始化。</li>
+</ol>
+<p>以上情况称为对一个类进行主动引用，且有且只要以上几种情况需要对类进行初始化。</p>
+<h4 id="双亲委派模型的工作过程"><a href="#双亲委派模型的工作过程" class="headerlink" title="双亲委派模型的工作过程"></a>双亲委派模型的工作过程</h4><p>如果一个类接受到类加载请求，他自己不会去加载这个请求，而是将这个类加载请求委派给父类加载器，这样一层一层传送，直到到达启动类加载器（Bootstrap ClassLoader）。<br>只有当父类加载器无法加载这个请求时，子加载器才会尝试自己去加载。</p>
+<h4 id="双亲委派模型的代码实现"><a href="#双亲委派模型的代码实现" class="headerlink" title="双亲委派模型的代码实现"></a>双亲委派模型的代码实现</h4><p>双亲委派模型的代码实现集中在java.lang.ClassLoader的loadClass()方法当中。<br>1）首先检查类是否被加载，没有则调用父类加载器的loadClass()方法；<br>2）若父类加载器为空，则默认使用启动类加载器作为父加载器；<br>3）若父类加载失败，抛出ClassNotFoundException 异常后，再调用自己的findClass() 方法。</p>
+<h3 id="链接加上一个面试题，巩固下类的加载过程。"><a href="#链接加上一个面试题，巩固下类的加载过程。" class="headerlink" title="链接加上一个面试题，巩固下类的加载过程。"></a>链接加上一个面试题，巩固下类的加载过程。</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">B</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t1 = <span class="keyword">new</span> B();</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> B t2 = <span class="keyword">new</span> B();</span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;构造块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span></span><br><span class="line">    &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;静态块&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span></span><br><span class="line"><span class="function">    </span>&#123;</span><br><span class="line">        B t = <span class="keyword">new</span> B();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>以上代码输出结果是？</strong><br>根据上文分析，类的加载过程是：<br>（1）加载B类；<br>（2）验证、准备（给静态属性t1、t2赋默认值null）、解析；<br>（3）初始化：执行public static B t1 = new B(); 和 public static B t2 = new B();、static {}；<br>注意，我们之前说的类的加载顺序是 有父类先加载父类静态域，这里的静态域不仅包括static{} 代码块，还有 静态属性；<br>然后再执行构造块{}和构造方法；<br>所以在执行public static B t1 = new B();时，不会加载static{}代码块，否则就会重复执行，只会执行B的构造块和构造方法(默认的无参构造器)，输出”构造块”；<br>执行public static B t2 = new B();时，也同样执行构造块和构造方法，输出”构造块”；<br>第三步再执行static{} 代码块，输出”静态快“；<br>最后执行main方法中的B t = new B();，输出”构造块”；</p>
+]]></content>
+      <tags>
+        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>
@@ -3403,6 +3403,2497 @@
 ]]></content>
       <tags>
         <tag>面经</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>idea Plugin Action Group</title>
+    <url>/2021/07/11/idea-Plugin-Action-Group/</url>
+    <content><![CDATA[<h1 id="Action-Group"><a href="#Action-Group" class="headerlink" title="Action Group"></a>Action Group</h1><p>这些是 IntelliJ IDEA 中内置操作的名称。您可以<code>&lt;add-to-group&gt;</code> 在插件的<code>plugin.xml</code>.</p>
+<p>每个表显示一个组中的操作，其 ID 显示在 中 <code>fixed-width font</code>，以及其父组的 ID（供参考）及其显示名称。您可以在<code>&lt;add-to-group&gt;</code>的<code>group-id</code>属性中使用组 ID 。</p>
+<p>表中的每一行代表一个动作，其 ID 可以在 <code>&lt;add-to-group&gt;</code>的<code>relative-to-action</code> 属性中使用。</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CaptureMemorySnapShot</code></td>
+<td>捕获内存快照</td>
+</tr>
+<tr>
+<td><code>CaptureCPUUsageData</code></td>
+<td>捕获cpu使用数据</td>
+</tr>
+<tr>
+<td><code>ContextHelp</code></td>
+<td>上下文帮助</td>
+</tr>
+<tr>
+<td><code>RunConfiguration</code></td>
+<td>选择运行/调试配置</td>
+</tr>
+<tr>
+<td><code>ShowIntentionActions</code></td>
+<td>显示意图操作</td>
+</tr>
+<tr>
+<td><code>ToggleReadOnlyAttribute</code></td>
+<td>切换只读属性</td>
+</tr>
+<tr>
+<td><code>TogglePopupHints</code></td>
+<td>Toggle 当前文件的弹出提示</td>
+</tr>
+<tr>
+<td><code>RunGc</code></td>
+<td>运行垃圾收集器</td>
+</tr>
+<tr>
+<td><code>ShowPopupMenu</code></td>
+<td>显示上下文菜单</td>
+</tr>
+<tr>
+<td><code>CloseWindow</code></td>
+<td>关闭活动窗口</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowHistory</code></td>
+<td>显示文件历史</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowHistoryForBlock</code></td>
+<td>显示选择历史</td>
+</tr>
+<tr>
+<td><code>Vcs.ShowTabbedFileHistory</code></td>
+<td>显示历史</td>
+</tr>
+<tr>
+<td><code>AddToFavoritesPopup</code></td>
+<td>添加到收藏夹</td>
+</tr>
+<tr>
+<td><code>AddNewFavoritesList</code></td>
+<td>添加新的收藏夹列表</td>
+</tr>
+<tr>
+<td><code>ExpandAll</code></td>
+<td>展开全部</td>
+</tr>
+<tr>
+<td><code>CollapseAll</code></td>
+<td>全部收缩</td>
+</tr>
+<tr>
+<td><code>ExportToTextFile</code></td>
+<td>导出到文本文件</td>
+</tr>
+<tr>
+<td><code>ExpandTreeNode</code></td>
+<td>展开树节点</td>
+</tr>
+<tr>
+<td><code>CollapseTreeNode</code></td>
+<td>折叠树节点</td>
+</tr>
+<tr>
+<td><code>FullyExpandTreeNode</code></td>
+<td>完全展开树节点</td>
+</tr>
+<tr>
+<td><code>NextDiff</code></td>
+<td>移至下一个差异</td>
+</tr>
+<tr>
+<td><code>PreviousDiff</code></td>
+<td>移至上一个差异</td>
+</tr>
+<tr>
+<td><code>Refresh</code></td>
+<td>刷新</td>
+</tr>
+<tr>
+<td><code>CheckinProject</code></td>
+<td>签入项目</td>
+</tr>
+<tr>
+<td><code>CheckinFiles</code></td>
+<td>报到</td>
+</tr>
+<tr>
+<td><code>UpdateFiles</code></td>
+<td>更新</td>
+</tr>
+<tr>
+<td><code>CheckStatusForFiles</code></td>
+<td>检查状态</td>
+</tr>
+<tr>
+<td><code>Annotate</code></td>
+<td>注释</td>
+</tr>
+<tr>
+<td><code>Compare.SameVersion</code></td>
+<td>与相同版本库比较</td>
+</tr>
+<tr>
+<td><code>Compare.LastVersion</code></td>
+<td>与上一个存储库版本比较</td>
+</tr>
+<tr>
+<td><code>Compare.Selected</code></td>
+<td>与之比较…</td>
+</tr>
+<tr>
+<td><code>Compare.Specified</code></td>
+<td>与指定修订版比较…</td>
+</tr>
+<tr>
+<td><code>CompareTwoFiles</code></td>
+<td>比较两个文件</td>
+</tr>
+<tr>
+<td><code>CompareFileWithEditor</code></td>
+<td>比较文件与编辑器</td>
+</tr>
+<tr>
+<td><code>ModuleSettings</code></td>
+<td>模块设置…</td>
+</tr>
+</tbody></table>
+<a id="more"></a>
+
+<table>
+<thead>
+<tr>
+<th align="center"><code>RunContextGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CreateRunConfiguration</code></td>
+<td>创建运行配置</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorActions</code> （编辑器操作）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>EditorChooseLookupItem</code></td>
+<td>选择查找项</td>
+</tr>
+<tr>
+<td align="center"><code>EditorChooseLookupItemReplace</code></td>
+<td>选择查找项替换</td>
+</tr>
+<tr>
+<td align="center"><code>NextTemplateVariable</code></td>
+<td>下一个模板变量</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousTemplateVariable</code></td>
+<td>上一个模板变量</td>
+</tr>
+<tr>
+<td align="center"><code>NextParameter</code></td>
+<td>下一个参数</td>
+</tr>
+<tr>
+<td align="center"><code>PrevParameter</code></td>
+<td>上一个参数</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageUp</code></td>
+<td>向上翻页</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageDown</code></td>
+<td>向下翻页</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageUpWithSelection</code></td>
+<td>向上翻页并选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPageDownWithSelection</code></td>
+<td>向上翻页并选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCopy</code></td>
+<td>复制</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCut</code></td>
+<td>切</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPaste</code></td>
+<td>粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPasteSimple</code></td>
+<td>粘贴简单</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPasteFromX11</code></td>
+<td>从 X 剪贴板粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDelete</code></td>
+<td>删除</td>
+</tr>
+<tr>
+<td align="center"><code>EditorBackSpace</code></td>
+<td>退格</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageTop</code></td>
+<td>将插入符号移至页面顶部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageBottom</code></td>
+<td>将插入符号移至页面底部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageTopWithSelection</code></td>
+<td>使用选择将插入符号移动到页面顶部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveToPageBottomWithSelection</code></td>
+<td>使用选择将插入符号移动到页面底部</td>
+</tr>
+<tr>
+<td align="center"><code>EditorEnter</code></td>
+<td>进入</td>
+</tr>
+<tr>
+<td align="center"><code>EditorEscape</code></td>
+<td>逃脱</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUp</code></td>
+<td>向上</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDown</code></td>
+<td>下</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLeft</code></td>
+<td>剩下</td>
+</tr>
+<tr>
+<td align="center"><code>EditorRight</code></td>
+<td>正确的</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUpWithSelection</code></td>
+<td>选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDownWithSelection</code></td>
+<td>打倒选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLeftWithSelection</code></td>
+<td>左边有选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorRightWithSelection</code></td>
+<td>正确选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorIndentSelection</code></td>
+<td>缩进选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUnindentSelection</code></td>
+<td>取消缩进选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTab</code></td>
+<td>标签</td>
+</tr>
+<tr>
+<td align="center"><code>EmacsStyleIndent</code></td>
+<td>Emacs 选项卡</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollUp</code></td>
+<td>向上滑动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollDown</code></td>
+<td>向下滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveUpAndScroll</code></td>
+<td>向上移动和滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveDownAndScroll</code></td>
+<td>向下移动并滚动</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveUpAndScrollWithSelection</code></td>
+<td>向上移动和滚动选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorMoveDownAndScrollWithSelection</code></td>
+<td>向下移动并滚动选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineStart</code></td>
+<td>将插入符号移至行首</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineEnd</code></td>
+<td>将插入符号移动到行尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCutLineEnd</code></td>
+<td>切割至线尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextStart</code></td>
+<td>将插入符号移至文本开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextEnd</code></td>
+<td>将插入符号移动到文本结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineStartWithSelection</code></td>
+<td>将插入符号移动到选择行的开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorLineEndWithSelection</code></td>
+<td>将插入符号移动到带有选择的行尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextStartWithSelection</code></td>
+<td>将插入符号移动到文本开头的选择</td>
+</tr>
+<tr>
+<td align="center"><code>EditorTextEndWithSelection</code></td>
+<td>将插入符号移动到带有选择的文本结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorNextWord</code></td>
+<td>将插入符号移到下一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPreviousWord</code></td>
+<td>将插入符号移动到上一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorNextWordWithSelection</code></td>
+<td>使用选择将插入符号移动到下一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorPreviousWordWithSelection</code></td>
+<td>使用选择将插入符号移动到上一个单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockStart</code></td>
+<td>将插入符号移至代码块开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockEnd</code></td>
+<td>将插入符号移动到代码块末尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockStartWithSelection</code></td>
+<td>将插入符号移至代码块以选择开始</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCodeBlockEndWithSelection</code></td>
+<td>将插入符号移动到代码块以选择结尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteToWordStart</code></td>
+<td>删除到 Word 开头</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteToWordEnd</code></td>
+<td>删除到词尾</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDeleteLine</code></td>
+<td>删除插入符号处的行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorDuplicate</code></td>
+<td>复制线或块</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSelectWord</code></td>
+<td>选择插入符号处的单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorUnSelectWord</code></td>
+<td>取消选择插入符号处的单词</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleInsertState</code></td>
+<td>切换插入/覆盖</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleColumnMode</code></td>
+<td>列模式</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleShowWhitespaces</code></td>
+<td>显示空格</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleShowLineNumbers</code></td>
+<td>显示行号</td>
+</tr>
+<tr>
+<td align="center"><code>EditorScrollToCenter</code></td>
+<td>滚动到中心</td>
+</tr>
+<tr>
+<td align="center"><code>EditorToggleCase</code></td>
+<td>切换案例</td>
+</tr>
+<tr>
+<td align="center"><code>EditorJoinLines</code></td>
+<td>连接线</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSelectLine</code></td>
+<td>在插入符号处选择行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorSplitLine</code></td>
+<td>分割线</td>
+</tr>
+<tr>
+<td align="center"><code>EditorStartNewLine</code></td>
+<td>开始新行</td>
+</tr>
+<tr>
+<td align="center"><code>EditorCompleteStatement</code></td>
+<td>完成当前声明</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>J2EEGenerateGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CreateSessionBean</code></td>
+<td>会话豆</td>
+</tr>
+<tr>
+<td align="center"><code>CreateContainerManagedEntityBeanAction</code></td>
+<td>CMP 实体 Bean</td>
+</tr>
+<tr>
+<td align="center"><code>CreateBeanManagedEntityBeanAction</code></td>
+<td>BMP实体Bean</td>
+</tr>
+<tr>
+<td align="center"><code>CreateMessageBean</code></td>
+<td>消息豆</td>
+</tr>
+<tr>
+<td align="center"><code>CreateTransferObject</code></td>
+<td>传输对象</td>
+</tr>
+<tr>
+<td align="center"><code>CreateCMPField</code></td>
+<td>CMP 字段</td>
+</tr>
+<tr>
+<td align="center"><code>CreateEJBRelationship</code></td>
+<td>EJB 关系</td>
+</tr>
+<tr>
+<td align="center"><code>CreateJSPAction</code></td>
+<td>jsp</td>
+</tr>
+<tr>
+<td align="center"><code>CreateJSPXAction</code></td>
+<td>jspx</td>
+</tr>
+<tr>
+<td align="center"><code>CreateServletAction</code></td>
+<td>小服务程序</td>
+</tr>
+<tr>
+<td align="center"><code>CreateFilterAction</code></td>
+<td>筛选</td>
+</tr>
+<tr>
+<td align="center"><code>CreateListenerAction</code></td>
+<td>听众</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GenerateGroup</code> （生成器）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateConstructor</code></td>
+<td>构造函数</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateGetter</code></td>
+<td>吸气剂</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateSetter</code></td>
+<td>二传手</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateGetterAndSetter</code></td>
+<td>吸气剂和吸气剂</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateEquals</code></td>
+<td>equals() 和 hashCode()</td>
+</tr>
+<tr>
+<td align="center"><code>OverrideMethods</code></td>
+<td>覆盖方法…</td>
+</tr>
+<tr>
+<td align="center"><code>ImplementMethods</code></td>
+<td>实现方法…</td>
+</tr>
+<tr>
+<td align="center"><code>DelegateMethods</code></td>
+<td>委托方法…</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateSuperMethodCall</code></td>
+<td>超级方法调用</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>NewGroup</code> （新的）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>NewClass</code></td>
+<td>班级</td>
+</tr>
+<tr>
+<td align="center"><code>NewInterface</code></td>
+<td>界面</td>
+</tr>
+<tr>
+<td align="center"><code>NewEnum</code></td>
+<td>枚举</td>
+</tr>
+<tr>
+<td align="center"><code>NewAnnotationType</code></td>
+<td>@界面</td>
+</tr>
+<tr>
+<td align="center"><code>NewFile</code></td>
+<td>文件</td>
+</tr>
+<tr>
+<td align="center"><code>NewDir</code></td>
+<td>目录/包</td>
+</tr>
+<tr>
+<td align="center"><code>NewFromTemplate</code></td>
+<td>从模板</td>
+</tr>
+<tr>
+<td align="center"><code>NewDialog</code></td>
+<td>对话</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>LocalVcsGroup</code> （当地历史）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowHistory</code></td>
+<td>显示历史</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.HistoryForBlock</code></td>
+<td>显示选择历史</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.AddLabel</code></td>
+<td>添加标签…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>VcsGroups</code> （版本控制）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.MarkSourcesAsCurrent</code></td>
+<td>将项目标记为当前</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>VcsGroups &gt; VcsGlobalGroup</code> （版本控制组）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.FileView</code></td>
+<td>显示文件视图</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.UpdateProject</code></td>
+<td>更新项目</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ProjectStatus</code></td>
+<td>检查项目状态</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; FileMenu</code> （文件）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>NewProject</code></td>
+<td>新项目…</td>
+</tr>
+<tr>
+<td align="center"><code>NewModule</code></td>
+<td>新模块…</td>
+</tr>
+<tr>
+<td align="center"><code>OpenProject</code></td>
+<td>打开项目…</td>
+</tr>
+<tr>
+<td align="center"><code>OpenFile</code></td>
+<td>打开文件…</td>
+</tr>
+<tr>
+<td align="center"><code>CloseProject</code></td>
+<td>关闭项目</td>
+</tr>
+<tr>
+<td align="center"><code>ShowSettings</code></td>
+<td>设置</td>
+</tr>
+<tr>
+<td align="center"><code>TemplateProjectProperties</code></td>
+<td>模板项目设置</td>
+</tr>
+<tr>
+<td align="center"><code>SaveAll</code></td>
+<td>保存全部</td>
+</tr>
+<tr>
+<td align="center"><code>ExportSettings</code></td>
+<td>导出设置…</td>
+</tr>
+<tr>
+<td align="center"><code>ImportSettings</code></td>
+<td>导入设置…</td>
+</tr>
+<tr>
+<td align="center"><code>ImportFromJBuilder</code></td>
+<td>从 JBuilder 导入</td>
+</tr>
+<tr>
+<td align="center"><code>Synchronize</code></td>
+<td>同步</td>
+</tr>
+<tr>
+<td align="center"><code>ReloadFromDisk</code></td>
+<td>从磁盘重新加载</td>
+</tr>
+<tr>
+<td align="center"><code>ExportToHTML</code></td>
+<td>导出为 HTML…</td>
+</tr>
+<tr>
+<td align="center"><code>Print</code></td>
+<td>打印…</td>
+</tr>
+<tr>
+<td align="center"><code>Exit</code></td>
+<td>出口</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; EditMenu</code> （编辑）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>$Undo</code></td>
+<td>撤消</td>
+</tr>
+<tr>
+<td align="center"><code>$Redo</code></td>
+<td>重做</td>
+</tr>
+<tr>
+<td align="center"><code>$SelectAll</code></td>
+<td>全选</td>
+</tr>
+<tr>
+<td align="center"><code>NewElement</code></td>
+<td>新的…</td>
+</tr>
+<tr>
+<td align="center"><code>$Delete</code></td>
+<td>删除</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark</code></td>
+<td>切换书签</td>
+</tr>
+<tr>
+<td align="center"><code>ShowBookmarks</code></td>
+<td>显示书签</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; EditMenu &gt; CutCopyPasteGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>$Cut</code></td>
+<td>切</td>
+</tr>
+<tr>
+<td align="center"><code>$Copy</code></td>
+<td>复制</td>
+</tr>
+<tr>
+<td align="center"><code>CopyPaths</code></td>
+<td>复制路径</td>
+</tr>
+<tr>
+<td align="center"><code>CopyReference</code></td>
+<td>复制参考</td>
+</tr>
+<tr>
+<td align="center"><code>$Paste</code></td>
+<td>粘贴</td>
+</tr>
+<tr>
+<td align="center"><code>PasteMultiple</code></td>
+<td>粘贴…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; SearchMenu</code> （搜索）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Find</code></td>
+<td>找…</td>
+</tr>
+<tr>
+<td align="center"><code>Replace</code></td>
+<td>代替…</td>
+</tr>
+<tr>
+<td align="center"><code>FindNext</code></td>
+<td>找下一个</td>
+</tr>
+<tr>
+<td align="center"><code>FindPrevious</code></td>
+<td>查找上一个</td>
+</tr>
+<tr>
+<td align="center"><code>FindWordAtCaret</code></td>
+<td>在插入符号中查找单词</td>
+</tr>
+<tr>
+<td align="center"><code>IncrementalSearch</code></td>
+<td>增量搜索</td>
+</tr>
+<tr>
+<td align="center"><code>FindUsages</code></td>
+<td>查找用法…</td>
+</tr>
+<tr>
+<td align="center"><code>FindUsagesInFile</code></td>
+<td>在文件中查找用法…</td>
+</tr>
+<tr>
+<td align="center"><code>HighlightUsagesInFile</code></td>
+<td>突出显示文件中的用法</td>
+</tr>
+<tr>
+<td align="center"><code>FindJoinpointsByPointcutAction</code></td>
+<td>查找由切入点标识的连接点</td>
+</tr>
+<tr>
+<td align="center"><code>FindInPath</code></td>
+<td>在路径中查找…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceInPath</code></td>
+<td>在路径中替换…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu</code> （看法）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ViewToolBar</code></td>
+<td>工具栏</td>
+</tr>
+<tr>
+<td align="center"><code>ViewStatusBar</code></td>
+<td>状态栏</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFullScreenMode</code></td>
+<td>全屏</td>
+</tr>
+<tr>
+<td align="center"><code>EditSource</code></td>
+<td>跳转到源</td>
+</tr>
+<tr>
+<td align="center"><code>ViewSource</code></td>
+<td>显示来源</td>
+</tr>
+<tr>
+<td align="center"><code>OpenInBrowser</code></td>
+<td>在浏览器中打开</td>
+</tr>
+<tr>
+<td align="center"><code>ExternalJavaDoc</code></td>
+<td>外部 JavaDoc</td>
+</tr>
+<tr>
+<td align="center"><code>RecentFiles</code></td>
+<td>最近的文件…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickChangeScheme</code></td>
+<td>快速切换方案…</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy</code></td>
+<td>类型层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy</code></td>
+<td>方法层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>CallHierarchy</code></td>
+<td>呼叫层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>RecentChanges</code></td>
+<td>近期变动…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; CodeEditorViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>FileStructurePopup</code></td>
+<td>文件结构弹出窗口</td>
+</tr>
+<tr>
+<td align="center"><code>SelectIn</code></td>
+<td>选择在…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickJavaDoc</code></td>
+<td>快速文档查找</td>
+</tr>
+<tr>
+<td align="center"><code>QuickImplementations</code></td>
+<td>快速定义查找</td>
+</tr>
+<tr>
+<td align="center"><code>ParameterInfo</code></td>
+<td>参数信息</td>
+</tr>
+<tr>
+<td align="center"><code>EditorContextInfo</code></td>
+<td>上下文信息</td>
+</tr>
+<tr>
+<td align="center"><code>ShowErrorDescription</code></td>
+<td>错误描述</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; CommanderViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CommanderSyncViews</code></td>
+<td>同步视图</td>
+</tr>
+<tr>
+<td align="center"><code>CommanderSwapPanels</code></td>
+<td>交换面板</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; ProjectViewGroup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ProjectViewChangeView</code></td>
+<td>更改视图</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ViewMenu &gt; FoldingGroup</code> （折叠式的）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandRegion</code></td>
+<td>扩张</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseRegion</code></td>
+<td>坍塌</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandAllRegions</code></td>
+<td>展开全部</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseAllRegions</code></td>
+<td>全部收缩</td>
+</tr>
+<tr>
+<td align="center"><code>ExpandJavadocs</code></td>
+<td>展开 Javadocs</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseJavadocs</code></td>
+<td>收起 Javadoc</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseSelection</code></td>
+<td>折叠选择/删除区域</td>
+</tr>
+<tr>
+<td align="center"><code>CollapseBlock</code></td>
+<td>折叠代码块</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; GoToMenu</code> （去）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GotoClass</code></td>
+<td>班级…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoFile</code></td>
+<td>文件…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoSymbol</code></td>
+<td>象征…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoLine</code></td>
+<td>线…</td>
+</tr>
+<tr>
+<td align="center"><code>GotoDeclaration</code></td>
+<td>宣言</td>
+</tr>
+<tr>
+<td align="center"><code>GotoDefinition</code></td>
+<td>定义</td>
+</tr>
+<tr>
+<td align="center"><code>GotoUsage</code></td>
+<td>用法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoImplementation</code></td>
+<td>实施</td>
+</tr>
+<tr>
+<td align="center"><code>SmartGotoImplementation</code></td>
+<td>调用的实现</td>
+</tr>
+<tr>
+<td align="center"><code>GotoTypeDeclaration</code></td>
+<td>类型声明</td>
+</tr>
+<tr>
+<td align="center"><code>GotoSuperMethod</code></td>
+<td>超级方法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoAspect</code></td>
+<td>方面</td>
+</tr>
+<tr>
+<td align="center"><code>GotoNextError</code></td>
+<td>下一个突出显示的错误</td>
+</tr>
+<tr>
+<td align="center"><code>GotoPreviousError</code></td>
+<td>上一个突出显示的错误</td>
+</tr>
+<tr>
+<td align="center"><code>MethodDown</code></td>
+<td>下一个方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodUp</code></td>
+<td>以前的方法</td>
+</tr>
+<tr>
+<td align="center"><code>GotoNextBookmark</code></td>
+<td>下一个书签</td>
+</tr>
+<tr>
+<td align="center"><code>GotoPreviousBookmark</code></td>
+<td>上一个书签</td>
+</tr>
+<tr>
+<td align="center"><code>Back</code></td>
+<td>后退</td>
+</tr>
+<tr>
+<td align="center"><code>Forward</code></td>
+<td>向前</td>
+</tr>
+<tr>
+<td align="center"><code>JumpToLastChange</code></td>
+<td>上次编辑位置</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousOccurence</code></td>
+<td>上一次发生</td>
+</tr>
+<tr>
+<td align="center"><code>NextOccurence</code></td>
+<td>下次发生</td>
+</tr>
+<tr>
+<td align="center"><code>VcsShowNextChangeMarker</code></td>
+<td>转到下一个更改</td>
+</tr>
+<tr>
+<td align="center"><code>VcsShowPrevChangeMarker</code></td>
+<td>转到上一个更改</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; CodeMenu</code> （代码）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>SurroundWith</code></td>
+<td>环绕…</td>
+</tr>
+<tr>
+<td align="center"><code>Generate</code></td>
+<td>产生…</td>
+</tr>
+<tr>
+<td align="center"><code>InsertLiveTemplate</code></td>
+<td>插入实时模板…</td>
+</tr>
+<tr>
+<td align="center"><code>SurroundWithLiveTemplate</code></td>
+<td>用实时模板环绕…</td>
+</tr>
+<tr>
+<td align="center"><code>CommentByLineComment</code></td>
+<td>带行注释的注释</td>
+</tr>
+<tr>
+<td align="center"><code>CommentByBlockComment</code></td>
+<td>带块注释的注释</td>
+</tr>
+<tr>
+<td align="center"><code>ReformatCode</code></td>
+<td>重新格式化代码…</td>
+</tr>
+<tr>
+<td align="center"><code>AutoIndentLines</code></td>
+<td>自动缩进行</td>
+</tr>
+<tr>
+<td align="center"><code>OptimizeImports</code></td>
+<td>优化导入…</td>
+</tr>
+<tr>
+<td align="center"><code>MoveStatementDown</code></td>
+<td>下移语句</td>
+</tr>
+<tr>
+<td align="center"><code>MoveStatementUp</code></td>
+<td>向上移动语句</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; CodeMenu &gt; CodeCompletionGroup</code> （完整代码）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CodeCompletion</code></td>
+<td>基本的</td>
+</tr>
+<tr>
+<td align="center"><code>WordCompletion</code></td>
+<td>完整的单词</td>
+</tr>
+<tr>
+<td align="center"><code>SmartTypeCompletion</code></td>
+<td>智能字体</td>
+</tr>
+<tr>
+<td align="center"><code>ClassNameCompletion</code></td>
+<td>班级名称</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; AnalyzeMenu</code> （分析）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>InspectCode</code></td>
+<td>检查代码…</td>
+</tr>
+<tr>
+<td align="center"><code>InspectCodeWithEditorProfile</code></td>
+<td>使用编辑器设置检查代码</td>
+</tr>
+<tr>
+<td align="center"><code>ViewOfflineInspection</code></td>
+<td>查看离线检测结果…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowPackageDeps</code></td>
+<td>分析依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowBackwardPackageDeps</code></td>
+<td>分析向后依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowPackageCycles</code></td>
+<td>分析循环依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>ShowModulesDependencies</code></td>
+<td>分析模块依赖…</td>
+</tr>
+<tr>
+<td align="center"><code>DupLocate</code></td>
+<td>找到重复项…</td>
+</tr>
+<tr>
+<td align="center"><code>Unscramble</code></td>
+<td>分析堆栈跟踪…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; RefactoringMenu</code> （重构）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>RenameElement</code></td>
+<td>改名…</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeSignature</code></td>
+<td>更改签名…</td>
+</tr>
+<tr>
+<td align="center"><code>MakeStatic</code></td>
+<td>使静态…</td>
+</tr>
+<tr>
+<td align="center"><code>ConvertToInstanceMethod</code></td>
+<td>转换为实例方法…</td>
+</tr>
+<tr>
+<td align="center"><code>Move</code></td>
+<td>移动…</td>
+</tr>
+<tr>
+<td align="center"><code>CopyElement</code></td>
+<td>复制…</td>
+</tr>
+<tr>
+<td align="center"><code>CloneElement</code></td>
+<td>克隆…</td>
+</tr>
+<tr>
+<td align="center"><code>SafeDelete</code></td>
+<td>安全删除…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractMethod</code></td>
+<td>提取方法…</td>
+</tr>
+<tr>
+<td align="center"><code>MethodDuplicates</code></td>
+<td>替换方法代码重复…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceVariable</code></td>
+<td>引入变量…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceField</code></td>
+<td>介绍领域…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceConstant</code></td>
+<td>介绍恒…</td>
+</tr>
+<tr>
+<td align="center"><code>IntroduceParameter</code></td>
+<td>引入参数…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractInterface</code></td>
+<td>提取接口…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractSuperclass</code></td>
+<td>提取超类…</td>
+</tr>
+<tr>
+<td align="center"><code>TurnRefsToSuper</code></td>
+<td>尽可能使用接口…</td>
+</tr>
+<tr>
+<td align="center"><code>MembersPullUp</code></td>
+<td>拉会员…</td>
+</tr>
+<tr>
+<td align="center"><code>MemberPushDown</code></td>
+<td>将成员推倒…</td>
+</tr>
+<tr>
+<td align="center"><code>InheritanceToDelegation</code></td>
+<td>将继承替换为委托…</td>
+</tr>
+<tr>
+<td align="center"><code>Inline</code></td>
+<td>排队…</td>
+</tr>
+<tr>
+<td align="center"><code>AnonymousToInner</code></td>
+<td>将匿名转换为内部…</td>
+</tr>
+<tr>
+<td align="center"><code>EncapsulateFields</code></td>
+<td>封装字段…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceTempWithQuery</code></td>
+<td>用查询替换 Temp…</td>
+</tr>
+<tr>
+<td align="center"><code>ReplaceConstructorWithFactory</code></td>
+<td>用工厂方法替换构造函数…</td>
+</tr>
+<tr>
+<td align="center"><code>Generify</code></td>
+<td>生成…</td>
+</tr>
+<tr>
+<td align="center"><code>Migrate</code></td>
+<td>迁移…</td>
+</tr>
+<tr>
+<td align="center"><code>Type Migration</code></td>
+<td>类型迁移…</td>
+</tr>
+<tr>
+<td align="center"><code>ExtractInclude</code></td>
+<td>提取包含文件…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; BuildMenu</code> （建造）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CompileProject</code></td>
+<td>重建项目</td>
+</tr>
+<tr>
+<td align="center"><code>CompileDirty</code></td>
+<td>制作项目</td>
+</tr>
+<tr>
+<td align="center"><code>MakeModule</code></td>
+<td>制作模块</td>
+</tr>
+<tr>
+<td align="center"><code>Compile</code></td>
+<td>编译</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateAntBuild</code></td>
+<td>生成 Ant 构建</td>
+</tr>
+<tr>
+<td align="center"><code>BuildJar</code></td>
+<td>构建罐子…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; RunMenu</code> （跑步）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>editRunConfigurations</code></td>
+<td>编辑配置</td>
+</tr>
+<tr>
+<td align="center"><code>Stop</code></td>
+<td>停止</td>
+</tr>
+<tr>
+<td align="center"><code>Hotswap</code></td>
+<td>重新加载更改的类</td>
+</tr>
+<tr>
+<td align="center"><code>StepOver</code></td>
+<td>跨过</td>
+</tr>
+<tr>
+<td align="center"><code>StepInto</code></td>
+<td>踏入</td>
+</tr>
+<tr>
+<td align="center"><code>StepOut</code></td>
+<td>走出去</td>
+</tr>
+<tr>
+<td align="center"><code>ForceStepOver</code></td>
+<td>强制越过</td>
+</tr>
+<tr>
+<td align="center"><code>ForceStepInto</code></td>
+<td>强行进入</td>
+</tr>
+<tr>
+<td align="center"><code>RunToCursor</code></td>
+<td>运行到光标</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.PopFrame</code></td>
+<td>流行框架</td>
+</tr>
+<tr>
+<td align="center"><code>Pause</code></td>
+<td>暂停程序</td>
+</tr>
+<tr>
+<td align="center"><code>Resume</code></td>
+<td>简历计划</td>
+</tr>
+<tr>
+<td align="center"><code>EvaluateExpression</code></td>
+<td>评估表达式…</td>
+</tr>
+<tr>
+<td align="center"><code>QuickEvaluateExpression</code></td>
+<td>快速评估表达式</td>
+</tr>
+<tr>
+<td align="center"><code>ShowExecutionPoint</code></td>
+<td>显示执行点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleLineBreakpoint</code></td>
+<td>切换行断点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleMethodBreakpoint</code></td>
+<td>切换方法断点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFieldBreakpoint</code></td>
+<td>切换字段观察点</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBreakpointEnabled</code></td>
+<td>切换断点已启用</td>
+</tr>
+<tr>
+<td align="center"><code>ViewBreakpoints</code></td>
+<td>查看断点</td>
+</tr>
+<tr>
+<td align="center"><code>ExportThreads</code></td>
+<td>导出线程…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu</code> （工具）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>SaveAsTemplate</code></td>
+<td>另存为实时模板…</td>
+</tr>
+<tr>
+<td align="center"><code>SaveFileAsTemplate</code></td>
+<td>将文件另存为模板…</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateJavadoc</code></td>
+<td>生成 JavaDoc…</td>
+</tr>
+<tr>
+<td align="center"><code>DataSources</code></td>
+<td>数据源…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; Macros &gt; StanardMacroActions</code> （标准宏操作）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>PlaybackLastMacro</code></td>
+<td>回放最后一个宏</td>
+</tr>
+<tr>
+<td align="center"><code>StartStopMacroRecording</code></td>
+<td>开始/停止宏录制</td>
+</tr>
+<tr>
+<td align="center"><code>EditMacros</code></td>
+<td>编辑宏…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt;</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ValidateXml</code></td>
+<td>证实</td>
+</tr>
+<tr>
+<td align="center"><code>AddAntBuildFile</code></td>
+<td>添加为 Ant 构建文件</td>
+</tr>
+<tr>
+<td align="center"><code>GenerateDTD</code></td>
+<td>从 XML 文件生成 DTD</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; </code>（内部行动）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>PsiViewer</code></td>
+<td>查看 PSI 结构</td>
+</tr>
+<tr>
+<td align="center"><code>DebugListen</code></td>
+<td>抛出调试异常</td>
+</tr>
+<tr>
+<td align="center"><code>VirtualFileInfo</code></td>
+<td>虚拟文件信息</td>
+</tr>
+<tr>
+<td align="center"><code>Merge3Files</code></td>
+<td>合并</td>
+</tr>
+<tr>
+<td align="center"><code>DecodeBytesAction</code></td>
+<td>解码字节</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowStatistics</code></td>
+<td>显示本地 VCS 统计信息…</td>
+</tr>
+<tr>
+<td align="center"><code>LocalVcs.ShowRepHistory</code></td>
+<td>存储库历史</td>
+</tr>
+<tr>
+<td align="center"><code>DropAnError</code></td>
+<td>删除错误</td>
+</tr>
+<tr>
+<td align="center"><code>ShowUserActivities</code></td>
+<td>表演活动</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; ToolsMenu &gt; &gt; MemoryManagement</code> （内存管理）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>DumpPsiMemoryCaches</code></td>
+<td>转储 PSI 中缓存的内容</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; WindowMenu</code> （窗户）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>StoreDefaultLayout</code></td>
+<td>将当前布局存储为默认值</td>
+</tr>
+<tr>
+<td align="center"><code>RestoreDefaultLayout</code></td>
+<td>恢复默认布局</td>
+</tr>
+<tr>
+<td align="center"><code>HideActiveWindow</code></td>
+<td>隐藏活动窗口</td>
+</tr>
+<tr>
+<td align="center"><code>HideAllWindows</code></td>
+<td>隐藏所有窗口</td>
+</tr>
+<tr>
+<td align="center"><code>JumpToLastWindow</code></td>
+<td>跳到最后一个窗口</td>
+</tr>
+<tr>
+<td align="center"><code>TogglePinnedMode</code></td>
+<td>固定模式</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleDockMode</code></td>
+<td>停靠模式</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleFloatingMode</code></td>
+<td>浮动模式</td>
+</tr>
+<tr>
+<td align="center"><code>NextTab</code></td>
+<td>选择下一个标签</td>
+</tr>
+<tr>
+<td align="center"><code>PreviousTab</code></td>
+<td>选择上一个标签</td>
+</tr>
+<tr>
+<td align="center"><code>CloseActiveTab</code></td>
+<td>关闭活动标签</td>
+</tr>
+<tr>
+<td align="center"><code>PinActiveTab</code></td>
+<td>引脚活动选项卡</td>
+</tr>
+<tr>
+<td align="center"><code>CloseEditor</code></td>
+<td>关闭活动编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllEditors</code></td>
+<td>关闭所有编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllEditorsButActive</code></td>
+<td>关闭所有编辑器但处于活动状态</td>
+</tr>
+<tr>
+<td align="center"><code>CloseAllUnmodifiedEditors</code></td>
+<td>关闭所有未修改的编辑器</td>
+</tr>
+<tr>
+<td align="center"><code>SplitVertically</code></td>
+<td>垂直分割</td>
+</tr>
+<tr>
+<td align="center"><code>SplitHorizontally</code></td>
+<td>水平分割</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeSplitOrientation</code></td>
+<td>更改分路器方向</td>
+</tr>
+<tr>
+<td align="center"><code>Unsplit</code></td>
+<td>未拆分</td>
+</tr>
+<tr>
+<td align="center"><code>UnsplitAll</code></td>
+<td>全部取消拆分</td>
+</tr>
+<tr>
+<td align="center"><code>NextSplitter</code></td>
+<td>转到下一个分路器</td>
+</tr>
+<tr>
+<td align="center"><code>PrevSplitter</code></td>
+<td>转到上一个拆分器</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MainMenu &gt; HelpMenu</code> （帮助）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>HelpTopics</code></td>
+<td>帮助主题</td>
+</tr>
+<tr>
+<td align="center"><code>ShowTips</code></td>
+<td>每日提示</td>
+</tr>
+<tr>
+<td align="center"><code>ProductivityGude</code></td>
+<td>生产力指南</td>
+</tr>
+<tr>
+<td align="center"><code>OnlineDocAction</code></td>
+<td>在线文档</td>
+</tr>
+<tr>
+<td align="center"><code>WhatsNewAction</code></td>
+<td>IDEA 5.0 中的新功能</td>
+</tr>
+<tr>
+<td align="center"><code>Help.KeymapReference</code></td>
+<td>默认键盘映射参考</td>
+</tr>
+<tr>
+<td align="center"><code>Register</code></td>
+<td>登记…</td>
+</tr>
+<tr>
+<td align="center"><code>CheckForUpdate</code></td>
+<td>检查更新…</td>
+</tr>
+<tr>
+<td align="center"><code>About</code></td>
+<td>关于</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Bookmarks</code> （书签）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark0</code></td>
+<td>切换书签 0</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark1</code></td>
+<td>切换书签 1</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark2</code></td>
+<td>切换书签 2</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark3</code></td>
+<td>切换书签 3</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark4</code></td>
+<td>切换书签 4</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark5</code></td>
+<td>切换书签 5</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark6</code></td>
+<td>切换书签 6</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark7</code></td>
+<td>切换书签 7</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark8</code></td>
+<td>切换书签 8</td>
+</tr>
+<tr>
+<td align="center"><code>ToggleBookmark9</code></td>
+<td>切换书签 9</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark0</code></td>
+<td>转到书签 0</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark1</code></td>
+<td>转到书签 1</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark2</code></td>
+<td>转到书签 2</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark3</code></td>
+<td>转到书签 3</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark4</code></td>
+<td>转到书签 4</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark5</code></td>
+<td>转到书签 5</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark6</code></td>
+<td>转到书签 6</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark7</code></td>
+<td>转到书签 7</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark8</code></td>
+<td>转到书签 8</td>
+</tr>
+<tr>
+<td align="center"><code>GotoBookmark9</code></td>
+<td>转到书签 9</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>DebuggerActions</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AdjustArrayRange</code></td>
+<td>调整范围…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.Inspect</code></td>
+<td>检查</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CopyValue</code></td>
+<td>复制值</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CustomizeContextView</code></td>
+<td>自定义数据视图…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.CustomizeThreadsView</code></td>
+<td>自定义线程视图…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.NewWatch</code></td>
+<td>新手表…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditWatch</code></td>
+<td>编辑手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditFrameSource</code></td>
+<td>编辑帧源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditNodeSource</code></td>
+<td>编辑节点源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.EditTypeSource</code></td>
+<td>跳转到对象源</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.RemoveAllWatches</code></td>
+<td>删除所有手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.RemoveWatch</code></td>
+<td>移除手表</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ViewAsGroup</code></td>
+<td>查看为</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.SetValue</code></td>
+<td>设定值…</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ShowFrame</code></td>
+<td>显示框架</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ResumeThread</code></td>
+<td>恢复</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.FreezeThread</code></td>
+<td>冻结</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.MuteBreakpoints</code></td>
+<td>静音断点</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.ToggleStepThreadSuspendPolicy</code></td>
+<td>步进时挂起所有线程</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AddToWatch</code></td>
+<td>添加到手表</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Debugger.Representation</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Debugger.AutoRenderer</code></td>
+<td>Auto</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorPopupMenu</code> （编辑器弹出菜单）</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Add to migration roots</code></td>
+<td>添加到迁移根</td>
+</tr>
+<tr>
+<td align="center"><code>ValidateJsp</code></td>
+<td>验证 JSP</td>
+</tr>
+<tr>
+<td align="center"><code>PackageFile</code></td>
+<td>打包文件</td>
+</tr>
+<tr>
+<td align="center"><code>CompareClipboardWithSelection</code></td>
+<td>与剪贴板比较</td>
+</tr>
+<tr>
+<td align="center"><code>ShowAppliedStylesAction</code></td>
+<td>显示标签的应用样式</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>ChangeScheme</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeColorScheme</code></td>
+<td>切换配色方案</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeCodeStyleScheme</code></td>
+<td>切换代码样式方案</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeKeymap</code></td>
+<td>切换键盘映射</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeLaf</code></td>
+<td>切换外观和感觉</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeInspectionProfile</code></td>
+<td>切换编辑器突出显示</td>
+</tr>
+<tr>
+<td align="center"><code>ChangeCustomizationSchema</code></td>
+<td>交换机自定义架构</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>EditorTabPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>MoveEditorToOppositeTabGroup</code></td>
+<td>将编辑器移动到相反的选项卡组</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>ProjectViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>AssociateWithFileType</code></td>
+<td>与文件类型关联</td>
+</tr>
+<tr>
+<td align="center"><code>SynchronizeCurrentFile</code></td>
+<td>同步所选文件</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>J2EEViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>OpenCustomEditor</code></td>
+<td>编辑…</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>FavoritesViewPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>RemoveFromFavorites</code></td>
+<td>从收藏夹中删除</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TypeHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.BaseOnThisType</code></td>
+<td>基于此类型</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Class</code></td>
+<td>类层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Subtypes</code></td>
+<td>子类型层次结构</td>
+</tr>
+<tr>
+<td align="center"><code>TypeHierarchy.Supertypes</code></td>
+<td>超类型层次结构</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>MethodHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.ImplementMethodAction</code></td>
+<td>实施方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.OverrideMethodAction</code></td>
+<td>覆盖方法</td>
+</tr>
+<tr>
+<td align="center"><code>MethodHierarchy.BaseOnThisType</code></td>
+<td>基于此类型</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>CallHierarchyPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>CallHierarchy.BaseOnThisType</code></td>
+<td>基于此方法</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Lvcs.DirectoryHistoryPopup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Lvcs.ShowLvcsDiffAction</code></td>
+<td>比较版本</td>
+</tr>
+<tr>
+<td align="center"><code>Lvcs.RollbackFileAction</code></td>
+<td>回滚文件</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>Vcs.CheckinProjectPopup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ShowDiffAction</code></td>
+<td>显示更改</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.RollbackChanges</code></td>
+<td>回滚更改</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.EditSourceAction</code></td>
+<td>编辑源</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.ExcludeAction</code></td>
+<td>从提交中排除</td>
+</tr>
+<tr>
+<td align="center"><code>Vcs.IncludeAction</code></td>
+<td>包含到提交中</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TestTreePopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>openAssertEqualsDiff</code></td>
+<td>查看 assertEquals 差异</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>TestStatisticsTablePopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>JUnitTesting.SelectInTree</code></td>
+<td>在树中选择</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>UsageView.Popup</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>UsageView.Include</code></td>
+<td>包括</td>
+</tr>
+<tr>
+<td align="center"><code>UsageView.Exclude</code></td>
+<td>排除</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GuiDesigner.EditorPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.PreviewForm</code></td>
+<td>预习</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.DataBindingWizard</code></td>
+<td>数据绑定向导…</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutHorizontally</code></td>
+<td>水平放置</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutVertically</code></td>
+<td>垂直布局</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.LayOutInGrid</code></td>
+<td>在网格中布置</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.BreakLayout</code></td>
+<td>休息布局</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.ExpandSelection</code></td>
+<td>展开选择</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.ShrinkSelection</code></td>
+<td>收缩选择</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>GuiDesigner.PropertyInspectorPopupMenu</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>GuiDesigner.QuickJavadoc</code></td>
+<td>快速 JavaDoc</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="center"><code>StructuralSearchActions</code></th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">ID</td>
+<td>名称</td>
+</tr>
+<tr>
+<td align="center"><code>StructuralSearchPlugin.StructuralSearchAction</code></td>
+<td>搜索结构…</td>
+</tr>
+<tr>
+<td align="center"><code>StructuralSearchPlugin.StructuralReplaceAction</code></td>
+<td>替换结构…</td>
+</tr>
+</tbody></table>
+<p>原文来自</p>
+<p>个人渣翻</p>
+]]></content>
+      <tags>
+        <tag>idea</tag>
       </tags>
   </entry>
 </search>
