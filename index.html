@@ -177,6 +177,94 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/09/02/MVCC-readview%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/peiky.png">
+      <meta itemprop="name" content="Biliking">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Groza's">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/02/MVCC-readview%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">MVCC readview解析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-02 14:53:59 / 修改时间：14:54:17" itemprop="dateCreated datePublished" datetime="2021-09-02T14:53:59+08:00">2021-09-02</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="MVCC-ReadView介绍"><a href="#MVCC-ReadView介绍" class="headerlink" title="MVCC ReadView介绍"></a>MVCC ReadView介绍</h1><p>对于使用<code>READ UNCOMMITTED</code>隔离级别的事务来说，由于可以读到未提交事务修改过的记录，所以直接读取记录的最新版本就好了；对于使用<code>SERIALIZABLE</code>隔离级别的事务来说，设计<code>InnoDB</code>的大叔规定使用加锁的方式来访问记录（加锁是啥我们后续文章中说哈）；对于使用<code>READ COMMITTED</code>和<code>REPEATABLE READ</code>隔离级别的事务来说，都必须保证读到已经提交了的事务修改过的记录，也就是说假如另一个事务已经修改了记录但是尚未提交，是不能直接读取最新版本的记录的，核心问题就是：需要判断一下版本链中的哪个版本是当前事务可见的。为此，设计<code>InnoDB</code>的大佬提出了一个<code>ReadView</code>的概念，这个<code>ReadView</code>中主要包含4个比较重要的内容：</p>
+<ul>
+<li><p><code>m_ids</code>：表示在生成<code>ReadView</code>时当前系统中活跃的读写事务的<code>事务id</code>列表。</p>
+</li>
+<li><p><code>min_trx_id</code>：表示在生成<code>ReadView</code>时当前系统中活跃的读写事务中最小的<code>事务id</code>，也就是<code>m_ids</code>中的最小值。</p>
+</li>
+<li><p><code>max_trx_id</code>：表示生成<code>ReadView</code>时系统中应该分配给下一个事务的<code>id</code>值。</p>
+<blockquote>
+<p>小贴士： 注意max_trx_id并不是m_ids中的最大值，事务id是递增分配的。比方说现在有id为1，2，3这三个事务，之后id为3的事务提交了。那么一个新的读事务在生成ReadView时，m_ids就包括1和2，min_trx_id的值就是1，max_trx_id的值就是4。</p>
+</blockquote>
+</li>
+<li><p><code>creator_trx_id</code>：表示生成该<code>ReadView</code>的事务的<code>事务id</code>。</p>
+<blockquote>
+<p>小贴士： 我们前边说过，只有在对表中的记录做改动时（执行INSERT、DELETE、UPDATE这些语句时）才会为事务分配事务id，否则在一个只读事务中的事务id值都默认为0。</p>
+</blockquote>
+</li>
+</ul>
+<p>有了这个<code>ReadView</code>，这样在访问某条记录时，只需要按照下边的步骤判断记录的某个版本是否可见：</p>
+<ul>
+<li>如果被访问版本的<code>trx_id</code>属性值与<code>ReadView</code>中的<code>creator_trx_id</code>值相同，意味着当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的<code>trx_id</code>属性值小于<code>ReadView</code>中的<code>min_trx_id</code>值，表明生成该版本的事务在当前事务生成<code>ReadView</code>前已经提交，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的<code>trx_id</code>属性值大于或等于<code>ReadView</code>中的<code>max_trx_id</code>值，表明生成该版本的事务在当前事务生成<code>ReadView</code>后才开启，所以该版本不可以被当前事务访问。</li>
+<li>如果被访问版本的<code>trx_id</code>属性值在<code>ReadView</code>的<code>min_trx_id</code>和<code>max_trx_id</code>之间，那就需要判断一下<code>trx_id</code>属性值是不是在<code>m_ids</code>列表中，如果在，说明创建<code>ReadView</code>时生成该版本的事务还是活跃的，该版本不可以被访问；如果不在，说明创建<code>ReadView</code>时生成该版本的事务已经被提交，该版本可以被访问。</li>
+</ul>
+<p>如果某个版本的数据对当前事务不可见的话，那就顺着版本链找到下一个版本的数据，继续按照上边的步骤判断可见性，依此类推，直到版本链中的最后一个版本。如果最后一个版本也不可见的话，那么就意味着该条记录对该事务完全不可见，查询结果就不包含该记录。</p>
+<p>在<code>MySQL</code>中，<code>READ COMMITTED</code>和<code>REPEATABLE READ</code>隔离级别的的一个非常大的区别就是它们生成ReadView的时机不同。</p>
+<ul>
+<li>READ COMMITTED —— 每次读取数据前都生成一个ReadView</li>
+<li>REPEATABLE READ —— 在第一次读取数据时生成一个ReadView</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/08/21/%E9%98%BF%E9%87%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E7%A6%81%E7%94%A8%E5%A4%96%E9%94%AE/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1002,91 +1090,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://bilikings.top/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/peiky.png">
-      <meta itemprop="name" content="Biliking">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Groza's">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/" class="post-title-link" itemprop="url">数据库事务与隔离级别</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-03-31 10:36:26 / 修改时间：10:36:35" itemprop="dateCreated datePublished" datetime="2021-03-31T10:36:26+08:00">2021-03-31</time>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h1 id="Mysql事务"><a href="#Mysql事务" class="headerlink" title="Mysql事务"></a>Mysql事务</h1><p>因为MyIsAM是没有事务的，所以说数据库事务只存在于InnoDB中</p>
-<h3 id="数据库要是能支持事务必须要满足ACID"><a href="#数据库要是能支持事务必须要满足ACID" class="headerlink" title="数据库要是能支持事务必须要满足ACID"></a>数据库要是能支持事务必须要满足ACID</h3><ol>
-<li>原子性（Atomicity）<ul>
-<li>一个事务中的所有执行语句要么全部成功，要么全部失败回滚</li>
-</ul>
-</li>
-<li>一致性（Consistency）<ul>
-<li><strong>一致读</strong> 事务读取数据只能从一个状态中读取，不能从2个或者2个以上状态读取。</li>
-<li><strong>一致写</strong> 事务执行的数据变更只能基于上一个一致的状态，且只能体现在一个状态中。</li>
-</ul>
-</li>
-<li>隔离性（Isolation）<ul>
-<li>每个事务都不能访问到其他事务操作过程中的状态。他们等于互相不可见。</li>
-</ul>
-</li>
-<li>持久性（Durability）<ul>
-<li>一旦提交，对于数据库中数据的改变是永久性的，即使数据库发生故障也不能丢失已提交事务所完成的改变。</li>
-</ul>
-</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/03/31/%E6%95%B0%E6%8D%AE%E5%BA%93%E4%BA%8B%E5%8A%A1%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1158,7 +1161,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-count">52</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

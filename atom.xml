@@ -6,7 +6,7 @@
   <link href="http://bilikings.top/atom.xml" rel="self"/>
   
   <link href="http://bilikings.top/"/>
-  <updated>2021-08-21T03:25:17.669Z</updated>
+  <updated>2021-09-02T06:54:17.575Z</updated>
   <id>http://bilikings.top/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>MVCC readview解析</title>
+    <link href="http://bilikings.top/2021/09/02/MVCC-readview%E8%A7%A3%E6%9E%90/"/>
+    <id>http://bilikings.top/2021/09/02/MVCC-readview%E8%A7%A3%E6%9E%90/</id>
+    <published>2021-09-02T06:53:59.000Z</published>
+    <updated>2021-09-02T06:54:17.575Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h1 id=&quot;MVCC-ReadView介绍&quot;&gt;&lt;a href=&quot;#MVCC-ReadView介绍&quot; class=&quot;headerlink&quot; title=&quot;MVCC ReadView介绍&quot;&gt;&lt;/a&gt;MVCC ReadView介绍&lt;/h1&gt;&lt;p&gt;对于使用&lt;code&gt;READ</summary>
+        
+      
+    
+    
+    
+    
+    <category term="Mysql" scheme="http://bilikings.top/tags/Mysql/"/>
+    
+  </entry>
   
   <entry>
     <title>阿里为什么禁用外键</title>
@@ -625,26 +648,6 @@
     
     
     <category term="Docker" scheme="http://bilikings.top/tags/Docker/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>排序与查找</title>
-    <link href="http://bilikings.top/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/"/>
-    <id>http://bilikings.top/2020/12/17/%E6%8E%92%E5%BA%8F%E4%B8%8E%E6%9F%A5%E6%89%BE/</id>
-    <published>2020-12-17T00:46:18.000Z</published>
-    <updated>2020-12-17T00:48:04.931Z</updated>
-    
-    
-    <summary type="html">&lt;h3 id=&quot;选择排序&quot;&gt;&lt;a href=&quot;#选择排序&quot; class=&quot;headerlink&quot; title=&quot;选择排序&quot;&gt;&lt;/a&gt;选择排序&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;&lt;p&gt;最没用的算法&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;一遍又一遍过滤这个数组，找到最小的放到前面来&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;</summary>
-    
-    
-    
-    
-    <category term="数据结构与算法" scheme="http://bilikings.top/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/"/>
     
   </entry>
   
